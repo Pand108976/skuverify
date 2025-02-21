@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesquisa de SKU</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 18px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 18px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 20px;
+            color: #333;
+        }
+
+        .result span {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Pesquisar SKU</h2>
+    <input type="number" id="skuInput" placeholder="Digite o SKU..." inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
+    <button onclick="pesquisarSKU()">Localizar</button>
+
+    <div class="result" id="result"></div>
+</div>
+
+<script>
+    const caixas = {
+        1: ["644557", "689112"],
+        2: ["770651", "688772", "770928", "749909"],
+        3: ["771013", "686671", "586940"],
+        4: ["694531", "697875"],
+        5: ["741409", "686658"],
+        6: ["770943", "689134"],
+        7: ["687611", "765787", "770928", "718382"],
+        8: ["697875", "764187"],
+        9: ["764796", "675158"],
+        10: ["687611", "741409", "770682"],
+        11: ["770567", "776307", "771976"],
+        12: ["770936", "776632"],
+        13: ["780488", "770936"],
+        14: ["770936", "781608"],
+        15: ["770567", "694745", "770567", "708206"],
+        16: ["476361", "781604", "476361"],
+        17: ["735830", "586940", "764151", "675158"],
+        18: ["749909", "781687", "770943"],
+        19: ["780998", "770654", "764164"],
+        20: ["770738", "780998", "780180"],
+        21: ["770738", "675158", "644557"],
+        22: ["764187", "770928", "770943", "776323"],
+        23: ["770567", "644557", "749909"],
+        24: ["749909", "765786", "476361"],
+        25: ["697875", "697875", "724127", "759044"],
+        26: ["464231", "770738", "586940", "759044"],
+        27: ["586940", "765787", "770651", "745872"],
+        28: ["770682", "780045"],
+        29: ["770928", "735830", "694531"],
+        30: ["781604", "780248"],
+        31: ["689134", "780486", "776635"],
+        32: ["675140", "746507"],
+        33: ["764161", "705614"],
+        34: ["765786", "758760", "476361"],
+        35: ["780487", "781607"],
+        36: ["780485", "770651", "770654"],
+        37: ["686671", "764151", "770682"],
+        38: ["764151", "770713", "688772"],
+        39: ["697875", "689112", "770715"],
+        40: ["771015", "644557", "746507"],
+        41: ["770654", "770654", "759027"],
+        42: ["749909", "741409", "770936"],
+        43: ["464231", "725421", "688772"],
+        44: ["746507", "776300", "770682", "770936"],
+        45: ["770654", "725421", "686671"],
+        46: ["464231", "686658", "675140"],
+        47: ["709528", "734227", "770943", "734227"],
+        48: ["717550", "759448", "780417", "780428"],
+        49: ["764045", "771067", "615288", "674487"],
+        50: ["780415", "771068", "780502", "764083"],
+        51: ["674556", "615288", "764038", "715735", "780503"]
+    };
+
+    function pesquisarSKU() {
+        const skuInput = document.getElementById("skuInput");
+        const resultDiv = document.getElementById("result");
+        const skuNumber = skuInput.value.trim();
+
+        if (skuNumber === "") {
+            resultDiv.innerHTML = "<span>Digite um SKU válido!</span>";
+            return;
+        }
+
+        let caixasEncontradas = [];
+        for (const caixa in caixas) {
+            if (caixas[caixa].includes(skuNumber)) {
+                caixasEncontradas.push(caixa);
+            }
+        }
+
+        if (caixasEncontradas.length > 0) {
+            resultDiv.innerHTML = `O SKU <span>${skuNumber}</span> está na caixa número <span>${caixasEncontradas.join(", ")}</span>.`;
+        } else {
+            resultDiv.innerHTML = `<span>SKU não encontrado.</span>`;
+        }
+
+        setTimeout(() => {
+            skuInput.value = "";
+        }, 2000);
+    }
+</script>
+
+</body>
+</html>
