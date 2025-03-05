@@ -22,21 +22,64 @@
         .tabs {
             display: flex;
             justify-content: center;
-            background-color: #A7060E;
-            padding: 10px 0;
+            background: linear-gradient(45deg, #fff, #fff);
+            padding: 15px 0;
+            border-radius: 15px;
+            margin: 20px auto;
+            max-width: 550px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .tab {
-            padding: 10px 20px;
+            padding: 12px 25px;
             cursor: pointer;
-            color: white;
-            margin: 0 5px;
-            background-color: #2980b9;
-            border-radius: 4px;
+            color: #fff;
+            margin: 0 10px;
+            background: linear-gradient(45deg, #2980b9, #3498db);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(41, 128, 185, 0.4);
+            background: linear-gradient(45deg, #3498db, #2980b9);
         }
 
         .tab.active {
-            background-color: #1c5980;
+            background: linear-gradient(45deg, red, #363636);
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent
+            );
+            transition: 0.5s;
+        }
+
+        .tab:hover::before {
+            left: 100%;
         }
 
         .container {
@@ -188,214 +231,213 @@
         <h2 id="modalSku">SKU: </h2>
         <p id="modalCaixa">Caixa: </p>
         <button onclick="fecharModal()">Fechar</button>
+        <button onclick="visitarSite()" style="background-color: #2ecc71;">Visitar Site</button>
     </div>
 </div>
 
 
 <script>
     const cintos = [
-        { sku: "644557", caixa: 1, imagem: "./images/cintos/644557.webp", classe: "imagem-cintos" },
-        { sku: "689112", caixa: 1, imagem: "./images/cintos/689112.webp", classe: "imagem-cintos" },
+        { sku: "644557", caixa: 1, imagem: "./images/cintos/644557.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-644557--1?srsltid=AfmBOopLmwHVk_Svsd6B15XSOM1rJze0p1J5_KrcuZUGhgTNI91A8JW9" },
+        { sku: "689112", caixa: 1, imagem: "./images/cintos/689112.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/ca/en/men/belts-man-ca/double-gancini-belts/double-adjus-689112?srsltid=AfmBOora5agPBxS0szDVzsaZhz0M1NZn89fjHXw1QsB3uuYN4ntaJNGG" },
+        
+        { sku: "770651", caixa: 2, imagem: "./images/cintos/770651.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/double-gancini-belts/double-adjus-770651" },
+        { sku: "688772", caixa: 2, imagem: "./images/cintos/688772.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/double-gancini-belts/double-adjus-688772" },
+        { sku: "770928", caixa: 2, imagem: "./images/cintos/770928.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770928" },
+        { sku: "749909", caixa: 2, imagem: "./images/cintos/749909.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/aus/en/men/men-belts/double-adjus-749909--24" },
 
-        { sku: "770651", caixa: 2, imagem: "./images/cintos/770651.webp", classe: "imagem-cintos" },
-        { sku: "688772", caixa: 2, imagem: "./images/cintos/688772.webp", classe: "imagem-cintos" },
-        { sku: "770928", caixa: 2, imagem: "./images/cintos/770928.webp", classe: "imagem-cintos" },
-        { sku: "749909", caixa: 2, imagem: "./images/cintos/749909.webp", classe: "imagem-cintos" },
+        { sku: "771013", caixa: 3, imagem: "./images/cintos/771013.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/single-gancini-belts/sized-771013" },
+        { sku: "686671", caixa: 3, imagem: "./images/cintos/686671.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/double-gancini-belts/double-adjus-686671" },
+        { sku: "586940", caixa: 3, imagem: "./images/cintos/586940.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/eu/en/men/man-belts/reversible-and-adjustable-belt-586940--24" },
 
-        { sku: "771013", caixa: 3, imagem: "./images/cintos/771013.webp", classe: "imagem-cintos" },
-        { sku: "686671", caixa: 3, imagem: "./images/cintos/686671.webp", classe: "imagem-cintos" },
-        { sku: "586940", caixa: 3, imagem: "./images/cintos/586940.webp", classe: "imagem-cintos" },
+        { sku: "694531", caixa: 4, imagem: "./images/cintos/694531.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-694531" },
+        { sku: "697875", caixa: 4, imagem: "./images/cintos/697875.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/mex/es/hombre/mx-cinturones/hebilla-doble-gancini/double-adjus-697875--5" },
 
-        { sku: "694531", caixa: 4, imagem: "./images/cintos/694531.webp", classe: "imagem-cintos" },
-        { sku: "697875", caixa: 4, imagem: "./images/cintos/697875.webp", classe: "imagem-cintos" },
+        { sku: "741409", caixa: 5, imagem: "./images/cintos/741409.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/aus/en/men/men-belts/double-adjus-741409--24" },
+        { sku: "686658", caixa: 5, imagem: "./images/cintos/686658.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-686658" },
 
-        { sku: "741409", caixa: 5, imagem: "./images/cintos/741409.webp", classe: "imagem-cintos" },
-        { sku: "686658", caixa: 5, imagem: "./images/cintos/686658.webp", classe: "imagem-cintos" },
+        { sku: "770943", caixa: 6, imagem: "./images/cintos/770943.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770943" },
+        { sku: "689134", caixa: 6, imagem: "./images/cintos/689134.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-689134" },
 
-        { sku: "770943", caixa: 6, imagem: "./images/cintos/770943.webp", classe: "imagem-cintos" },
-        { sku: "689134", caixa: 6, imagem: "./images/cintos/689134.webp", classe: "imagem-cintos" },
+        { sku: "687611", caixa: 7, imagem: "./images/cintos/687611.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-687611" },
+        { sku: "765787", caixa: 7, imagem: "./images/cintos/765787.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-765787" },
+        { sku: "770928", caixa: 7, imagem: "./images/cintos/770928.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770928" },
+        { sku: "718382", caixa: 7, imagem: "./images/cintos/718382.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-718382" },
 
-        { sku: "687611", caixa: 7, imagem: "./images/cintos/687611.webp", classe: "imagem-cintos" },
-        { sku: "765787", caixa: 7, imagem: "./images/cintos/765787.webp", classe: "imagem-cintos" },
-        { sku: "770928", caixa: 7, imagem: "./images/cintos/770928.webp", classe: "imagem-cintos" },
-        { sku: "718382", caixa: 7, imagem: "./images/cintos/718382.webp", classe: "imagem-cintos" },
+        { sku: "764187", caixa: 8, imagem: "./images/cintos/764187.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-764187" },
+        { sku: "764187", caixa: 8, imagem: "./images/cintos/764187.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-764187" },
 
-        { sku: "697875", caixa: 8, imagem: "./images/cintos/697875.webp", classe: "imagem-cintos" },
-        { sku: "764187", caixa: 8, imagem: "./images/cintos/764187.webp", classe: "imagem-cintos" },
+        { sku: "764796", caixa: 9, imagem: "./images/cintos/764796.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-764796" },
+        { sku: "675158", caixa: 9, imagem: "./images/cintos/675158.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-675158" },
 
-        { sku: "764796", caixa: 9, imagem: "./images/cintos/764796.webp", classe: "imagem-cintos" },
-        { sku: "675158", caixa: 9, imagem: "./images/cintos/675158.webp", classe: "imagem-cintos" },
+        { sku: "687611", caixa: 10, imagem: "./images/cintos/687611.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-687611" },
+        { sku: "741409", caixa: 10, imagem: "./images/cintos/741409.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-741409" },
+        { sku: "770682", caixa: 10, imagem: "./images/cintos/770682.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770682" },
 
-        { sku: "687611", caixa: 10, imagem: "./images/cintos/687611.webp", classe: "imagem-cintos" },
-        { sku: "741409", caixa: 10, imagem: "./images/cintos/741409.webp", classe: "imagem-cintos" },
-        { sku: "770682", caixa: 10, imagem: "./images/cintos/770682.webp", classe: "imagem-cintos" },
+        { sku: "770567", caixa: 11, imagem: "./images/cintos/770567.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770567" },
+        { sku: "776307", caixa: 11, imagem: "./images/cintos/776307.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-776307" },
+        { sku: "771976", caixa: 11, imagem: "./images/cintos/771976.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-771976" },
 
-        { sku: "770567", caixa: 11, imagem: "./images/cintos/770567.webp", classe: "imagem-cintos" },
-        { sku: "776307", caixa: 11, imagem: "./images/cintos/776307.webp", classe: "imagem-cintos" },
-        { sku: "771976", caixa: 11, imagem: "./images/cintos/771976.webp", classe: "imagem-cintos" },
+        { sku: "770936", caixa: 12, imagem: "./images/cintos/770936.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770936" },
+        { sku: "776632", caixa: 12, imagem: "./images/cintos/776632.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-776632" },
 
-        { sku: "770936", caixa: 12, imagem: "./images/cintos/770936.webp", classe: "imagem-cintos" },
-        { sku: "776632", caixa: 12, imagem: "./images/cintos/776632.webp", classe: "imagem-cintos" },
+        { sku: "780488", caixa: 13, imagem: "./images/cintos/780488.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-780488" },
+        { sku: "770936", caixa: 13, imagem: "./images/cintos/770936.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770936" },
 
-        { sku: "780488", caixa: 13, imagem: "./images/cintos/780488.webp", classe: "imagem-cintos" },
-        { sku: "770936", caixa: 13, imagem: "./images/cintos/770936.webp", classe: "imagem-cintos" },
+        { sku: "770936", caixa: 14, imagem: "./images/cintos/770936.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770936" },
+        { sku: "781608", caixa: 14, imagem: "./images/cintos/781608.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-781608" },
 
-        { sku: "770936", caixa: 14, imagem: "./images/cintos/770936.webp", classe: "imagem-cintos" },
-        { sku: "781608", caixa: 14, imagem: "./images/cintos/781608.webp", classe: "imagem-cintos" },
+        { sku: "770567", caixa: 15, imagem: "./images/cintos/770567.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770567" },
+        { sku: "694745", caixa: 15, imagem: "./images/cintos/694745.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-694745" },
+        { sku: "708206", caixa: 15, imagem: "./images/cintos/708206.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-708206" },
 
-        { sku: "770567", caixa: 15, imagem: "./images/cintos/770567.webp", classe: "imagem-cintos" },
-        { sku: "694745", caixa: 15, imagem: "./images/cintos/694745.webp", classe: "imagem-cintos" },
-        { sku: "708206", caixa: 15, imagem: "./images/cintos/708206.webp", classe: "imagem-cintos" },
+        { sku: "476361", caixa: 16, imagem: "./images/cintos/476361.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-476361" },
+        { sku: "781604", caixa: 16, imagem: "./images/cintos/781604.jpg", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-781604" },
 
-        { sku: "476361", caixa: 16, imagem: "./images/cintos/476361.webp", classe: "imagem-cintos" },
-        { sku: "781604", caixa: 16, imagem: "./images/cintos/781604.jpg", classe: "imagem-cintos" },
+        { sku: "735830", caixa: 17, imagem: "./images/cintos/735830.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-735830" },
+        { sku: "586940", caixa: 17, imagem: "./images/cintos/586940.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/eu/en/men/man-belts/reversible-and-adjustable-belt-586940--24" },
+        { sku: "764151", caixa: 17, imagem: "./images/cintos/764151.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-764151" },
+        { sku: "675158", caixa: 17, imagem: "./images/cintos/675158.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-675158" },
 
-        { sku: "735830", caixa: 17, imagem: "./images/cintos/735830.webp", classe: "imagem-cintos" },
-        { sku: "586940", caixa: 17, imagem: "./images/cintos/586940.webp", classe: "imagem-cintos" },
-        { sku: "764151", caixa: 17, imagem: "./images/cintos/764151.webp", classe: "imagem-cintos" },
-        { sku: "675158", caixa: 17, imagem: "./images/cintos/675158.webp", classe: "imagem-cintos" },
+        { sku: "749909", caixa: 18, imagem: "./images/cintos/749909.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/aus/en/men/men-belts/double-adjus-749909--24" },
+        { sku: "781687", caixa: 18, imagem: "./images/cintos/781687.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-781687" },
+        { sku: "770943", caixa: 18, imagem: "./images/cintos/770943.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770943" },
 
-        { sku: "749909", caixa: 18, imagem: "./images/cintos/749909.webp", classe: "imagem-cintos" },
-        { sku: "781687", caixa: 18, imagem: "./images/cintos/781687.webp", classe: "imagem-cintos" },
-        { sku: "770943", caixa: 18, imagem: "./images/cintos/770943.webp", classe: "imagem-cintos" },
+        { sku: "780998", caixa: 19, imagem: "./images/cintos/780998.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-780998" },
+        { sku: "770654", caixa: 19, imagem: "./images/cintos/770654.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770654" },
+        { sku: "764164", caixa: 19, imagem: "./images/cintos/764164.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-764164" },
 
-        { sku: "780998", caixa: 19, imagem: "./images/cintos/780998.webp", classe: "imagem-cintos" },
-        { sku: "770654", caixa: 19, imagem: "./images/cintos/770654.webp", classe: "imagem-cintos" },
-        { sku: "764164", caixa: 19, imagem: "./images/cintos/764164.webp", classe: "imagem-cintos" },
+        { sku: "770738", caixa: 20, imagem: "./images/cintos/770738.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770738" },
+        { sku: "780998", caixa: 20, imagem: "./images/cintos/780998.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-780998" },
+        { sku: "780180", caixa: 20, imagem: "./images/cintos/780180.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-780180" },
 
-        { sku: "770738", caixa: 20, imagem: "./images/cintos/770738.webp", classe: "imagem-cintos" },
-        { sku: "780998", caixa: 20, imagem: "./images/cintos/780998.webp", classe: "imagem-cintos" },
-        { sku: "780180", caixa: 20, imagem: "./images/cintos/780180.webp", classe: "imagem-cintos" },
+        { sku: "770738", caixa: 21, imagem: "./images/cintos/770738.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770738" },
+        { sku: "675158", caixa: 21, imagem: "./images/cintos/675158.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-675158" },
+        { sku: "644557", caixa: 21, imagem: "./images/cintos/644557.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-644557" },
 
-        { sku: "770738", caixa: 21, imagem: "./images/cintos/770738.webp", classe: "imagem-cintos" },
-        { sku: "675158", caixa: 21, imagem: "./images/cintos/675158.webp", classe: "imagem-cintos" },
-        { sku: "644557", caixa: 21, imagem: "./images/cintos/644557.webp", classe: "imagem-cintos" },
+        { sku: "764187", caixa: 22, imagem: "./images/cintos/764187.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-764187" },
+        { sku: "770928", caixa: 22, imagem: "./images/cintos/770928.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770928" },
+        { sku: "770943", caixa: 22, imagem: "./images/cintos/770943.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770943" },
+        { sku: "776323", caixa: 22, imagem: "./images/cintos/776323.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-776323" },
+        { sku: "775596", caixa: 22, imagem: "./images/cintos/775596.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-775596" },
 
-        { sku: "764187", caixa: 22, imagem: "./images/cintos/764187.webp", classe: "imagem-cintos" },
-        { sku: "770928", caixa: 22, imagem: "./images/cintos/770928.webp", classe: "imagem-cintos" },
-        { sku: "770943", caixa: 22, imagem: "./images/cintos/770943.webp", classe: "imagem-cintos" },
-        { sku: "776323", caixa: 22, imagem: "./images/cintos/776323.webp", classe: "imagem-cintos" },
-        { sku: "775596", caixa: 22, imagem: "./images/cintos/775596.webp", classe: "imagem-cintos" },
+        { sku: "770567", caixa: 23, imagem: "./images/cintos/770567.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770567" },
+        { sku: "644557", caixa: 23, imagem: "./images/cintos/644557.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-644557" },
+        { sku: "749909", caixa: 23, imagem: "./images/cintos/749909.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/aus/en/men/men-belts/double-adjus-749909--24" },
 
-        { sku: "770567", caixa: 23, imagem: "./images/cintos/770567.webp", classe: "imagem-cintos" },
-        { sku: "644557", caixa: 23, imagem: "./images/cintos/644557.webp", classe: "imagem-cintos" },
-        { sku: "749909", caixa: 23, imagem: "./images/cintos/749909.webp", classe: "imagem-cintos" },
+        { sku: "749909", caixa: 24, imagem: "./images/cintos/749909.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/aus/en/men/men-belts/double-adjus-749909--24" },
+        { sku: "765786", caixa: 24, imagem: "./images/cintos/765786.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-765786" },
+        { sku: "476361", caixa: 24, imagem: "./images/cintos/476361.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-476361" },
 
-        { sku: "749909", caixa: 24, imagem: "./images/cintos/749909.webp", classe: "imagem-cintos" },
-        { sku: "765786", caixa: 24, imagem: "./images/cintos/765786.webp", classe: "imagem-cintos" },
-        { sku: "476361", caixa: 24, imagem: "./images/cintos/476361.webp", classe: "imagem-cintos" },
+        { sku: "697875", caixa: 25, imagem: "./images/cintos/697875.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/mex/es/hombre/mx-cinturones/hebilla-doble-gancini/double-adjus-697875--5" },
+        { sku: "724127", caixa: 25, imagem: "./images/cintos/724127.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-724127" },
+        { sku: "759044", caixa: 25, imagem: "./images/cintos/759044.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/aus/en/men/men-belts/double-adjus-759044--24" },
 
-        { sku: "697875", caixa: 25, imagem: "./images/cintos/697875.webp", classe: "imagem-cintos" },
-        { sku: "724127", caixa: 25, imagem: "./images/cintos/724127.webp", classe: "imagem-cintos" },
-        { sku: "759044", caixa: 25, imagem: "./images/cintos/759044.webp", classe: "imagem-cintos" },
+        { sku: "464231", caixa: 26, imagem: "./images/cintos/464231.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-464231" },
+        { sku: "770738", caixa: 26, imagem: "./images/cintos/770738.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770738" },
+        { sku: "586940", caixa: 26, imagem: "./images/cintos/586940.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/eu/en/men/man-belts/reversible-and-adjustable-belt-586940--24" },
+        { sku: "759044", caixa: 26, imagem: "./images/cintos/759044.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/aus/en/men/men-belts/double-adjus-759044--24" },
 
-        { sku: "464231", caixa: 26, imagem: "./images/cintos/464231.webp", classe: "imagem-cintos" },
-        { sku: "770738", caixa: 26, imagem: "./images/cintos/770738.webp", classe: "imagem-cintos" },
-        { sku: "586940", caixa: 26, imagem: "./images/cintos/586940.webp", classe: "imagem-cintos" },
-        { sku: "759044", caixa: 26, imagem: "./images/cintos/759044.webp", classe: "imagem-cintos" },
+        { sku: "586940", caixa: 27, imagem: "./images/cintos/586940.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/eu/en/men/man-belts/reversible-and-adjustable-belt-586940--24" },
+        { sku: "765787", caixa: 27, imagem: "./images/cintos/765787.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-765787" },
+        { sku: "770651", caixa: 27, imagem: "./images/cintos/770651.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/double-gancini-belts/double-adjus-770651" },
+        { sku: "745872", caixa: 27, imagem: "./images/cintos/745872.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-745872" },
 
-        { sku: "586940", caixa: 27, imagem: "./images/cintos/586940.webp", classe: "imagem-cintos" },
-        { sku: "765787", caixa: 27, imagem: "./images/cintos/765787.webp", classe: "imagem-cintos" },
-        { sku: "770651", caixa: 27, imagem: "./images/cintos/770651.webp", classe: "imagem-cintos" },
-        { sku: "745872", caixa: 27, imagem: "./images/cintos/745872.webp", classe: "imagem-cintos" },
+        { sku: "770682", caixa: 28, imagem: "./images/cintos/770682.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770682" },
+        { sku: "780045", caixa: 28, imagem: "./images/cintos/780045.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-780045" },
 
-        { sku: "770682", caixa: 28, imagem: "./images/cintos/770682.webp", classe: "imagem-cintos" },
-        { sku: "780045", caixa: 28, imagem: "./images/cintos/780045.webp", classe: "imagem-cintos" },
+        { sku: "770928", caixa: 29, imagem: "./images/cintos/770928.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770928" },
+        { sku: "735830", caixa: 29, imagem: "./images/cintos/735830.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-735830" },
+        { sku: "694531", caixa: 29, imagem: "./images/cintos/694531.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-694531" },
 
-        { sku: "770928", caixa: 29, imagem: "./images/cintos/770928.webp", classe: "imagem-cintos" },
-        { sku: "735830", caixa: 29, imagem: "./images/cintos/735830.webp", classe: "imagem-cintos" },
-        { sku: "694531", caixa: 29, imagem: "./images/cintos/694531.webp", classe: "imagem-cintos" },
+        { sku: "781604", caixa: 30, imagem: "./images/cintos/781604.jpg", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-781604" },
+        { sku: "780248", caixa: 30, imagem: "./images/cintos/780248.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-780248" },
 
-        { sku: "781604", caixa: 30, imagem: "./images/cintos/781604.jpg", classe: "imagem-cintos" },
-        { sku: "780248", caixa: 30, imagem: "./images/cintos/780248.webp", classe: "imagem-cintos" },
+        { sku: "689134", caixa: 31, imagem: "./images/cintos/689134.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-689134" },
+        { sku: "780486", caixa: 31, imagem: "./images/cintos/780486.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-780486" },
+        { sku: "776635", caixa: 31, imagem: "./images/cintos/776635.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-776635" },
 
-        { sku: "689134", caixa: 31, imagem: "./images/cintos/689134.webp", classe: "imagem-cintos" },
-        { sku: "780486", caixa: 31, imagem: "./images/cintos/780486.webp", classe: "imagem-cintos" },
-        { sku: "776635", caixa: 31, imagem: "./images/cintos/776635.webp", classe: "imagem-cintos" },
+        { sku: "675140", caixa: 32, imagem: "./images/cintos/675140.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-675140" },
+        { sku: "746507", caixa: 32, imagem: "./images/cintos/746507.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-746507" },
 
-        { sku: "675140", caixa: 32, imagem: "./images/cintos/675140.webp", classe: "imagem-cintos" },
-        { sku: "746507", caixa: 32, imagem: "./images/cintos/746507.webp", classe: "imagem-cintos" },
+        { sku: "764161", caixa: 33, imagem: "./images/cintos/764161.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-764161" },
+        { sku: "705614", caixa: 33, imagem: "./images/cintos/705614.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-705614" },
 
-        { sku: "764161", caixa: 33, imagem: "./images/cintos/764161.webp", classe: "imagem-cintos" },
-        { sku: "705614", caixa: 33, imagem: "./images/cintos/705614.webp", classe: "imagem-cintos" },
+        { sku: "765786", caixa: 34, imagem: "./images/cintos/765786.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-765786" },
+        { sku: "758760", caixa: 34, imagem: "./images/cintos/758760.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-758760" },
+        { sku: "476361", caixa: 34, imagem: "./images/cintos/476361.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-476361" },
 
-        { sku: "765786", caixa: 34, imagem: "./images/cintos/765786.webp", classe: "imagem-cintos" },
-        { sku: "758760", caixa: 34, imagem: "./images/cintos/758760.webp", classe: "imagem-cintos" },
-        { sku: "476361", caixa: 34, imagem: "./images/cintos/476361.webp", classe: "imagem-cintos" },
+        { sku: "780487", caixa: 35, imagem: "./images/cintos/780487.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-780487" },
+        { sku: "781607", caixa: 35, imagem: "./images/cintos/781607.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-781607" },
 
-        { sku: "780487", caixa: 35, imagem: "./images/cintos/780487.webp", classe: "imagem-cintos" },
-        { sku: "781607", caixa: 35, imagem: "./images/cintos/781607.webp", classe: "imagem-cintos" },
+        { sku: "780485", caixa: 36, imagem: "./images/cintos/780485.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-780485" },
+        { sku: "770651", caixa: 36, imagem: "./images/cintos/770651.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/double-gancini-belts/double-adjus-770651" },
+        { sku: "770654", caixa: 36, imagem: "./images/cintos/770654.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770654" },
 
-        { sku: "780485", caixa: 36, imagem: "./images/cintos/780485.webp", classe: "imagem-cintos" },
-        { sku: "770651", caixa: 36, imagem: "./images/cintos/770651.webp", classe: "imagem-cintos" },
-        { sku: "770654", caixa: 36, imagem: "./images/cintos/770654.webp", classe: "imagem-cintos" },
+        { sku: "686671", caixa: 37, imagem: "./images/cintos/686671.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-686671" },
+        { sku: "764151", caixa: 37, imagem: "./images/cintos/764151.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-764151" },
+        { sku: "770682", caixa: 37, imagem: "./images/cintos/770682.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770682" },
 
-        { sku: "686671", caixa: 37, imagem: "./images/cintos/686671.webp", classe: "imagem-cintos" },
-        { sku: "764151", caixa: 37, imagem: "./images/cintos/764151.webp", classe: "imagem-cintos" },
-        { sku: "770682", caixa: 37, imagem: "./images/cintos/770682.webp", classe: "imagem-cintos" },
+        { sku: "764151", caixa: 38, imagem: "./images/cintos/764151.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-764151" },
+        { sku: "770713", caixa: 38, imagem: "./images/cintos/770713.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770713" },
+        { sku: "688772", caixa: 38, imagem: "./images/cintos/688772.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-688772" },
 
-        { sku: "764151", caixa: 38, imagem: "./images/cintos/764151.webp", classe: "imagem-cintos" },
-        { sku: "770713", caixa: 38, imagem: "./images/cintos/770713.webp", classe: "imagem-cintos" },
-        { sku: "688772", caixa: 38, imagem: "./images/cintos/688772.webp", classe: "imagem-cintos" },
+        { sku: "697875", caixa: 39, imagem: "./images/cintos/697875.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/mex/es/hombre/mx-cinturones/hebilla-doble-gancini/double-adjus-697875--5" },
+        { sku: "689112", caixa: 39, imagem: "./images/cintos/689112.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/ca/en/men/belts-man-ca/double-gancini-belts/double-adjus-689112" },
+        { sku: "770715", caixa: 39, imagem: "./images/cintos/770715.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770715" },
 
-        { sku: "697875", caixa: 39, imagem: "./images/cintos/697875.webp", classe: "imagem-cintos" },
-        { sku: "689112", caixa: 39, imagem: "./images/cintos/689112.webp", classe: "imagem-cintos" },
-        { sku: "770715", caixa: 39, imagem: "./images/cintos/770715.webp", classe: "imagem-cintos" },
+        { sku: "771015", caixa: 40, imagem: "./images/cintos/771015.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-771015" },
+        { sku: "644557", caixa: 40, imagem: "./images/cintos/644557.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-644557" },
+        { sku: "746507", caixa: 40, imagem: "./images/cintos/746507.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-746507" },
 
-        { sku: "771015", caixa: 40, imagem: "./images/cintos/771015.webp", classe: "imagem-cintos" },
-        { sku: "644557", caixa: 40, imagem: "./images/cintos/644557.webp", classe: "imagem-cintos" },
-        { sku: "746507", caixa: 40, imagem: "./images/cintos/746507.webp", classe: "imagem-cintos" },
+        { sku: "770654", caixa: 41, imagem: "./images/cintos/770654.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770654" },
+        { sku: "759027", caixa: 41, imagem: "./images/cintos/759027.jpg", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-759027" },
 
-        { sku: "770654", caixa: 41, imagem: "./images/cintos/770654.webp", classe: "imagem-cintos" },
-        { sku: "759027", caixa: 41, imagem: "./images/cintos/759027.jpg", classe: "imagem-cintos" },
+        { sku: "749909", caixa: 42, imagem: "./images/cintos/749909.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/aus/en/men/men-belts/double-adjus-749909--24" },
+        { sku: "741409", caixa: 42, imagem: "./images/cintos/741409.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/aus/en/men/men-belts/double-adjus-741409--24" },
+        { sku: "770936", caixa: 42, imagem: "./images/cintos/770936.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770936" },
 
-        { sku: "749909", caixa: 42, imagem: "./images/cintos/749909.webp", classe: "imagem-cintos" },
-        { sku: "741409", caixa: 42, imagem: "./images/cintos/741409.webp", classe: "imagem-cintos" },
-        { sku: "770936", caixa: 42, imagem: "./images/cintos/770936.webp", classe: "imagem-cintos" },
+        { sku: "464231", caixa: 43, imagem: "./images/cintos/464231.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-464231" },
+        { sku: "725421", caixa: 43, imagem: "./images/cintos/725421.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-725421" },
+        { sku: "688772", caixa: 43, imagem: "./images/cintos/688772.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-688772" },
 
-        { sku: "464231", caixa: 43, imagem: "./images/cintos/464231.webp", classe: "imagem-cintos" },
-        { sku: "725421", caixa: 43, imagem: "./images/cintos/725421.webp", classe: "imagem-cintos" },
-        { sku: "688772", caixa: 43, imagem: "./images/cintos/688772.webp", classe: "imagem-cintos" },
+        { sku: "746507", caixa: 44, imagem: "./images/cintos/746507.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-746507" },
+        { sku: "776300", caixa: 44, imagem: "./images/cintos/776300.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-776300" },
+        { sku: "770682", caixa: 44, imagem: "./images/cintos/770682.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770682" },
+        { sku: "770936", caixa: 44, imagem: "./images/cintos/770936.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770936" },
 
-        { sku: "746507", caixa: 44, imagem: "./images/cintos/746507.webp", classe: "imagem-cintos" },
-        { sku: "776300", caixa: 44, imagem: "./images/cintos/776300.webp", classe: "imagem-cintos" },
-        { sku: "770682", caixa: 44, imagem: "./images/cintos/770682.webp", classe: "imagem-cintos" },
-        { sku: "770936", caixa: 44, imagem: "./images/cintos/770936.webp", classe: "imagem-cintos" },
+        { sku: "770654", caixa: 45, imagem: "./images/cintos/770654.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770654" },
+        { sku: "725421", caixa: 45, imagem: "./images/cintos/725421.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-725421" },
+        { sku: "686671", caixa: 45, imagem: "./images/cintos/686671.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-686671" },
 
-        { sku: "770654", caixa: 45, imagem: "./images/cintos/770654.webp", classe: "imagem-cintos" },
-        { sku: "725421", caixa: 45, imagem: "./images/cintos/725421.webp", classe: "imagem-cintos" },
-        { sku: "686671", caixa: 45, imagem: "./images/cintos/686671.webp", classe: "imagem-cintos" },
+        { sku: "464231", caixa: 46, imagem: "./images/cintos/464231.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-464231" },
+        { sku: "686658", caixa: 46, imagem: "./images/cintos/686658.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-686658" },
+        { sku: "675140", caixa: 46, imagem: "./images/cintos/675140.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-675140" },
 
-        { sku: "464231", caixa: 46, imagem: "./images/cintos/464231.webp", classe: "imagem-cintos" },
-        { sku: "686658", caixa: 46, imagem: "./images/cintos/686658.webp", classe: "imagem-cintos" },
-        { sku: "675140", caixa: 46, imagem: "./images/cintos/675140.webp", classe: "imagem-cintos" },
+        { sku: "709528", caixa: 47, imagem: "./images/cintos/709528.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-709528" },
+        { sku: "734227", caixa: 47, imagem: "./images/cintos/734227.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-734227" },
+        { sku: "770943", caixa: 47, imagem: "./images/cintos/770943.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770943" },
 
-        { sku: "709528", caixa: 47, imagem: "./images/cintos/709528.webp", classe: "imagem-cintos" },
-        { sku: "734227", caixa: 47, imagem: "./images/cintos/734227.webp", classe: "imagem-cintos" },
-        { sku: "770943", caixa: 47, imagem: "./images/cintos/770943.webp", classe: "imagem-cintos" },
+        { sku: "717550", caixa: 48, imagem: "./images/cintos/717550.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-717550" },
+        { sku: "759448", caixa: 48, imagem: "./images/cintos/759448.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-759448" },
+        { sku: "780417", caixa: 48, imagem: "./images/cintos/780417.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-780417" },
+        { sku: "780428", caixa: 48, imagem: "./images/cintos/780428.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-780428" },
 
-        { sku: "717550", caixa: 48, imagem: "./images/cintos/717550.webp", classe: "imagem-cintos" },
-        { sku: "759448", caixa: 48, imagem: "./images/cintos/759448.webp", classe: "imagem-cintos" },
-        { sku: "780417", caixa: 48, imagem: "./images/cintos/780417.webp", classe: "imagem-cintos" },
-        { sku: "780428", caixa: 48, imagem: "./images/cintos/780428.webp", classe: "imagem-cintos" },
+        { sku: "764045", caixa: 49, imagem: "./images/cintos/764045.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-764045" },
+        { sku: "771067", caixa: 49, imagem: "./images/cintos/771067.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-771067" },
+        { sku: "615288", caixa: 49, imagem: "./images/cintos/615288.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-615288" },
+        { sku: "674487", caixa: 49, imagem: "./images/cintos/674487.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-674487" },
 
-        { sku: "764045", caixa: 49, imagem: "./images/cintos/764045.webp", classe: "imagem-cintos" },
-        { sku: "771067", caixa: 49, imagem: "./images/cintos/771067.webp", classe: "imagem-cintos" },
-        { sku: "615288", caixa: 49, imagem: "./images/cintos/615288.webp", classe: "imagem-cintos" },
-        { sku: "674487", caixa: 49, imagem: "./images/cintos/674487.webp", classe: "imagem-cintos" },
+        { sku: "780415", caixa: 50, imagem: "./images/cintos/780415.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-780415" },
+        { sku: "771068", caixa: 50, imagem: "./images/cintos/771068.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-771068" },
+        { sku: "780502", caixa: 50, imagem: "./images/cintos/780502.jpg", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-780502" },
+        { sku: "764083", caixa: 50, imagem: "./images/cintos/764083.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-764083" },
 
-        { sku: "780415", caixa: 50, imagem: "./images/cintos/780415.webp", classe: "imagem-cintos" },
-        { sku: "771068", caixa: 50, imagem: "./images/cintos/771068.webp", classe: "imagem-cintos" },
-        { sku: "780502", caixa: 50, imagem: "./images/cintos/780502.jpg", classe: "imagem-cintos" },
-        { sku: "764083", caixa: 50, imagem: "./images/cintos/764083.webp", classe: "imagem-cintos" },
-
-        { sku: "674556", caixa: 51, imagem: "./images/cintos/674556.webp", classe: "imagem-cintos" },
-        { sku: "615288", caixa: 51, imagem: "./images/cintos/615288.webp", classe: "imagem-cintos" },
-        { sku: "764038", caixa: 51, imagem: "./images/cintos/764038.webp", classe: "imagem-cintos" },
-        { sku: "715735", caixa: 51, imagem: "./images/cintos/715735.webp", classe: "imagem-cintos" },
-        { sku: "780503", caixa: 51, imagem: "./images/cintos/780503.jpg", classe: "imagem-cintos" },
-
-
+        { sku: "674556", caixa: 51, imagem: "./images/cintos/674556.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-674556" },
+        { sku: "615288", caixa: 51, imagem: "./images/cintos/615288.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-615288" },
+        { sku: "764038", caixa: 51, imagem: "./images/cintos/764038.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-764038" },
+        { sku: "715735", caixa: 51, imagem: "./images/cintos/715735.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-715735" },
+        { sku: "780503", caixa: 51, imagem: "./images/cintos/780503.jpg", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-780503" },
     ];
     
     const oculos = [
@@ -416,7 +458,7 @@
     { sku: "782117", caixa: 1, imagem: "./images/oculos/A1/782117.jpg", classe: "imagem-oculos" },
     { sku: "782119", caixa: 1, imagem: "./images/oculos/A1/782119.jpg", classe: "imagem-oculos" },
     { sku: "782111", caixa: 1, imagem: "./images/oculos/A1/782111.jpg", classe: "imagem-oculos" },
-    { sku: "782120", caixa: 1, imagem: "./images/oculos/A1/782120.jpg", classe: "imagem-oculos" },
+    { sku: "782120", caixa: 1, imagem: "./images/oculos/A1/782120.webp", classe: "imagem-oculos" },
 
     { sku: "774433", caixa: 2, imagem: "./images/oculos/A2/774433.jpg", classe: "imagem-oculos" },
     { sku: "774524", caixa: 2, imagem: "./images/oculos/A2/774524.jpg", classe: "imagem-oculos" },
@@ -425,7 +467,7 @@
     { sku: "774465", caixa: 2, imagem: "./images/oculos/A2/774465.jpg", classe: "imagem-oculos" },
     { sku: "774458", caixa: 2, imagem: "./images/oculos/A2/774458.jpg", classe: "imagem-oculos" },
     { sku: "774453", caixa: 2, imagem: "./images/oculos/A2/774453.jpg", classe: "imagem-oculos" },
-    { sku: "774532", caixa: 2, imagem: "./images/oculos/A/774532.jpg", classe: "imagem-oculos" },
+    { sku: "774532", caixa: 2, imagem: "./images/oculos/A2/774532.jpg", classe: "imagem-oculos" },
     { sku: "774533", caixa: 2, imagem: "./images/oculos/A2/774533.jpg", classe: "imagem-oculos" },
     { sku: "782091", caixa: 2, imagem: "./images/oculos/A2/782091.jpg", classe: "imagem-oculos" },
     { sku: "782075", caixa: 2, imagem: "./images/oculos/A2/782075.jpg", classe: "imagem-oculos" },
@@ -636,6 +678,8 @@ function abrirModal(sku) {
         document.getElementById("modalCaixa").innerText = `Caixa: ${todasCaixas}`;
         document.getElementById("modalImagem").src = itensEncontrados[0].imagem;
         document.getElementById("modal").style.display = "flex";
+        // Armazenar o link do item atual
+        document.getElementById("modal").setAttribute("data-link", itensEncontrados[0].link || "");
     }
 }
 
@@ -653,6 +697,13 @@ function abrirModal(sku) {
     function fecharModalFora(event) {
     if (event.target === document.getElementById('modal')) {
         fecharModal();
+    }
+}
+
+function visitarSite() {
+    const link = document.getElementById("modal").getAttribute("data-link");
+    if (link) {
+        window.open(link, '_blank');
     }
 }
 </script>
