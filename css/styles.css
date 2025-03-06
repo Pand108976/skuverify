@@ -1,0 +1,223 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    background: radial-gradient(circle at center, #B9121B 0%, #8B0000 50%, #000000 110%);
+    min-height: 100vh;
+}
+
+.backgroundpage{
+    background-image: url('./logo.jpeg');
+    background-size: 200px 200px;
+    background-repeat: no-repeat;
+}
+
+.tabs {
+    display: flex;
+    justify-content: center;
+    background: linear-gradient(45deg, #fff, #fff);
+    padding: 15px 0;
+    border-radius: 15px;
+    margin: 20px auto;
+    max-width: 550px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tab {
+    padding: 12px 25px;
+    cursor: pointer;
+    color: #fff;
+    margin: 0 10px;
+    background: linear-gradient(45deg, #2980b9, #3498db);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.tab:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(41, 128, 185, 0.4);
+    background: linear-gradient(45deg, #3498db, #2980b9);
+}
+
+.tab.active {
+    background: linear-gradient(45deg, red, #363636);
+    box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4);
+    transform: translateY(-2px);
+}
+
+.tab::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transition: 0.5s;
+}
+
+.tab:hover::before {
+    left: 100%;
+}
+
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    padding-right: 1px;
+    font-size: 18px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-align: center;
+    outline: none;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    font-size: 18px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+.result {
+    margin-top: 20px;
+    font-size: 20px;
+    color: #333;
+}
+
+.result span {
+    font-weight: bold;
+    color: #e74c3c;
+}
+
+.oculos-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.oculos-item {
+    width: 100%;
+    max-width: 200px; /* 200px */
+    height: 200px; /* 200px */
+    margin: 10px;
+    object-fit: contain;
+}
+
+.oculos-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: scale-down; 
+    border-radius: 8px;
+    max-height: 150px;
+}
+
+.imagem-oculos {
+    max-width: 10px; 
+    max-height: 10px;
+    width: auto;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    object-fit: contain;
+}
+
+.imagem-cintos {
+    max-width: 10px; 
+    max-height: 10px;
+    width: auto;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    object-fit: contain;
+}
+
+.oculos-container {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: white;
+    border: 2px solid #3498db;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    display: inline-block;
+    width: 500px;
+}
+
+.oculostodos-container {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: white;
+    border: 2px solid #3498db;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    display: inline-block;
+    width: 200px; /* 200px */
+    height: 200px; /* 200px */
+}
+
+.hidden {
+    display: none;
+}
+
+
+img[src$=".webp"] {
+    max-width: 350px;
+    max-height: 3500px;
+    object-fit: scale-down;
+}
+
+.resultado-pesquisa {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+}
+
+.resultado-pesquisa button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-weight: bold;
+    transition: opacity 0.3s;
+}
+
+.resultado-pesquisa button:hover:not([disabled]) {
+    opacity: 0.8;
+}
