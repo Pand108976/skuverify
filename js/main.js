@@ -24,51 +24,85 @@ function pesquisarSKU() {
     const skuNumber = skuInput.value.trim();
 
     if (skuNumber === "") {
-        resultDiv.innerHTML = "<span>Digite um SKU válido!</span>";
+        resultDiv.innerHTML = `
+            <div class="alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>Digite um SKU válido!</span>
+            </div>`;
         return;
     }
 
     const cintosEncontrados = cintos.filter(cinto => cinto.sku === skuNumber);
     const oculosEncontrados = oculos.filter(oculo => oculo.sku === skuNumber);
     
-    if (cintosEncontrados.length > 0) {
-        const caixas = cintosEncontrados.map(c => c.caixa).join(", ");
-        const link = cintosEncontrados[0].link;
-        const buttonStyle = link && link.trim() !== "" 
-            ? 'background-color: #007bff; cursor: pointer;' 
-            : 'background-color: #cccccc; cursor: not-allowed;';
+    if (cintosEncontrados.length > 0 || oculosEncontrados.length > 0) {
+        const item = cintosEncontrados.length > 0 ? cintosEncontrados[0] : oculosEncontrados[0];
+        const tipo = cintosEncontrados.length > 0 ? "Cinto" : "Óculos";
+        const caixas = (cintosEncontrados.length > 0 ? cintosEncontrados : oculosEncontrados)
+            .map(i => i.caixa)
+            .sort((a, b) => a - b)
+            .join(", ");
         
         resultDiv.innerHTML = `
-            <div class="resultado-pesquisa">
-                <p>O SKU <span>${skuNumber}</span> é de um cinto na caixa <span>${caixas}</span>.</p>
-                <img src="${cintosEncontrados[0].imagem}" alt="Cinto" style="max-width: 200px;">
-                <button 
-                    onclick="window.open('${link}', '_blank')"
-                    style="${buttonStyle}"
-                    ${!link ? 'disabled' : ''}>
-                    Visitar Site
-                </button>
-            </div>`;
-    } else if (oculosEncontrados.length > 0) {
-        const caixas = oculosEncontrados.map(o => o.caixa).join(", ");
-        const link = oculosEncontrados[0].link;
-        const buttonStyle = link && link.trim() !== "" 
-            ? 'background-color: #007bff; cursor: pointer;' 
-            : 'background-color: #cccccc; cursor: not-allowed;';
-        
-        resultDiv.innerHTML = `
-            <div class="resultado-pesquisa">
-                <p>O SKU <span>${skuNumber}</span> é de um óculos na caixa <span>${caixas}</span>.</p>
-                <img src="${oculosEncontrados[0].imagem}" alt="Óculos">
-                <button 
-                    onclick="window.open('${link}', '_blank')"
-                    style="${buttonStyle}"
-                    ${!link ? 'disabled' : ''}>
-                    Visitar Site
-                </button>
+
+                   <div class="detail-row location-row">
+                            <i class="fas fa-warehouse"></i>
+                            <span class="detail-label">Localização:</span>
+                            <div class="box-locations">
+                                ${caixas.split(',').map(caixa => `
+                                    <span class="box-badge">
+                                        <i class="fas fa-box-open"></i>
+                                        Caixa ${caixa.trim()}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>      
+                        
+            <div class="inventory-card">
+                <div class="product-image-container">
+                    <div class="product-image">
+                        <img src="${item.imagem}" alt="${tipo}">
+                    </div>
+                </div>
+
+                
+                <div class="inventory-content">
+                    <div class="product-details">
+                        <div class="detail-row">
+                            <i class="fas fa-tag"></i>
+                            <span class="detail-label">SKU:</span>
+                            <span class="detail-value">${item.sku}</span>
+                        </div>
+
+
+                        <div class="detail-row">
+                            <i class="fas fa-box"></i>
+                            <span class="detail-label">Categoria:</span>
+                            <span class="detail-value">${tipo}</span>
+                        </div>
+
+                        
+
+                       
+                    </div>
+                </div>
+
+                <div class="inventory-footer">
+                    <button 
+                        onclick="window.open('${item.link}', '_blank')"
+                        class="action-button ${!item.link ? 'disabled' : ''}"
+                        ${!item.link ? 'disabled' : ''}>
+                        <i class="fas fa-external-link-alt"></i>
+                        Acessar Site
+                    </button>
+                </div>
             </div>`;
     } else {
-        resultDiv.innerHTML = `<span>SKU não encontrado.</span>`;
+        resultDiv.innerHTML = `
+            <div class="alert-error">
+                <i class="fas fa-box-open"></i>
+                <span>SKU não encontrado no estoque.</span>
+            </div>`;
     }
 
     setTimeout(() => {
@@ -194,3 +228,14 @@ if (link) {
     window.open(link, '_blank');
 }
 }
+
+const css = `
+.detail-row.location-row {
+    width: 100%;
+    margin-bottom: 10px;
+}
+`;
+
+const style = document.createElement('style');
+style.textContent = css;
+document.head.appendChild(style);
