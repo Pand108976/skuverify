@@ -150,6 +150,7 @@ const cintos = [
         { sku: "771015", caixa: 40, imagem: "./images/cintos/771015.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/single-gancini-belts/sized-771015?srsltid=AfmBOop3KDWc0HXGzbWaeDv3kWQgubJrlT_TtMtE4e4w9iHPunSr1fki" },
         { sku: "644557", caixa: 40, imagem: "./images/cintos/644557.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-644557--1?srsltid=AfmBOopLmwHVk_Svsd6B15XSOM1rJze0p1J5_KrcuZUGhgTNI91A8JW9" },
         { sku: "746507", caixa: 40, imagem: "./images/cintos/746507.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-746507?srsltid=AfmBOopTnDvBvDyzl9vVF2G5XLnqoMst34rEpj795ZLGqHpBL7pULwvy" },
+        { sku: "770986", caixa: 40, imagem: "./images/cintos/770986.webp", classe: "imagem-cintos", link: "" },
 
         { sku: "770654", caixa: 41, imagem: "./images/cintos/770654.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/eu/en/men/man-belts/double-gancini-belts-eu-en/double-adjus-770654--24?srsltid=AfmBOoqki2_JNHGMoxAQ9WPjT0X1OiKjmVxSpodurECag_oC9eQXgJWI" },
         { sku: "759027", caixa: 41, imagem: "./images/cintos/759027.jpg",  classe: "imagem-cintos", link: "https://www.ferragamo.cn/productdetails/0759027?category=woman-shoes-sneakers" },
@@ -166,6 +167,7 @@ const cintos = [
         { sku: "776300", caixa: 44, imagem: "./images/cintos/776300.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/eu/en/men/man-belts/square-belts-eu-en/double-adjus-776300--24?srsltid=AfmBOoq-SoCnZvw0PjqmEhaNRPuDWemsqDvoaQJd2uc1FjdbMluZnN5F" },
         { sku: "770682", caixa: 44, imagem: "./images/cintos/770682.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-770682?srsltid=AfmBOopTnDvBvDyzl9vVF2G5XLnqoMst34rEpj795ZLGqHpBL7pULwvy" },
         { sku: "770936", caixa: 44, imagem: "./images/cintos/770936.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adju-770936?srsltid=AfmBOor-qa0QP8BEaLn2i41iuQibSUonJ13nXr1wEPx4VslIB15tb1ne" },
+        { sku: "593873", caixa: 44, imagem: "./images/cintos/593873.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/ca/en/women/wallets---small-leathers-goods/-593873--1?srsltid=AfmBOor2iG1InuUgC4S0TguHW-lG8tTuaK7ohdrziqVa6GnAQgE_pz-T" },
 
         { sku: "770654", caixa: 45, imagem: "./images/cintos/770654.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/eu/en/men/man-belts/double-gancini-belts-eu-en/double-adjus-770654--24?srsltid=AfmBOoqki2_JNHGMoxAQ9WPjT0X1OiKjmVxSpodurECag_oC9eQXgJWI" },
         { sku: "725421", caixa: 45, imagem: "./images/cintos/725421.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-725421?srsltid=AfmBOopTnDvBvDyzl9vVF2G5XLnqoMst34rEpj795ZLGqHpBL7pULwvy" },
@@ -196,7 +198,6 @@ const cintos = [
 
         { sku: "674556", caixa: 51, imagem: "./images/cintos/674556.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/women/wallets-small-leathers-goods/belts-woman/medium-double-gancio-belt-674556?srsltid=AfmBOor2bSWp0FfImQIpi8mkn_LnhsslpQLGY51kh-YOJI36sxSrUOk4" },
         { sku: "615288", caixa: 51, imagem: "./images/cintos/615288.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/women/wallets-small-leathers-goods/belts-woman/-615288--1?srsltid=AfmBOoqahnw2Y3H6K81fKzb7-Cdx2S7P_r54PkJ9R_HF7CkbiSL-sIoI" },
-        { sku: "764038", caixa: 51, imagem: "./images/cintos/764038.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/women/wallets-small-leathers-goods/belts-woman/donna-h25-764038?srsltid=AfmBOorONyD3_dBhuzWkTLC071r4WY8oteSqiXFyH-_RM0qtmIsbuxQQ" },
         { sku: "715735", caixa: 51, imagem: "./images/cintos/715735.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/ca/en/women/wallets---small-leathers-goods/belts-woman-ca/verstellbarer-gancini-g%C3%BCrtel-715735?srsltid=AfmBOoquva7Y7ezTqZXaqb7wPsbagUyQyu9iggMNhyQ-LIdd_-HjL9aV" },
         { sku: "780503", caixa: 51, imagem: "./images/cintos/780503.jpg",  classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/women/wallets-small-leathers-goods/belts-woman/donna-h-25-780503?srsltid=AfmBOoqVZEMIGpgJs_VDc72f3-sUX8Nmh_k83PElpP2HB7gMLdPSAAZD" },
 ]; 
