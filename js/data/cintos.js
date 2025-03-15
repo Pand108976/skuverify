@@ -206,3 +206,5 @@ const cintos = [
         { sku: "780999", caixa: 53, imagem: "",  classe: "imagem-cintos", link: ""},
         { sku: "773331", caixa: 53, imagem: "",  classe: "imagem-cintos", link: ""},
         { sku: "780459", caixa: 53, imagem: "",  classe: "imagem-cintos", link: ""},
+
+    ];
