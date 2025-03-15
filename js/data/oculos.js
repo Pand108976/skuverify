@@ -1,5 +1,5 @@
 const oculos = [
-    { sku: "774419", caixa: 1, imagem: "./images/oculos/A1/774419.jpg", classe: "imagem-oculos", link: "https://www.ferragamo.com/shop/us/en/men/eyewear-man-usa/sunglasses-men-us/prisma-774419?srsltid=AfmBOoqxYhWX6ToPjFqGg7e9n5kat8K9XWgt6lJePHNjUQeItpXmXCHG" },
+    { sku: "774419", caixa: "A", imagem: "./images/oculos/A1/774419.jpg", classe: "imagem-oculos", link: "https://www.ferragamo.com/shop/us/en/men/eyewear-man-usa/sunglasses-men-us/prisma-774419?srsltid=AfmBOoqxYhWX6ToPjFqGg7e9n5kat8K9XWgt6lJePHNjUQeItpXmXCHG" },
     { sku: "774424", caixa: 1, imagem: "./images/oculos/A1/774424.jpg", classe: "imagem-oculos", link: "https://www.ferragamo.com/shop/us/en/men/eyewear-man-usa/ganci-rivets-774424?srsltid=AfmBOopVYsw0D6ENOBtU7Cc6TEFC4bHcMDy7Houhi4pTfQsrQ_ctCYv7" },
     { sku: "774426", caixa: 1, imagem: "./images/oculos/A1/774426.jpg", classe: "imagem-oculos", link: "https://www.ferragamo.com/shop/eu/en/men/man-eyewear/sunglasses-men-eu-en/ganci-rivets-774426--24?srsltid=AfmBOop5Tz6MCggJiiNfPN2N7nYIUklCBQceOpgbDD3PPkTAHAdx0dz9" },
     { sku: "774416", caixa: 1, imagem: "./images/oculos/A1/774416.jpg", classe: "imagem-oculos", link: "https://www.ferragamo.com/shop/us/en/men/eyewear-man-usa/prisma-774416?srsltid=AfmBOookmAWobCQ9Levn1opBSasTahFJIZgpfgS-bEkkbYTNidwke--R" },
