@@ -202,6 +202,8 @@ const cintos = [
         { sku: "780503", caixa: 51, imagem: "./images/cintos/780503.jpg",  classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/women/wallets-small-leathers-goods/belts-woman/donna-h-25-780503?srsltid=AfmBOoqVZEMIGpgJs_VDc72f3-sUX8Nmh_k83PElpP2HB7gMLdPSAAZD"},
         
         { sku: "781219", caixa: 52, imagem: "",  classe: "imagem-cintos", link: ""},
+        { sku: "783172", caixa: 52, imagem: "",  classe: "imagem-cintos", link: ""},
+        { sku: "780047", caixa: 52, imagem: "",  classe: "imagem-cintos", link: ""},
 
         { sku: "780999", caixa: 53, imagem: "",  classe: "imagem-cintos", link: ""},
         { sku: "773331", caixa: 53, imagem: "",  classe: "imagem-cintos", link: ""},
