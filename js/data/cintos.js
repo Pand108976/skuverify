@@ -197,7 +197,6 @@ const cintos = [
         { sku: "764083", caixa: 50, imagem: "./images/cintos/764083.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/eu/en/women/wallets-small-leathers-goods/donna-h25-764083--24?srsltid=AfmBOoqSCOxssQ5tFqUuMmpEPuX9Lb1ATGMZ4Q23UpfNjqiX5ImCVirs" },
 
         { sku: "674556", caixa: 51, imagem: "./images/cintos/674556.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/women/wallets-small-leathers-goods/belts-woman/medium-double-gancio-belt-674556?srsltid=AfmBOor2bSWp0FfImQIpi8mkn_LnhsslpQLGY51kh-YOJI36sxSrUOk4" },
-        { sku: "615288", caixa: 51, imagem: "./images/cintos/615288.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/women/wallets-small-leathers-goods/belts-woman/-615288--1?srsltid=AfmBOoqahnw2Y3H6K81fKzb7-Cdx2S7P_r54PkJ9R_HF7CkbiSL-sIoI" },
         { sku: "715735", caixa: 51, imagem: "./images/cintos/715735.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/ca/en/women/wallets---small-leathers-goods/belts-woman-ca/verstellbarer-gancini-g%C3%BCrtel-715735?srsltid=AfmBOoquva7Y7ezTqZXaqb7wPsbagUyQyu9iggMNhyQ-LIdd_-HjL9aV" },
         { sku: "780503", caixa: 51, imagem: "./images/cintos/780503.jpg",  classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/women/wallets-small-leathers-goods/belts-woman/donna-h-25-780503?srsltid=AfmBOoqVZEMIGpgJs_VDc72f3-sUX8Nmh_k83PElpP2HB7gMLdPSAAZD"},
         
