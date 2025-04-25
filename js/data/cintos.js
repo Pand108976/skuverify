@@ -41,7 +41,7 @@ const cintos = [
 
         { sku: "694745", caixa: 15, imagem: "./images/cintos/694745.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-694745?srsltid=AfmBOopTnDvBvDyzl9vVF2G5XLnqoMst34rEpj795ZLGqHpBL7pULwvy" },
         { sku: "708206", caixa: 15, imagem: "./images/cintos/708206.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-708206?srsltid=AfmBOopTnDvBvDyzl9vVF2G5XLnqoMst34rEpj795ZLGqHpBL7pULwvy" },
-        { sku: "686671", caixa: 2, imagem: "./images/cintos/686671.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/double-gancini-belts/double-adjus-686671?srsltid=AfmBOoom1HPoHoNF0XOC2uT7enX1fBBVaRfy4yDjqMnp6MWyPITe5e86" },
+        { sku: "686671", caixa: 15, imagem: "./images/cintos/686671.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/double-gancini-belts/double-adjus-686671?srsltid=AfmBOoom1HPoHoNF0XOC2uT7enX1fBBVaRfy4yDjqMnp6MWyPITe5e86" },
 
         { sku: "476361", caixa: 16, imagem: "./images/cintos/476361.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/reversible-and-adjustable-belt-476361--1?srsltid=AfmBOorUTmM3KO0V-QETmdDZa3E5A3GCtd9BSBpj9uOXG_GUX9XTCTMd" },
 
