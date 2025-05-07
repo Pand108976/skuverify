@@ -37,6 +37,7 @@ const oculos = [
     { sku: "782085", caixa: "B", imagem: "./images/oculos/A2/782085.jpg", classe: "imagem-oculos", link: "" },
     { sku: "782080", caixa: "B", imagem: "./images/oculos/A2/782080.jpg", classe: "imagem-oculos", link: "https://www.ferragamo.com/shop/us/en/women/eyewear-w/sunglasses-women-us/gancini-782080?srsltid=AfmBOooiQWaIqLxxZenfC-l0EH1zNCWaPDNWUU9AIQ5_bmZOG3c5NzYR" },
     { sku: "782081", caixa: "B", imagem: "./images/oculos/A2/782081.jpg", classe: "imagem-oculos", link: "https://www.ferragamo.com/shop/eu/en/women/eyewear/sunglasses-women-eu-en/gancini-782081--24?srsltid=AfmBOoqrMy7UQZvSXSNaJyT_loZbj6tNA6pGqk-48wiap70hBWjgcavc" },
+    { sku: "774475", caixa: "B", imagem: "", classe: "imagem-oculos", link: "" },
 
     { sku: "774275", caixa: "C", imagem: "./images/oculos/A3/774275.jpg", classe: "imagem-oculos", link: "https://www.ferragamo.com/shop/us/en/women/eyewear-w/prisma-metal-774275?srsltid=AfmBOoriuWM69CiQKW4TMyh4LCscnHJVtW8iUgR5Ru1lrTgm_8WqjTrw" },
     { sku: "774276", caixa: "C", imagem: "./images/oculos/A3/774276.jpg", classe: "imagem-oculos", link:"https://www.ferragamo.com/shop/eu/en/women/eyewear/prisma-metal-774276--24?srsltid=AfmBOopLx94-GcIWzg8kVFIQODRByPObTvwkq85yqId-ChNyXoMXLZnx" },
