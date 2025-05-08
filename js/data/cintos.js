@@ -19,7 +19,6 @@ const cintos = [
 
         { sku: "764187", caixa: 8, imagem: "./images/cintos/764187.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-764187?srsltid=AfmBOopTnDvBvDyzl9vVF2G5XLnqoMst34rEpj795ZLGqHpBL7pULwvy" },
         { sku: "776323", caixa: 8, imagem: "./images/cintos/776323.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-776323?srsltid=AfmBOopTnDvBvDyzl9vVF2G5XLnqoMst34rEpj795ZLGqHpBL7pULwvy" },
-        { sku: "734227", caixa: 8, imagem: "./images/cintos/734227.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-734227?srsltid=AfmBOopTnDvBvDyzl9vVF2G5XLnqoMst34rEpj795ZLGqHpBL7pULwvy" },
 
         { sku: "764796", caixa: 9, imagem: "./images/cintos/764796.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-764796?srsltid=AfmBOopTnDvBvDyzl9vVF2G5XLnqoMst34rEpj795ZLGqHpBL7pULwvy" },
         { sku: "675158", caixa: 9, imagem: "./images/cintos/675158.webp", classe: "imagem-cintos", link: "https://www.ferragamo.com/shop/us/en/men/belts-man/detailed-buckle-belts/double-adjus-675158?srsltid=AfmBOopTnDvBvDyzl9vVF2G5XLnqoMst34rEpj795ZLGqHpBL7pULwvy" },
