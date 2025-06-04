@@ -142,28 +142,25 @@ export const firebase = {
 
   // Remove products
   async removeProducts(skus: string[]): Promise<void> {
+    const storeId = getStoreCollection();
+    const localStorageKey = getLocalStorageKey();
+    
+    // Remove from localStorage first
+    const stored = localStorage.getItem(localStorageKey);
+    if (stored) {
+      const products: Product[] = JSON.parse(stored);
+      const filtered = products.filter(p => !skus.includes(p.sku));
+      localStorage.setItem(localStorageKey, JSON.stringify(filtered));
+    }
+    
+    // Try to remove from Firebase
     try {
       for (const sku of skus) {
-        await deleteDoc(doc(db, 'products', sku));
-      }
-      
-      // Update localStorage cache
-      const stored = localStorage.getItem('ferragamo_products');
-      if (stored) {
-        const products: Product[] = JSON.parse(stored);
-        const filtered = products.filter(p => !skus.includes(p.sku));
-        localStorage.setItem('ferragamo_products', JSON.stringify(filtered));
+        await deleteDoc(doc(db, storeId, sku));
+        console.log(`Produto removido do Firebase na coleção "${storeId}":`, sku);
       }
     } catch (error) {
-      console.error('Firebase error, using localStorage only:', error);
-      
-      // Fallback to localStorage only
-      const stored = localStorage.getItem('ferragamo_products');
-      if (stored) {
-        const products: Product[] = JSON.parse(stored);
-        const filtered = products.filter(p => !skus.includes(p.sku));
-        localStorage.setItem('ferragamo_products', JSON.stringify(filtered));
-      }
+      console.error('Firebase error, produtos removidos apenas localmente:', error);
     }
   }
 };

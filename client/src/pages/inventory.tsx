@@ -19,7 +19,7 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [storeName, setStoreName] = useState<string>('');
 
-  React.useEffect(() => {
+  useEffect(() => {
     const currentStoreName = localStorage.getItem('ferragamo_store_name') || 'Sistema';
     setStoreName(currentStoreName);
   }, []);
@@ -50,7 +50,7 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
             </div>
             <div>
               <h1 className="text-xl font-bold">Salvatore Ferragamo</h1>
-              <p className="text-sm text-gray-300">Sistema de Estoque Premium</p>
+              <p className="text-sm text-gray-300">Sistema de Estoque - {storeName}</p>
             </div>
           </div>
           <Button 
