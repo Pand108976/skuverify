@@ -79,23 +79,24 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
           <p className="text-muted-foreground">Adicione produtos desta categoria para visualizá-los aqui</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.map((product) => (
+        <div className="grid grid-cols-3 gap-6">
+          {products.map((product, index) => (
             <Card 
-              key={product.id}
-              className="product-card overflow-hidden cursor-pointer premium-shadow"
+              key={`${product.sku}-${index}`}
+              className="product-card overflow-hidden cursor-pointer premium-shadow hover:shadow-xl transition-all duration-300"
               onClick={() => onProductClick(product)}
             >
-              <div className="aspect-square overflow-hidden">
+              <div className="aspect-[4/3] overflow-hidden bg-gradient-to-br from-muted/20 to-muted/40">
                 <img 
                   src={product.imagem || getProductImage(product.categoria, product.sku)}
                   alt={product.sku}
-                  className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                 />
               </div>
-              <div className="p-4">
-                <h3 className="font-bold text-ferragamo-dark mb-1">{product.sku}</h3>
-                <p className="text-sm text-muted-foreground">Caixa: {product.caixa}</p>
+              <div className="p-4 bg-gradient-to-r from-background to-muted/10">
+                <h3 className="font-bold text-ferragamo-dark mb-1 text-lg">{product.sku}</h3>
+                <p className="text-sm text-muted-foreground font-medium">Caixa: {product.caixa}</p>
+                <div className="mt-2 w-full h-1 gold-gradient rounded-full opacity-60"></div>
               </div>
             </Card>
           ))}
