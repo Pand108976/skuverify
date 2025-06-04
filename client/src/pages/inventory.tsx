@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Crown, Search, Glasses, Shirt, Plus, Trash2, LogOut } from "lucide-react";
+import { Crown, Search, Glasses, Shirt, Plus, Trash2, LogOut, Database } from "lucide-react";
 import { SearchTab } from "@/components/search-tab";
 import { ProductsTab } from "@/components/products-tab";
 import { AddProductTab } from "@/components/add-product-tab";
 import { RemoveProductTab } from "@/components/remove-product-tab";
 import { ProductModal } from "@/components/product-modal";
+import { FirebaseStatusTab } from "@/components/firebase-status-tab";
 import type { Product } from "@/lib/types";
 
 interface InventoryPageProps {
@@ -56,7 +57,7 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto p-6">
         <Tabs defaultValue="search" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 bg-background border premium-shadow">
+          <TabsList className="grid w-full grid-cols-6 bg-background border premium-shadow">
             <TabsTrigger value="search" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
               <Search size={16} />
               <span className="hidden sm:inline">Pesquisar</span>
@@ -76,6 +77,10 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
             <TabsTrigger value="remove" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
               <Trash2 size={16} />
               <span className="hidden sm:inline">Remover</span>
+            </TabsTrigger>
+            <TabsTrigger value="firebase" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
+              <Database size={16} />
+              <span className="hidden sm:inline">Firebase</span>
             </TabsTrigger>
           </TabsList>
 
@@ -98,6 +103,10 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
 
             <TabsContent value="remove" className="fade-in">
               <RemoveProductTab />
+            </TabsContent>
+
+            <TabsContent value="firebase" className="fade-in">
+              <FirebaseStatusTab />
             </TabsContent>
           </div>
         </Tabs>

@@ -181,8 +181,8 @@ export function RemoveProductTab() {
               <div>
                 <h3 className="text-lg font-semibold mb-4">3. Selecione os Produtos:</h3>
                 <div className="space-y-2 max-h-60 overflow-y-auto p-4 bg-muted/20 rounded-lg">
-                  {products.map((product) => (
-                    <div key={product.sku} className="flex items-center space-x-3 p-3 bg-background rounded-lg border">
+                  {products.map((product, index) => (
+                    <div key={`${product.sku}-${index}-remove`} className="flex items-center space-x-3 p-3 bg-background rounded-lg border">
                       <Checkbox
                         id={product.sku}
                         checked={selectedProducts.includes(product.sku)}
