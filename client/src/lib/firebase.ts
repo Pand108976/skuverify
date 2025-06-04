@@ -107,25 +107,25 @@ export const firebase = {
 
   // Add product
   async addProduct(product: Omit<Product, 'id'>): Promise<void> {
+    // Atualiza localStorage primeiro para velocidade
+    const stored = localStorage.getItem('ferragamo_products');
+    const products: Product[] = stored ? JSON.parse(stored) : [];
+    const newProduct = { ...product, id: product.sku, createdAt: new Date() };
+    
+    // Remove produto existente com mesmo SKU se houver
+    const filteredProducts = products.filter(p => p.sku !== product.sku);
+    filteredProducts.push(newProduct);
+    localStorage.setItem('ferragamo_products', JSON.stringify(filteredProducts));
+    
+    // Tenta salvar no Firebase em segundo plano
     try {
       await setDoc(doc(db, 'products', product.sku), {
         ...product,
         createdAt: new Date()
       });
-      
-      // Update localStorage cache
-      const stored = localStorage.getItem('ferragamo_products');
-      const products: Product[] = stored ? JSON.parse(stored) : [];
-      products.push({ ...product, id: product.sku });
-      localStorage.setItem('ferragamo_products', JSON.stringify(products));
+      console.log('Produto salvo no Firebase:', product.sku);
     } catch (error) {
-      console.error('Firebase error, using localStorage only:', error);
-      
-      // Fallback to localStorage only
-      const stored = localStorage.getItem('ferragamo_products');
-      const products: Product[] = stored ? JSON.parse(stored) : [];
-      products.push({ ...product, id: product.sku });
-      localStorage.setItem('ferragamo_products', JSON.stringify(products));
+      console.error('Firebase error, dados salvos apenas localmente:', error);
     }
   },
 

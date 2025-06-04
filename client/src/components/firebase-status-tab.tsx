@@ -73,6 +73,54 @@ export function FirebaseStatusTab() {
     }
   };
 
+  const createFirebaseCollection = async () => {
+    setLoading(true);
+    try {
+      // Adiciona produtos de exemplo diretamente no Firebase para criar a coleção
+      const sampleProducts = [
+        {
+          sku: 'SF001',
+          categoria: 'oculos' as 'oculos' | 'cintos',
+          caixa: 'A1',
+          imagem: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600'
+        },
+        {
+          sku: 'SF002',
+          categoria: 'oculos' as 'oculos' | 'cintos',
+          caixa: 'A2',
+          imagem: 'https://images.unsplash.com/photo-1506634572416-48cdfe530110?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600'
+        },
+        {
+          sku: 'SF003',
+          categoria: 'cintos' as 'oculos' | 'cintos',
+          caixa: 'B1',
+          imagem: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600'
+        }
+      ];
+
+      for (const product of sampleProducts) {
+        await firebase.addProduct(product);
+      }
+
+      toast({
+        title: "Coleção Criada",
+        description: "Coleção 'products' criada no Firebase com produtos de exemplo",
+      });
+
+      // Recarrega dados
+      await syncWithFirebase();
+    } catch (error) {
+      console.error('Error creating collection:', error);
+      toast({
+        title: "Erro ao Criar Coleção",
+        description: "Não foi possível criar a coleção no Firebase",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const clearLocalData = () => {
     const confirmed = confirm('Tem certeza que deseja limpar todos os dados locais?');
     if (confirmed) {
@@ -164,7 +212,25 @@ export function FirebaseStatusTab() {
             </div>
 
             {/* Ações */}
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid md:grid-cols-3 gap-4">
+              <Button 
+                onClick={createFirebaseCollection}
+                disabled={loading}
+                className="bg-green-600 hover:bg-green-700 text-white font-semibold py-4"
+              >
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                    Criando...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="mr-2" size={16} />
+                    Criar Coleção no Firebase
+                  </>
+                )}
+              </Button>
+
               <Button 
                 onClick={syncWithFirebase}
                 disabled={loading}
