@@ -1,0 +1,22 @@
+import { pgTable, text, serial, timestamp } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
+
+export const products = pgTable("products", {
+  id: serial("id").primaryKey(),
+  sku: text("sku").notNull().unique(),
+  categoria: text("categoria").notNull(),
+  caixa: text("caixa").notNull(),
+  imagem: text("imagem"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertProductSchema = createInsertSchema(products).pick({
+  sku: true,
+  categoria: true,
+  caixa: true,
+  imagem: true,
+});
+
+export type InsertProduct = z.infer<typeof insertProductSchema>;
+export type Product = typeof products.$inferSelect;
