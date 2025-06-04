@@ -17,12 +17,35 @@ export function LoginForm({ onLogin }: LoginFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (username === "admin" && password === "1234") {
+    // Sistema multi-loja
+    const validLogins: Record<string, string> = {
+      'patiobatel': 'patiobatel',
+      'village': 'village',
+      'admin': '1234'
+    };
+    
+    const normalizedUsername = username.toLowerCase().trim();
+    const normalizedPassword = password.toLowerCase().trim();
+    
+    if (validLogins[normalizedUsername] === normalizedPassword) {
+      // Salva informação da loja no localStorage
+      const storeId = normalizedUsername === 'admin' ? 'admin' : normalizedUsername;
+      localStorage.setItem('ferragamo_store_id', storeId);
+      localStorage.setItem('ferragamo_store_name', getStoreName(storeId));
       onLogin();
     } else {
-      setError("Credenciais inválidas. Use: admin / 1234");
+      setError("Credenciais inválidas. Use: patiobatel/patiobatel, village/village ou admin/1234");
       setTimeout(() => setError(""), 3000);
     }
+  };
+
+  const getStoreName = (storeId: string) => {
+    const storeNames: Record<string, string> = {
+      'patiobatel': 'Patio Batel',
+      'village': 'Village',
+      'admin': 'Administrador'
+    };
+    return storeNames[storeId] || storeId;
   };
 
   return (

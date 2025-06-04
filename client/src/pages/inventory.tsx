@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Crown, Search, Glasses, Shirt, Plus, Trash2, LogOut, Database } from "lucide-react";
@@ -17,6 +17,12 @@ interface InventoryPageProps {
 export function InventoryPage({ onLogout }: InventoryPageProps) {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [storeName, setStoreName] = useState<string>('');
+
+  React.useEffect(() => {
+    const currentStoreName = localStorage.getItem('ferragamo_store_name') || 'Sistema';
+    setStoreName(currentStoreName);
+  }, []);
 
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
@@ -26,6 +32,9 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
   const handleLogout = () => {
     const confirmed = confirm('Tem certeza que deseja sair?');
     if (confirmed) {
+      // Limpa dados da sessão
+      localStorage.removeItem('ferragamo_store_id');
+      localStorage.removeItem('ferragamo_store_name');
       onLogout();
     }
   };
