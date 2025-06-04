@@ -33,7 +33,7 @@ export function RemoveProductTab() {
     try {
       const allProducts = await firebase.getProducts();
       const categoryProducts = allProducts.filter(p => p.categoria === selectedCategory);
-      const uniqueBoxes = [...new Set(categoryProducts.map(p => p.caixa))].sort();
+      const uniqueBoxes = Array.from(new Set(categoryProducts.map(p => p.caixa))).sort();
       setBoxes(uniqueBoxes);
     } catch (error) {
       console.error('Error loading boxes:', error);
