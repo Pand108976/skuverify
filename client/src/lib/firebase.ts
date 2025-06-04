@@ -17,33 +17,90 @@ export const db = getFirestore(app);
 export const firebase = {
   // Get all products
   async getProducts(): Promise<Product[]> {
-    try {
-      const snapshot = await getDocs(collection(db, 'products'));
-      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-    } catch (error) {
-      console.error('Firebase error, using localStorage:', error);
-      const stored = localStorage.getItem('ferragamo_products');
-      return stored ? JSON.parse(stored) : [];
+    // Primeiro tenta localStorage para velocidade
+    const stored = localStorage.getItem('ferragamo_products');
+    let localProducts: Product[] = stored ? JSON.parse(stored) : [];
+    
+    // Se localStorage estiver vazio, inicializa com produtos de exemplo
+    if (localProducts.length === 0) {
+      const sampleProducts: Product[] = [
+        {
+          id: 'SF001',
+          sku: 'SF001',
+          categoria: 'oculos',
+          caixa: 'A1',
+          imagem: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600',
+          createdAt: new Date()
+        },
+        {
+          id: 'SF002',
+          sku: 'SF002',
+          categoria: 'oculos',
+          caixa: 'A2',
+          imagem: 'https://images.unsplash.com/photo-1506634572416-48cdfe530110?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600',
+          createdAt: new Date()
+        },
+        {
+          id: 'SF003',
+          sku: 'SF003',
+          categoria: 'cintos',
+          caixa: 'B1',
+          imagem: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600',
+          createdAt: new Date()
+        },
+        {
+          id: 'SF004',
+          sku: 'SF004',
+          categoria: 'cintos',
+          caixa: 'B2',
+          imagem: 'https://images.unsplash.com/photo-1594223274512-ad4803739b7c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600',
+          createdAt: new Date()
+        }
+      ];
+      
+      localStorage.setItem('ferragamo_products', JSON.stringify(sampleProducts));
+      localProducts = sampleProducts;
     }
+    
+    // Retorna produtos do localStorage instantaneamente
+    return localProducts;
   },
 
   // Get product by SKU
   async getProductBySku(sku: string): Promise<Product | null> {
+    // Busca primeiro no localStorage
+    const stored = localStorage.getItem('ferragamo_products');
+    if (stored) {
+      const products: Product[] = JSON.parse(stored);
+      const localProduct = products.find(p => p.sku.toLowerCase() === sku.toLowerCase());
+      if (localProduct) {
+        return localProduct;
+      }
+    }
+    
+    // Só busca no Firebase se não encontrou no localStorage
     try {
       const docRef = doc(db, 'products', sku);
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
-        return { id: docSnap.id, ...docSnap.data() } as Product;
+        const product = { id: docSnap.id, ...docSnap.data() } as Product;
+        
+        // Atualiza localStorage
+        const products: Product[] = stored ? JSON.parse(stored) : [];
+        const existingIndex = products.findIndex(p => p.sku === product.sku);
+        if (existingIndex >= 0) {
+          products[existingIndex] = product;
+        } else {
+          products.push(product);
+        }
+        localStorage.setItem('ferragamo_products', JSON.stringify(products));
+        
+        return product;
       }
       return null;
     } catch (error) {
       console.error('Firebase error, using localStorage:', error);
-      const stored = localStorage.getItem('ferragamo_products');
-      if (stored) {
-        const products: Product[] = JSON.parse(stored);
-        return products.find(p => p.sku.toLowerCase() === sku.toLowerCase()) || null;
-      }
       return null;
     }
   },
