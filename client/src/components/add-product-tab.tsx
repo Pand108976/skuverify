@@ -20,6 +20,13 @@ export function AddProductTab() {
     setStep(2);
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !loading) {
+      e.preventDefault();
+      handleSubmit(e as any);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -116,6 +123,7 @@ export function AddProductTab() {
                       type="text"
                       value={sku}
                       onChange={(e) => setSku(e.target.value)}
+                      onKeyPress={handleKeyPress}
                       className="luxury-input"
                       placeholder=" "
                       required
@@ -129,6 +137,7 @@ export function AddProductTab() {
                       type="text"
                       value={caixa}
                       onChange={(e) => setCaixa(e.target.value)}
+                      onKeyPress={handleKeyPress}
                       className="luxury-input"
                       placeholder=" "
                       required
