@@ -13,9 +13,12 @@ export function FirebaseStatusTab() {
   const [lastSync, setLastSync] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [storeCounts, setStoreCounts] = useState<{[key: string]: number}>({});
+  const [isAdmin, setIsAdmin] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
+    const currentStoreId = localStorage.getItem('luxury_store_id') || '';
+    setIsAdmin(currentStoreId === 'admin');
     loadLocalData();
     checkFirebaseStatus();
     loadStoreProductCounts();
@@ -220,7 +223,7 @@ export function FirebaseStatusTab() {
 
           <div className="space-y-6">
             {/* Status do Firebase */}
-            <div className="grid md:grid-cols-3 gap-4">
+            <div className={`grid gap-4 ${isAdmin ? 'md:grid-cols-2' : 'md:grid-cols-3'}`}>
               <Card>
                 <CardContent className="p-4 text-center">
                   <div className="flex items-center justify-center mb-2">
@@ -237,15 +240,17 @@ export function FirebaseStatusTab() {
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardContent className="p-4 text-center">
-                  <div className="flex items-center justify-center mb-2">
-                    <Database className="text-blue-600" size={24} />
-                  </div>
-                  <h3 className="font-semibold mb-1">Produtos Locais</h3>
-                  <p className="text-2xl font-bold text-luxury-dark">{localProducts.length}</p>
-                </CardContent>
-              </Card>
+              {!isAdmin && (
+                <Card>
+                  <CardContent className="p-4 text-center">
+                    <div className="flex items-center justify-center mb-2">
+                      <Database className="text-blue-600" size={24} />
+                    </div>
+                    <h3 className="font-semibold mb-1">Produtos Locais</h3>
+                    <p className="text-2xl font-bold text-luxury-dark">{localProducts.length}</p>
+                  </CardContent>
+                </Card>
+              )}
 
               <Card>
                 <CardContent className="p-4 text-center">
@@ -372,24 +377,26 @@ export function FirebaseStatusTab() {
             </div>
 
             {/* Ações Gerais */}
-            <div className="grid gap-4 md:grid-cols-3">
-              <Button 
-                onClick={syncWithFirebase}
-                disabled={loading}
-                className="gold-gradient text-white font-semibold py-4"
-              >
-                {loading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                    Sincronizando...
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="mr-2" size={16} />
-                    Sincronizar Loja Atual
-                  </>
-                )}
-              </Button>
+            <div className={`grid gap-4 ${isAdmin ? 'md:grid-cols-1' : 'md:grid-cols-3'}`}>
+              {!isAdmin && (
+                <Button 
+                  onClick={syncWithFirebase}
+                  disabled={loading}
+                  className="gold-gradient text-white font-semibold py-4"
+                >
+                  {loading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                      Sincronizando...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="mr-2" size={16} />
+                      Sincronizar Loja Atual
+                    </>
+                  )}
+                </Button>
+              )}
 
               <Button 
                 onClick={openFirebaseConsole}
