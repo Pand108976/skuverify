@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { X, Package, Tag, FolderOpen, ImageOff, Calendar } from "lucide-react";
+import { X, Package, Tag, FolderOpen, ImageOff } from "lucide-react";
 import type { Product } from "@/lib/types";
 
 // Componente para imagem padrão quando não há foto
@@ -107,20 +107,7 @@ export function ProductModal({ product, open, onClose }: ProductModalProps) {
               </div>
             </div>
 
-            {/* Data de cadastro se disponível */}
-            {product.createdAt && (
-              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                <div className="flex items-center space-x-2">
-                  <Calendar size={16} className="text-gray-600" />
-                  <div className="flex-1">
-                    <p className="text-xs font-medium text-gray-600 uppercase">Cadastrado</p>
-                    <p className="font-semibold text-gray-800 text-sm">
-                      {new Date(product.createdAt).toLocaleDateString('pt-BR')}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
+
           </div>
 
           {/* Botão de fechar */}
