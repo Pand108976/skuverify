@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Database, Wifi, WifiOff, RefreshCw, Eye, Upload, Store, Plus, FolderTree } from "lucide-react";
+import { Database, Wifi, WifiOff, RefreshCw, Eye, Upload, Store, Plus } from "lucide-react";
 import { firebase } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import type { Product } from "@/lib/types";
@@ -14,7 +14,6 @@ export function FirebaseStatusTab() {
   const [loading, setLoading] = useState(false);
   const [storeCounts, setStoreCounts] = useState<{[key: string]: number}>({});
   const [isAdmin, setIsAdmin] = useState(false);
-  const [migrating, setMigrating] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -192,30 +191,7 @@ export function FirebaseStatusTab() {
     window.open('https://console.firebase.google.com/project/sku-search-3451b/firestore/databases/-default-/data', '_blank');
   };
 
-  const migrateProducts = async () => {
-    setMigrating(true);
-    try {
-      await firebase.migrateExistingProducts();
-      
-      toast({
-        title: "Migração Concluída",
-        description: "Produtos reorganizados na estrutura hierárquica loja → categoria → produtos",
-      });
-      
-      // Recarregar dados após migração
-      loadLocalData();
-      loadStoreProductCounts();
-    } catch (error) {
-      console.error('Migration error:', error);
-      toast({
-        title: "Erro na Migração",
-        description: "Não foi possível migrar os produtos",
-        variant: "destructive",
-      });
-    } finally {
-      setMigrating(false);
-    }
-  };
+
 
   const getStatusColor = () => {
     switch (firebaseStatus) {
@@ -402,37 +378,7 @@ export function FirebaseStatusTab() {
               </Card>
             </div>
 
-            {/* Migração de Estrutura */}
-            <div className="border-t pt-6">
-              <h3 className="text-lg font-semibold mb-4 text-center">Reorganização Hierárquica</h3>
-              <Card className="border-2 border-orange-200 bg-orange-50">
-                <CardContent className="p-4">
-                  <div className="text-center space-y-3">
-                    <FolderTree className="mx-auto text-orange-600" size={32} />
-                    <p className="text-sm text-muted-foreground">
-                      Reorganizar produtos existentes para estrutura: <strong>loja → categoria → produtos</strong>
-                    </p>
-                    <Button 
-                      onClick={migrateProducts}
-                      disabled={migrating || loading}
-                      className="bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 px-6"
-                    >
-                      {migrating ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                          Migrando Produtos...
-                        </>
-                      ) : (
-                        <>
-                          <FolderTree className="mr-2" size={16} />
-                          Migrar para Estrutura Hierárquica
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+
 
             {/* Ações Gerais */}
             <div className={`grid gap-4 ${isAdmin ? 'md:grid-cols-1' : 'md:grid-cols-3'}`}>
