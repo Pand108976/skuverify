@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, CheckCircle, AlertCircle, Code, Store } from "lucide-react";
+import { Upload, CheckCircle, AlertCircle, Code, Store, Tag } from "lucide-react";
 import { firebase } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 
@@ -16,6 +16,7 @@ export function AdvancedImportTab() {
   const [inputData, setInputData] = useState("");
   const [extractedProducts, setExtractedProducts] = useState<ExtractedProduct[]>([]);
   const [selectedStore, setSelectedStore] = useState("patiobatel");
+  const [selectedCategory, setSelectedCategory] = useState<'oculos' | 'cintos'>('oculos');
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<{ success: number; errors: number } | null>(null);
   const { toast } = useToast();
@@ -23,6 +24,11 @@ export function AdvancedImportTab() {
   const availableStores = [
     { id: 'patiobatel', name: 'Patio Batel' },
     { id: 'village', name: 'Village' }
+  ];
+
+  const availableCategories = [
+    { id: 'oculos', name: 'Óculos' },
+    { id: 'cintos', name: 'Cintos' }
   ];
 
   const extractProductsFromArray = () => {
@@ -99,7 +105,7 @@ export function AdvancedImportTab() {
         try {
           await firebase.addProduct({
             sku: product.sku,
-            categoria: 'oculos',
+            categoria: selectedCategory,
             caixa: product.caixa
           });
           successCount++;
@@ -117,9 +123,10 @@ export function AdvancedImportTab() {
 
       setImportResult({ success: successCount, errors: errorCount });
       
+      const selectedCategoryName = availableCategories.find(c => c.id === selectedCategory)?.name || selectedCategory;
       toast({
         title: "Importação Concluída",
-        description: `${successCount} produtos importados para ${selectedStoreName}. ${errorCount} erros.`,
+        description: `${successCount} ${selectedCategoryName} importados para ${selectedStoreName}. ${errorCount} erros.`,
         variant: successCount > 0 ? "default" : "destructive",
       });
 
@@ -201,23 +208,44 @@ export function AdvancedImportTab() {
                 </div>
 
                 <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      <Store className="inline mr-2" size={16} />
-                      Selecionar Loja de Destino:
-                    </label>
-                    <Select value={selectedStore} onValueChange={setSelectedStore}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Escolha a loja" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableStores.map((store) => (
-                          <SelectItem key={store.id} value={store.id}>
-                            {store.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        <Store className="inline mr-2" size={16} />
+                        Loja de Destino:
+                      </label>
+                      <Select value={selectedStore} onValueChange={setSelectedStore}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Escolha a loja" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableStores.map((store) => (
+                            <SelectItem key={store.id} value={store.id}>
+                              {store.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        <Tag className="inline mr-2" size={16} />
+                        Categoria:
+                      </label>
+                      <Select value={selectedCategory} onValueChange={(value: 'oculos' | 'cintos') => setSelectedCategory(value)}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Escolha a categoria" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableCategories.map((category) => (
+                            <SelectItem key={category.id} value={category.id}>
+                              {category.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
 
                   <Button 
@@ -228,12 +256,12 @@ export function AdvancedImportTab() {
                     {importing ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                        Importando para {availableStores.find(s => s.id === selectedStore)?.name}...
+                        Importando {availableCategories.find(c => c.id === selectedCategory)?.name} para {availableStores.find(s => s.id === selectedStore)?.name}...
                       </>
                     ) : (
                       <>
                         <Upload className="mr-2" size={16} />
-                        Importar {extractedProducts.length} produtos para {availableStores.find(s => s.id === selectedStore)?.name}
+                        Importar {extractedProducts.length} {availableCategories.find(c => c.id === selectedCategory)?.name} para {availableStores.find(s => s.id === selectedStore)?.name}
                       </>
                     )}
                   </Button>
@@ -257,7 +285,7 @@ export function AdvancedImportTab() {
                 </div>
                 
                 <div className="text-sm text-muted-foreground text-center">
-                  Produtos importados para {availableStores.find(s => s.id === selectedStore)?.name}. Verifique o console para detalhes.
+                  {availableCategories.find(c => c.id === selectedCategory)?.name} importados para {availableStores.find(s => s.id === selectedStore)?.name}. Verifique o console para detalhes.
                 </div>
               </div>
             )}
