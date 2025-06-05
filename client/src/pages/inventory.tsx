@@ -21,8 +21,8 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
   useEffect(() => {
-    const currentStoreName = localStorage.getItem('ferragamo_store_name') || 'Sistema';
-    const currentStoreId = localStorage.getItem('ferragamo_store_id') || '';
+    const currentStoreName = localStorage.getItem('luxury_store_name') || 'Sistema';
+    const currentStoreId = localStorage.getItem('luxury_store_id') || '';
     setStoreName(currentStoreName);
     setIsAdmin(currentStoreId === 'admin');
   }, []);
@@ -52,7 +52,7 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
               <Crown className="text-white" size={20} />
             </div>
             <div>
-              <h1 className="text-xl font-bold">Salvatore Ferragamo</h1>
+              <h1 className="text-xl font-bold">Luxury Store</h1>
               <p className="text-sm text-gray-300">Sistema de Estoque - {storeName}</p>
             </div>
           </div>

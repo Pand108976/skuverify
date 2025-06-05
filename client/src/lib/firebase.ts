@@ -15,13 +15,13 @@ const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 
 const getStoreCollection = () => {
-  const storeId = localStorage.getItem('ferragamo_store_id') || 'default';
+  const storeId = localStorage.getItem('luxury_store_id') || 'default';
   return storeId;
 };
 
 const getLocalStorageKey = () => {
   const storeId = getStoreCollection();
-  return `ferragamo_products_${storeId}`;
+  return `luxury_products_${storeId}`;
 };
 
 export const firebase = {
