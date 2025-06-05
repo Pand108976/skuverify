@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, Image, ExternalLink, RefreshCw, Glasses, Shirt } from "lucide-react";
+import { AlertTriangle, Image, ExternalLink, RefreshCw, Glasses, Shirt, Store } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { firebase } from "@/lib/firebase";
 import { ProductImage } from "@/components/product-image";
 import type { Product } from "@/lib/types";
@@ -18,29 +19,75 @@ export function PendingTab() {
   const [pendingProducts, setPendingProducts] = useState<PendingProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<'oculos' | 'cintos'>('oculos');
+  const [selectedStore, setSelectedStore] = useState<string>('');
+  const [availableStores, setAvailableStores] = useState<Array<{id: string, name: string}>>([]);
+  
+  // Verificar se é admin
+  const isAdmin = localStorage.getItem('luxury_store_id') === 'admin';
 
   useEffect(() => {
-    loadPendingProducts();
+    if (isAdmin) {
+      loadAvailableStores();
+    } else {
+      loadPendingProducts();
+    }
   }, []);
+
+  useEffect(() => {
+    if (selectedStore) {
+      loadPendingProducts();
+    }
+  }, [selectedStore]);
+
+  const loadAvailableStores = () => {
+    const stores = [
+      { id: 'patiobatel', name: 'Pátio Batel' },
+      { id: 'patiosavassi', name: 'Pátio Savassi' },
+      { id: 'palladiumcuritiba', name: 'Palladium Curitiba' },
+      { id: 'palladiumbelo', name: 'Palladium BH' },
+      { id: 'boulevardlondrina', name: 'Boulevard Londrina' },
+      { id: 'boulevardcampos', name: 'Boulevard Campos' },
+      { id: 'boulevardbelem', name: 'Boulevard Belém' },
+      { id: 'boulevardvilavelha', name: 'Boulevard Vila Velha' }
+    ];
+    setAvailableStores(stores);
+    setSelectedStore('patiobatel'); // Seleciona a primeira loja por padrão
+  };
 
   const loadPendingProducts = async () => {
     setLoading(true);
     try {
-      // Verifica qual loja está ativa
-      const currentStoreId = localStorage.getItem('luxury_store_id');
-      const currentStoreName = localStorage.getItem('luxury_store_name');
-      console.log('Carregando pendentes para loja:', currentStoreName, '(ID:', currentStoreId, ')');
+      // Para admin, usa a loja selecionada; para usuário normal, usa a loja atual
+      const targetStoreId = isAdmin ? selectedStore : localStorage.getItem('luxury_store_id');
+      const targetStoreName = isAdmin ? availableStores.find(s => s.id === selectedStore)?.name : localStorage.getItem('luxury_store_name');
       
-      // Carrega produtos tanto do Firebase quanto localStorage
+      if (isAdmin && !selectedStore) {
+        setLoading(false);
+        return;
+      }
+      
+      // Se for admin, temporariamente muda para a loja selecionada
+      const originalStoreId = localStorage.getItem('luxury_store_id');
+      const originalStoreName = localStorage.getItem('luxury_store_name');
+      
+      if (isAdmin && selectedStore) {
+        localStorage.setItem('luxury_store_id', selectedStore);
+        localStorage.setItem('luxury_store_name', availableStores.find(s => s.id === selectedStore)?.name || selectedStore);
+      }
+      
+      // Carrega produtos
       let products: Product[] = [];
       
       try {
         products = await firebase.getProductsFromFirebase();
-        console.log('Produtos carregados do Firebase:', products.length);
       } catch (firebaseError) {
-        console.log('Firebase indisponível, tentando localStorage...');
         products = await firebase.getProducts();
-        console.log('Produtos carregados do localStorage:', products.length);
+      }
+      
+      // Restaura configuração original se for admin
+      if (isAdmin && originalStoreId && originalStoreName) {
+        localStorage.setItem('luxury_store_id', originalStoreId);
+        localStorage.setItem('luxury_store_name', originalStoreName);
       }
       
       const pending: PendingProduct[] = [];
@@ -52,17 +99,6 @@ export function PendingTab() {
         // Verifica se o link está ausente  
         const missingLink = !product.link || product.link === '' || product.link === undefined;
         
-        // Debug para os primeiros produtos
-        if (products.indexOf(product) < 3) {
-          console.log(`Debug produto ${product.sku}:`, {
-            imagem: product.imagem,
-            link: product.link,
-            missingImage,
-            missingLink,
-            categoria: product.categoria
-          });
-        }
-        
         if (missingImage || missingLink) {
           pending.push({
             product,
@@ -71,12 +107,6 @@ export function PendingTab() {
           });
         }
       }
-      
-      console.log('Produtos pendentes encontrados:', pending.length);
-      console.log('Resumo por categoria:', {
-        oculos: pending.filter(p => p.product.categoria === 'oculos').length,
-        cintos: pending.filter(p => p.product.categoria === 'cintos').length
-      });
       
       setPendingProducts(pending);
     } catch (error) {
@@ -153,15 +183,32 @@ export function PendingTab() {
                 Produtos Pendentes
               </CardTitle>
             </div>
-            <Button 
-              onClick={loadPendingProducts}
-              variant="outline"
-              size="sm"
-              className="text-gray-600"
-            >
-              <RefreshCw size={16} className="mr-2" />
-              Atualizar
-            </Button>
+            <div className="flex items-center gap-3">
+              {isAdmin && (
+                <Select value={selectedStore} onValueChange={setSelectedStore}>
+                  <SelectTrigger className="w-48">
+                    <Store size={16} className="mr-2" />
+                    <SelectValue placeholder="Selecione a loja" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableStores.map((store) => (
+                      <SelectItem key={store.id} value={store.id}>
+                        {store.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+              <Button 
+                onClick={loadPendingProducts}
+                variant="outline"
+                size="sm"
+                className="text-gray-600"
+              >
+                <RefreshCw size={16} className="mr-2" />
+                Atualizar
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
