@@ -17,9 +17,19 @@ const NoImagePlaceholder = ({ className }: { className?: string }) => (
   </div>
 );
 
-export function SearchTab() {
+interface SearchTabProps {
+  isAdmin?: boolean;
+}
+
+interface GlobalSearchResult extends Product {
+  storeName: string;
+  storeId: string;
+}
+
+export function SearchTab({ isAdmin = false }: SearchTabProps) {
   const [sku, setSku] = useState("");
   const [result, setResult] = useState<Product | null>(null);
+  const [globalResults, setGlobalResults] = useState<GlobalSearchResult[]>([]);
   const [notFound, setNotFound] = useState(false);
   const [countdown, setCountdown] = useState(0);
 
@@ -43,17 +53,38 @@ export function SearchTab() {
     
     // Limpa resultados anteriores ao iniciar nova busca
     setResult(null);
+    setGlobalResults([]);
     setNotFound(false);
     setCountdown(0);
     
-    const product = await firebase.getProductBySku(sku.trim());
-    
-    if (product) {
-      setResult(product);
-      setNotFound(false);
-      setCountdown(5);
-    } else {
-      setResult(null);
+    try {
+      if (isAdmin) {
+        // Busca global em todas as lojas para admin
+        const results = await firebase.searchProductInAllStores(sku.trim());
+        if (results.length > 0) {
+          setGlobalResults(results);
+          setNotFound(false);
+          setCountdown(5);
+        } else {
+          setGlobalResults([]);
+          setNotFound(true);
+          setTimeout(() => setNotFound(false), 5000);
+        }
+      } else {
+        // Busca normal na loja atual
+        const product = await firebase.getProductBySku(sku.trim());
+        if (product) {
+          setResult(product);
+          setNotFound(false);
+          setCountdown(5);
+        } else {
+          setResult(null);
+          setNotFound(true);
+          setTimeout(() => setNotFound(false), 5000);
+        }
+      }
+    } catch (error) {
+      console.error('Search error:', error);
       setNotFound(true);
       setTimeout(() => setNotFound(false), 5000);
     }
@@ -157,6 +188,46 @@ export function SearchTab() {
                   </Button>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Global Results for Admin */}
+          {isAdmin && globalResults.length > 0 && (
+            <div className="mt-8 space-y-4 fade-in">
+              <h3 className="text-lg font-semibold text-luxury-dark">Resultados Encontrados em Todas as Lojas</h3>
+              {globalResults.map((product, index) => (
+                <div key={`${product.storeId}-${product.sku}-${index}`} className="p-6 bg-gradient-to-r from-primary to-yellow-400 rounded-xl text-white">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <NoImagePlaceholder className="w-full h-64" />
+                    </div>
+                    <div className="space-y-4">
+                      <div className="bg-white/20 rounded-lg p-3 mb-4">
+                        <span className="text-sm font-medium">Loja:</span>
+                        <p className="text-xl font-bold">{product.storeName}</p>
+                      </div>
+                      <h3 className="text-2xl font-bold">{product.sku}</h3>
+                      <div className="space-y-2">
+                        <p className="flex items-center">
+                          <span className="font-medium">Categoria:</span> 
+                          <span className="ml-2 capitalize">{product.categoria}</span>
+                        </p>
+                        <p className="flex items-center">
+                          <span className="font-medium">Caixa:</span> 
+                          <span className="ml-2">{product.caixa}</span>
+                        </p>
+                      </div>
+                      <Button 
+                        onClick={() => window.open(`https://www.google.com/search?q=${product.sku}`, '_blank')}
+                        className="w-full bg-white text-primary font-semibold py-3 hover:shadow-lg transition-all duration-200"
+                      >
+                        <ExternalLink className="mr-2" size={16} />
+                        Ver Página do Produto
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
           

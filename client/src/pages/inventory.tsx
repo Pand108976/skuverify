@@ -73,19 +73,23 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto p-6">
         <Tabs defaultValue="search" className="w-full">
-          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-6' : 'grid-cols-5'} bg-background border premium-shadow`}>
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-5'} bg-background border premium-shadow`}>
             <TabsTrigger value="search" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
               <Search size={16} />
               <span className="hidden sm:inline">Pesquisar</span>
             </TabsTrigger>
-            <TabsTrigger value="glasses" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
-              <Glasses size={16} />
-              <span className="hidden sm:inline">Óculos</span>
-            </TabsTrigger>
-            <TabsTrigger value="belts" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
-              <Shirt size={16} />
-              <span className="hidden sm:inline">Cintos</span>
-            </TabsTrigger>
+            {!isAdmin && (
+              <>
+                <TabsTrigger value="glasses" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
+                  <Glasses size={16} />
+                  <span className="hidden sm:inline">Óculos</span>
+                </TabsTrigger>
+                <TabsTrigger value="belts" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
+                  <Shirt size={16} />
+                  <span className="hidden sm:inline">Cintos</span>
+                </TabsTrigger>
+              </>
+            )}
             <TabsTrigger value="add" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
               <Plus size={16} />
               <span className="hidden sm:inline">Adicionar</span>
@@ -104,16 +108,20 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
 
           <div className="mt-6">
             <TabsContent value="search" className="fade-in">
-              <SearchTab />
+              <SearchTab isAdmin={isAdmin} />
             </TabsContent>
 
-            <TabsContent value="glasses" className="fade-in">
-              <ProductsTab category="oculos" onProductClick={handleProductClick} />
-            </TabsContent>
+            {!isAdmin && (
+              <>
+                <TabsContent value="glasses" className="fade-in">
+                  <ProductsTab category="oculos" onProductClick={handleProductClick} />
+                </TabsContent>
 
-            <TabsContent value="belts" className="fade-in">
-              <ProductsTab category="cintos" onProductClick={handleProductClick} />
-            </TabsContent>
+                <TabsContent value="belts" className="fade-in">
+                  <ProductsTab category="cintos" onProductClick={handleProductClick} />
+                </TabsContent>
+              </>
+            )}
 
             <TabsContent value="add" className="fade-in">
               <AddProductTab />

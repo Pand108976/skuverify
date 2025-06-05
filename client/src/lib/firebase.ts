@@ -221,5 +221,60 @@ export const firebase = {
     } catch (error) {
       console.error('Erro na sincronização automática:', error);
     }
+  },
+
+  // Search product in all stores (admin only)
+  async searchProductInAllStores(sku: string): Promise<Array<Product & { storeName: string; storeId: string }>> {
+    const stores = [
+      { id: 'patiobatel', name: 'Patio Batel' },
+      { id: 'village', name: 'Village' }
+    ];
+    
+    const results: Array<Product & { storeName: string; storeId: string }> = [];
+    
+    try {
+      for (const store of stores) {
+        // Check localStorage first
+        const localStorageKey = `luxury_products_${store.id}`;
+        const stored = localStorage.getItem(localStorageKey);
+        if (stored) {
+          const products: Product[] = JSON.parse(stored);
+          const found = products.find(p => p.sku.toLowerCase() === sku.toLowerCase());
+          if (found) {
+            results.push({
+              ...found,
+              storeName: store.name,
+              storeId: store.id
+            });
+          }
+        }
+        
+        // Also check Firebase for this store
+        try {
+          const docRef = doc(db, store.id, sku);
+          const docSnap = await getDoc(docRef);
+          
+          if (docSnap.exists()) {
+            const product = { id: docSnap.id, ...docSnap.data() } as Product;
+            // Only add if not already found in localStorage
+            if (!results.find(r => r.storeId === store.id && r.sku === product.sku)) {
+              results.push({
+                ...product,
+                storeName: store.name,
+                storeId: store.id
+              });
+            }
+          }
+        } catch (error) {
+          console.error(`Error searching in Firebase store ${store.id}:`, error);
+        }
+      }
+      
+      console.log(`Global search for "${sku}": found ${results.length} results`);
+      return results;
+    } catch (error) {
+      console.error('Error in global search:', error);
+      return [];
+    }
   }
 };
