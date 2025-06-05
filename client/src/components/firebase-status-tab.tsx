@@ -20,11 +20,13 @@ export function FirebaseStatusTab() {
   }, []);
 
   const loadLocalData = () => {
-    const stored = localStorage.getItem('ferragamo_products');
+    const storeId = localStorage.getItem('luxury_store_id') || 'default';
+    const localStorageKey = `luxury_products_${storeId}`;
+    const stored = localStorage.getItem(localStorageKey);
     const products = stored ? JSON.parse(stored) : [];
     setLocalProducts(products);
     
-    const lastSyncTime = localStorage.getItem('ferragamo_last_sync');
+    const lastSyncTime = localStorage.getItem(`luxury_last_sync_${storeId}`);
     if (lastSyncTime) {
       setLastSync(new Date(lastSyncTime).toLocaleString('pt-BR'));
     }
@@ -45,13 +47,16 @@ export function FirebaseStatusTab() {
   const syncWithFirebase = async () => {
     setLoading(true);
     try {
+      const storeId = localStorage.getItem('luxury_store_id') || 'default';
+      const localStorageKey = `luxury_products_${storeId}`;
+      
       // Força sincronização com Firebase
-      localStorage.removeItem('ferragamo_products');
+      localStorage.removeItem(localStorageKey);
       const products = await firebase.getProducts();
       setLocalProducts(products);
       
       const now = new Date().toISOString();
-      localStorage.setItem('ferragamo_last_sync', now);
+      localStorage.setItem(`luxury_last_sync_${storeId}`, now);
       setLastSync(new Date(now).toLocaleString('pt-BR'));
       
       toast({

@@ -139,7 +139,7 @@ export function SearchTab() {
                     </p>
                   </div>
                   <Button 
-                    onClick={() => window.open(`https://www.ferragamo.com/search?q=${result.sku}`, '_blank')}
+                    onClick={() => window.open(`https://www.google.com/search?q=${result.sku}`, '_blank')}
                     className="w-full bg-white text-primary font-semibold py-3 hover:shadow-lg transition-all duration-200"
                   >
                     <ExternalLink className="mr-2" size={16} />

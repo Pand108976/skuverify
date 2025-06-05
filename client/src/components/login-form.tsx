@@ -30,8 +30,8 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     if (validLogins[normalizedUsername] === normalizedPassword) {
       // Salva informação da loja no localStorage
       const storeId = normalizedUsername === 'admin' ? 'admin' : normalizedUsername;
-      localStorage.setItem('ferragamo_store_id', storeId);
-      localStorage.setItem('ferragamo_store_name', getStoreName(storeId));
+      localStorage.setItem('luxury_store_id', storeId);
+      localStorage.setItem('luxury_store_name', getStoreName(storeId));
       onLogin();
     } else {
       setError("Credenciais inválidas. Use: patiobatel/patiobatel, village/village ou admin/1234");
@@ -56,7 +56,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             <div className="w-20 h-20 mx-auto mb-4 gold-gradient rounded-full flex items-center justify-center">
               <Crown className="text-white text-2xl" size={32} />
             </div>
-            <h1 className="text-2xl font-bold text-ferragamo-dark mb-2">Salvatore Ferragamo</h1>
+            <h1 className="text-2xl font-bold text-luxury-dark mb-2">Luxury Store</h1>
             <p className="text-muted-foreground">Sistema de Gerenciamento de Estoque</p>
           </div>
           

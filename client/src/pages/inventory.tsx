@@ -36,8 +36,8 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
     const confirmed = confirm('Tem certeza que deseja sair?');
     if (confirmed) {
       // Limpa dados da sessão
-      localStorage.removeItem('ferragamo_store_id');
-      localStorage.removeItem('ferragamo_store_name');
+      localStorage.removeItem('luxury_store_id');
+      localStorage.removeItem('luxury_store_name');
       onLogout();
     }
   };

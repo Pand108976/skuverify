@@ -34,7 +34,7 @@ export function ProductModal({ product, open, onClose }: ProductModalProps) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-ferragamo-dark">
+          <DialogTitle className="text-2xl font-bold text-luxury-dark">
             Detalhes do Produto
           </DialogTitle>
         </DialogHeader>
@@ -49,20 +49,20 @@ export function ProductModal({ product, open, onClose }: ProductModalProps) {
           <div className="space-y-3 text-left">
             <div className="bg-muted/20 p-4 rounded-lg">
               <span className="text-sm text-muted-foreground">SKU:</span>
-              <p className="font-bold text-lg text-ferragamo-dark">{product.sku}</p>
+              <p className="font-bold text-lg text-luxury-dark">{product.sku}</p>
             </div>
             <div className="bg-muted/20 p-4 rounded-lg">
               <span className="text-sm text-muted-foreground">Categoria:</span>
-              <p className="font-semibold text-ferragamo-dark capitalize">{product.categoria}</p>
+              <p className="font-semibold text-luxury-dark capitalize">{product.categoria}</p>
             </div>
             <div className="bg-muted/20 p-4 rounded-lg">
               <span className="text-sm text-muted-foreground">Caixa:</span>
-              <p className="font-semibold text-ferragamo-dark">{product.caixa}</p>
+              <p className="font-semibold text-luxury-dark">{product.caixa}</p>
             </div>
           </div>
           
           <Button 
-            onClick={() => window.open(`https://www.ferragamo.com/search?q=${product.sku}`, '_blank')}
+            onClick={() => window.open(`https://www.google.com/search?q=${product.sku}`, '_blank')}
             className="gold-gradient text-white px-8 py-3 font-semibold hover:shadow-lg transition-all duration-200"
           >
             <ExternalLink className="mr-2" size={16} />
