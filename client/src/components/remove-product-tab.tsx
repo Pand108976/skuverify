@@ -182,6 +182,12 @@ export function RemoveProductTab() {
     setLoading(true);
     
     try {
+      // Se for admin, temporariamente muda para a loja selecionada
+      const originalStoreId = localStorage.getItem('luxury_store_id');
+      if (isAdmin && selectedStore) {
+        localStorage.setItem('luxury_store_id', selectedStore);
+      }
+      
       // Buscar detalhes dos produtos antes de remover
       const allProducts = await firebase.getProducts();
       const productsToDelete = allProducts.filter(p => selectedProducts.includes(p.sku));
@@ -190,7 +196,7 @@ export function RemoveProductTab() {
       await firebase.removeProducts(selectedProducts);
       
       // Registrar auditoria
-      const storeName = localStorage.getItem('luxury_store_id') || 'unknown';
+      const storeName = isAdmin ? selectedStore : (localStorage.getItem('luxury_store_id') || 'unknown');
       await firebase.logProductDeletion(productsToDelete, selectedUser, storeName);
       
       toast({
@@ -200,11 +206,17 @@ export function RemoveProductTab() {
 
       // Reset form
       setStep(1);
+      setSelectedStore('');
       setSelectedCategory('');
       setSelectedBox('');
       setProducts([]);
       setSelectedProducts([]);
       setSelectedUser('');
+      
+      // Restaura a loja original se for admin
+      if (isAdmin && originalStoreId) {
+        localStorage.setItem('luxury_store_id', originalStoreId);
+      }
     } catch (error) {
       console.error('Error removing products:', error);
       toast({
@@ -230,10 +242,33 @@ export function RemoveProductTab() {
           </div>
           
           <div className="space-y-6">
-            {/* Step 1: Select Category */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4">1. Selecione a Categoria:</h3>
-              <div className="grid grid-cols-2 gap-4">
+            {/* Step 1: Select Store (Admin only) */}
+            {isAdmin && (
+              <div>
+                <h3 className="text-lg font-semibold mb-4">1. Selecione a Loja:</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {availableStores.map((store) => (
+                    <Button
+                      key={store.id}
+                      variant={selectedStore === store.id ? 'default' : 'outline'}
+                      className={`p-6 h-auto ${selectedStore === store.id ? 'gold-gradient text-white' : 'border-2 hover:border-primary'}`}
+                      onClick={() => handleStoreSelect(store.id)}
+                    >
+                      <div className="text-center">
+                        <Store className="mx-auto mb-3" size={32} />
+                        <p className="font-semibold">{store.name}</p>
+                      </div>
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Step 2: Select Category */}
+            {((!isAdmin && step >= 1) || (isAdmin && step >= 2)) && (
+              <div>
+                <h3 className="text-lg font-semibold mb-4">{isAdmin ? '2' : '1'}. Selecione a Categoria:</h3>
+                <div className="grid grid-cols-2 gap-4">
                 <Button
                   variant={selectedCategory === 'oculos' ? 'default' : 'outline'}
                   className={`p-6 h-auto ${selectedCategory === 'oculos' ? 'gold-gradient text-white' : 'border-2 hover:border-primary'}`}
@@ -254,41 +289,34 @@ export function RemoveProductTab() {
                     <p className="font-semibold">Cintos</p>
                   </div>
                 </Button>
-              </div>
-            </div>
-            
-            {/* Step 2: Select Box */}
-            {step >= 2 && selectedCategory && (
-              <div>
-                <h3 className="text-lg font-semibold mb-4">2. Selecione a Caixa:</h3>
-                <div className="space-y-2">
-                  {boxes.map((box) => {
-                    const productCount = products.filter(p => p.caixa === box).length || 
-                      (async () => {
-                        const allProducts = await firebase.getProducts();
-                        return allProducts.filter(p => p.categoria === selectedCategory && p.caixa === box).length;
-                      });
-                    
-                    return (
-                      <Button
-                        key={box}
-                        variant={selectedBox === box ? 'default' : 'outline'}
-                        className={`w-full p-4 text-left justify-between ${selectedBox === box ? 'gold-gradient text-white' : 'border-2 hover:border-primary'}`}
-                        onClick={() => handleBoxSelect(box)}
-                      >
-                        <span className="font-semibold">Caixa {box}</span>
-                        <span className="text-sm opacity-75">produtos na caixa</span>
-                      </Button>
-                    );
-                  })}
                 </div>
               </div>
             )}
             
-            {/* Step 3: Select Products */}
-            {step >= 3 && selectedCategory && selectedBox && (
+            {/* Step 3: Select Box */}
+            {((!isAdmin && step >= 2) || (isAdmin && step >= 3)) && selectedCategory && (
               <div>
-                <h3 className="text-lg font-semibold mb-4">3. Selecione os Produtos:</h3>
+                <h3 className="text-lg font-semibold mb-4">{isAdmin ? '3' : '2'}. Selecione a Caixa:</h3>
+                <div className="space-y-2">
+                  {boxes.map((box) => (
+                    <Button
+                      key={box}
+                      variant={selectedBox === box ? 'default' : 'outline'}
+                      className={`w-full p-4 text-left justify-between ${selectedBox === box ? 'gold-gradient text-white' : 'border-2 hover:border-primary'}`}
+                      onClick={() => handleBoxSelect(box)}
+                    >
+                      <span className="font-semibold">Caixa {box}</span>
+                      <span className="text-sm opacity-75">produtos na caixa</span>
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Step 4: Select Products */}
+            {((!isAdmin && step >= 3) || (isAdmin && step >= 4)) && selectedCategory && selectedBox && (
+              <div>
+                <h3 className="text-lg font-semibold mb-4">{isAdmin ? '4' : '3'}. Selecione os Produtos:</h3>
                 <div className="space-y-2 max-h-60 overflow-y-auto p-4 bg-muted/20 rounded-lg">
                   {products.map((product, index) => (
                     <div key={`${product.sku}-${index}-remove`} className="flex items-center space-x-3 p-3 bg-background rounded-lg border">
@@ -319,10 +347,10 @@ export function RemoveProductTab() {
               </div>
             )}
             
-            {/* Step 4: Select User */}
-            {step >= 4 && selectedProducts.length > 0 && (
+            {/* Step 5: Select User */}
+            {((!isAdmin && step >= 4) || (isAdmin && step >= 5)) && selectedProducts.length > 0 && (
               <div>
-                <h3 className="text-lg font-semibold mb-4">4. Quem está removendo os produtos?</h3>
+                <h3 className="text-lg font-semibold mb-4">{isAdmin ? '5' : '4'}. Quem está removendo os produtos?</h3>
                 <div className="space-y-4">
                   <div className="p-4 bg-muted/20 rounded-lg">
                     <div className="flex items-center mb-4">
