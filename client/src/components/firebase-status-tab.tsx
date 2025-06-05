@@ -345,7 +345,7 @@ export function FirebaseStatusTab() {
                       <Store className="text-purple-600" size={20} />
                       <div>
                         <h4 className="font-semibold">Administrador</h4>
-                        <p className="text-sm text-muted-foreground">Coleção: admin</p>
+                        <p className="text-sm text-muted-foreground">Apenas sincronização</p>
                       </div>
                     </div>
                     <div className="flex space-x-2">
@@ -357,15 +357,6 @@ export function FirebaseStatusTab() {
                       >
                         <RefreshCw className="mr-1" size={14} />
                         Sync
-                      </Button>
-                      <Button 
-                        onClick={() => createStoreCollection('admin', 'Administrador')}
-                        disabled={loading}
-                        size="sm"
-                        className="bg-purple-600 hover:bg-purple-700 text-white"
-                      >
-                        <Plus className="mr-1" size={14} />
-                        Criar
                       </Button>
                     </div>
                   </div>
