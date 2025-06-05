@@ -3,7 +3,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Search, ExternalLink, AlertCircle, ImageOff } from "lucide-react";
+import { Search, ExternalLink, AlertCircle, ImageOff, Package, FolderOpen, Store } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { firebase } from "@/lib/firebase";
 import type { Product } from "@/lib/types";
 
@@ -162,30 +163,49 @@ export function SearchTab({ isAdmin = false }: SearchTabProps) {
           </Button>
           
           {result && (
-            <div className="mt-8 p-6 bg-gradient-to-r from-primary to-yellow-400 rounded-xl text-white fade-in">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <NoImagePlaceholder className="w-full h-64" />
-                </div>
-                <div className="space-y-4">
-                  <h3 className="text-2xl font-bold">{result.sku}</h3>
-                  <div className="space-y-2">
-                    <p className="flex items-center">
-                      <span className="font-medium">Categoria:</span> 
-                      <span className="ml-2 capitalize">{result.categoria}</span>
-                    </p>
-                    <p className="flex items-center">
-                      <span className="font-medium">Caixa:</span> 
-                      <span className="ml-2">{result.caixa}</span>
-                    </p>
+            <div className="mt-8 bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden fade-in">
+              <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4">
+                <h3 className="text-xl font-bold flex items-center">
+                  <Package className="mr-2" size={20} />
+                  Produto Encontrado
+                </h3>
+              </div>
+              <div className="p-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <NoImagePlaceholder className="w-full h-48 rounded-lg" />
                   </div>
-                  <Button 
-                    onClick={() => window.open(`https://www.google.com/search?q=${result.sku}`, '_blank')}
-                    className="w-full bg-white text-primary font-semibold py-3 hover:shadow-lg transition-all duration-200"
-                  >
-                    <ExternalLink className="mr-2" size={16} />
-                    Ver Página do Produto
-                  </Button>
+                  <div className="space-y-4">
+                    <h4 className="text-2xl font-bold text-gray-800">{result.sku}</h4>
+                    
+                    <div className="space-y-3">
+                      <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                        <div className="flex items-center space-x-2">
+                          <FolderOpen size={16} className="text-blue-600" />
+                          <div>
+                            <p className="text-xs font-medium text-blue-600 uppercase">Categoria</p>
+                            <p className="font-semibold text-blue-800 capitalize">{result.categoria}</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
+                        <div className="flex items-center space-x-2">
+                          <Package size={16} className="text-orange-600" />
+                          <div>
+                            <p className="text-xs font-medium text-orange-600 uppercase">Localização</p>
+                            <p className="font-semibold text-orange-800">Caixa {result.caixa}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                      <p className="text-sm text-green-700 font-medium">
+                        ✓ Produto encontrado no inventário
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -196,34 +216,54 @@ export function SearchTab({ isAdmin = false }: SearchTabProps) {
             <div className="mt-8 space-y-4 fade-in">
               <h3 className="text-lg font-semibold text-luxury-dark">Resultados Encontrados em Todas as Lojas</h3>
               {globalResults.map((product, index) => (
-                <div key={`${product.storeId}-${product.sku}-${index}`} className="p-6 bg-gradient-to-r from-primary to-yellow-400 rounded-xl text-white">
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <NoImagePlaceholder className="w-full h-64" />
+                <div key={`${product.storeId}-${product.sku}-${index}`} className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden">
+                  <div className="bg-gradient-to-r from-purple-500 to-pink-600 text-white p-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xl font-bold flex items-center">
+                        <Store className="mr-2" size={20} />
+                        {product.storeName}
+                      </h3>
+                      <Badge className="bg-white/20 text-white border-white/30">
+                        Global
+                      </Badge>
                     </div>
-                    <div className="space-y-4">
-                      <div className="bg-white/20 rounded-lg p-3 mb-4">
-                        <span className="text-sm font-medium">Loja:</span>
-                        <p className="text-xl font-bold">{product.storeName}</p>
+                  </div>
+                  <div className="p-6">
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div>
+                        <NoImagePlaceholder className="w-full h-48 rounded-lg" />
                       </div>
-                      <h3 className="text-2xl font-bold">{product.sku}</h3>
-                      <div className="space-y-2">
-                        <p className="flex items-center">
-                          <span className="font-medium">Categoria:</span> 
-                          <span className="ml-2 capitalize">{product.categoria}</span>
-                        </p>
-                        <p className="flex items-center">
-                          <span className="font-medium">Caixa:</span> 
-                          <span className="ml-2">{product.caixa}</span>
-                        </p>
+                      <div className="space-y-4">
+                        <h4 className="text-2xl font-bold text-gray-800">{product.sku}</h4>
+                        
+                        <div className="space-y-3">
+                          <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                            <div className="flex items-center space-x-2">
+                              <FolderOpen size={16} className="text-blue-600" />
+                              <div>
+                                <p className="text-xs font-medium text-blue-600 uppercase">Categoria</p>
+                                <p className="font-semibold text-blue-800 capitalize">{product.categoria}</p>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
+                            <div className="flex items-center space-x-2">
+                              <Package size={16} className="text-orange-600" />
+                              <div>
+                                <p className="text-xs font-medium text-orange-600 uppercase">Localização</p>
+                                <p className="font-semibold text-orange-800">Caixa {product.caixa}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
+                          <p className="text-sm text-purple-700 font-medium">
+                            ✓ Encontrado em {product.storeName}
+                          </p>
+                        </div>
                       </div>
-                      <Button 
-                        onClick={() => window.open(`https://www.google.com/search?q=${product.sku}`, '_blank')}
-                        className="w-full bg-white text-primary font-semibold py-3 hover:shadow-lg transition-all duration-200"
-                      >
-                        <ExternalLink className="mr-2" size={16} />
-                        Ver Página do Produto
-                      </Button>
                     </div>
                   </div>
                 </div>
