@@ -41,7 +41,7 @@ export function SearchTab() {
     if (product) {
       setResult(product);
       setNotFound(false);
-      setCountdown(10);
+      setCountdown(5);
     } else {
       setResult(null);
       setNotFound(true);
