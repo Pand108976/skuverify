@@ -56,7 +56,7 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
               <Crown className="text-white" size={20} />
             </div>
             <div>
-              <h1 className="text-xl font-bold">Luxury Store</h1>
+              <h1 className="text-xl font-bold">Vitréo</h1>
               <p className="text-sm text-gray-300">Sistema de Estoque - {storeName}</p>
             </div>
           </div>

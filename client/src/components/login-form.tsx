@@ -56,7 +56,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             <div className="w-20 h-20 mx-auto mb-4 gold-gradient rounded-full flex items-center justify-center">
               <Crown className="text-white text-2xl" size={32} />
             </div>
-            <h1 className="text-2xl font-bold text-luxury-dark mb-2">Luxury Store</h1>
+            <h1 className="text-2xl font-bold text-luxury-dark mb-2">Vitréo</h1>
             <p className="text-muted-foreground">Sistema de Gerenciamento de Estoque</p>
           </div>
           
