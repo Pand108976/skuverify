@@ -27,12 +27,27 @@ export function PendingTab() {
     setLoading(true);
     try {
       const products = await firebase.getProducts();
+      console.log('Total de produtos carregados:', products.length);
       
       const pending: PendingProduct[] = [];
       
       for (const product of products) {
-        const missingImage = !product.imagem || product.imagem === '';
-        const missingLink = !product.link || product.link === '';
+        // Verifica se a imagem está realmente ausente
+        // Se não tem campo imagem ou está vazio, considera como ausente
+        const missingImage = !product.imagem || product.imagem === '' || product.imagem === undefined;
+        
+        // Verifica se o link está ausente
+        const missingLink = !product.link || product.link === '' || product.link === undefined;
+        
+        // Debug para alguns produtos
+        if (pending.length < 5) {
+          console.log(`Produto ${product.sku}:`, {
+            imagem: product.imagem,
+            link: product.link,
+            missingImage,
+            missingLink
+          });
+        }
         
         if (missingImage || missingLink) {
           pending.push({
@@ -43,6 +58,7 @@ export function PendingTab() {
         }
       }
       
+      console.log('Produtos pendentes encontrados:', pending.length);
       setPendingProducts(pending);
     } catch (error) {
       console.error('Erro ao carregar produtos pendentes:', error);
