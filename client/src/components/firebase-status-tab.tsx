@@ -407,18 +407,21 @@ export function FirebaseStatusTab() {
                 Abrir Console Firebase
               </Button>
 
-              <Button 
-                onClick={clearLocalData}
-                variant="destructive"
-                className="py-4"
-              >
-                <Upload className="mr-2" size={16} />
-                Limpar Dados Locais
-              </Button>
+              {!isAdmin && (
+                <Button 
+                  onClick={clearLocalData}
+                  variant="destructive"
+                  className="py-4"
+                >
+                  <Upload className="mr-2" size={16} />
+                  Limpar Dados Locais
+                </Button>
+              )}
             </div>
 
-            {/* Lista de Produtos */}
-            <div>
+            {/* Lista de Produtos - apenas para lojas */}
+            {!isAdmin && (
+              <div>
               <h3 className="text-lg font-semibold mb-4">Produtos da Loja Atual ({localProducts.length})</h3>
               <div className="space-y-2 max-h-60 overflow-y-auto p-4 bg-muted/20 rounded-lg">
                 {localProducts.length === 0 ? (
@@ -444,7 +447,8 @@ export function FirebaseStatusTab() {
                   ))
                 )}
               </div>
-            </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
