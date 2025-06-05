@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, Glasses, Shirt, User, ImageOff } from "lucide-react";
+import { Trash2, Glasses, Shirt, User, ImageOff, Store } from "lucide-react";
 import { firebase } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import type { Product } from "@/lib/types";
@@ -17,6 +17,7 @@ const NoImagePlaceholder = ({ className }: { className?: string }) => (
 
 export function RemoveProductTab() {
   const [step, setStep] = useState(1);
+  const [selectedStore, setSelectedStore] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'oculos' | 'cintos' | ''>('');
   const [boxes, setBoxes] = useState<string[]>([]);
   const [selectedBox, setSelectedBox] = useState('');
@@ -26,9 +27,17 @@ export function RemoveProductTab() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  // Função para obter usuários baseado na loja atual
+  // Verificar se é admin
+  const isAdmin = localStorage.getItem('luxury_store_id') === 'admin';
+  
+  const availableStores = [
+    { id: 'patiobatel', name: 'Patio Batel' },
+    { id: 'village', name: 'Village' }
+  ];
+
+  // Função para obter usuários baseado na loja atual ou selecionada
   const getCurrentStoreUsers = () => {
-    const storeId = localStorage.getItem('luxury_store_id') || 'default';
+    const storeId = isAdmin ? selectedStore : (localStorage.getItem('luxury_store_id') || 'default');
     
     if (storeId === 'patiobatel') {
       return ['Milton', 'Henrique', 'Lucas', 'Adriana', 'Pedro'];
@@ -55,6 +64,12 @@ export function RemoveProductTab() {
 
   const loadBoxes = async () => {
     try {
+      // Se for admin, temporariamente muda para a loja selecionada
+      const originalStoreId = localStorage.getItem('luxury_store_id');
+      if (isAdmin && selectedStore) {
+        localStorage.setItem('luxury_store_id', selectedStore);
+      }
+      
       const allProducts = await firebase.getProducts();
       const categoryProducts = allProducts.filter(p => p.categoria === selectedCategory);
       const uniqueBoxes = Array.from(new Set(categoryProducts.map(p => p.caixa)));
@@ -82,6 +97,11 @@ export function RemoveProductTab() {
       });
       
       setBoxes(sortedBoxes);
+      
+      // Restaura a loja original se for admin
+      if (isAdmin && originalStoreId) {
+        localStorage.setItem('luxury_store_id', originalStoreId);
+      }
     } catch (error) {
       console.error('Error loading boxes:', error);
     }
@@ -89,14 +109,34 @@ export function RemoveProductTab() {
 
   const loadProducts = async () => {
     try {
+      // Se for admin, temporariamente muda para a loja selecionada
+      const originalStoreId = localStorage.getItem('luxury_store_id');
+      if (isAdmin && selectedStore) {
+        localStorage.setItem('luxury_store_id', selectedStore);
+      }
+      
       const allProducts = await firebase.getProducts();
       const filteredProducts = allProducts.filter(
         p => p.categoria === selectedCategory && p.caixa === selectedBox
       );
       setProducts(filteredProducts);
+      
+      // Restaura a loja original se for admin
+      if (isAdmin && originalStoreId) {
+        localStorage.setItem('luxury_store_id', originalStoreId);
+      }
     } catch (error) {
       console.error('Error loading products:', error);
     }
+  };
+
+  const handleStoreSelect = (storeId: string) => {
+    setSelectedStore(storeId);
+    setSelectedCategory('');
+    setSelectedBox('');
+    setProducts([]);
+    setSelectedProducts([]);
+    setStep(2);
   };
 
   const handleCategorySelect = (category: 'oculos' | 'cintos') => {
@@ -104,13 +144,13 @@ export function RemoveProductTab() {
     setSelectedBox('');
     setProducts([]);
     setSelectedProducts([]);
-    setStep(2);
+    setStep(isAdmin ? 3 : 2);
   };
 
   const handleBoxSelect = (box: string) => {
     setSelectedBox(box);
     setSelectedProducts([]);
-    setStep(3);
+    setStep(isAdmin ? 4 : 3);
   };
 
   const handleProductToggle = (productSku: string, checked: boolean) => {
@@ -130,7 +170,7 @@ export function RemoveProductTab() {
       });
       return;
     }
-    setStep(4); // Ir para seleção do usuário
+    setStep(isAdmin ? 5 : 4); // Ir para seleção do usuário
   };
 
   const handleRemoveProducts = async () => {
