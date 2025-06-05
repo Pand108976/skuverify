@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Trash2, Glasses, Shirt } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Trash2, Glasses, Shirt, User } from "lucide-react";
 import { firebase } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import type { Product } from "@/lib/types";
@@ -14,8 +15,12 @@ export function RemoveProductTab() {
   const [selectedBox, setSelectedBox] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [selectedUser, setSelectedUser] = useState('');
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+
+  // Usuários do Patio Batel
+  const patioBatelUsers = ['Milton', 'Henrique', 'Lucas', 'Adriana', 'Pedro'];
 
   useEffect(() => {
     if (selectedCategory) {
@@ -74,16 +79,37 @@ export function RemoveProductTab() {
     }
   };
 
-  const handleRemoveProducts = async () => {
-    if (selectedProducts.length === 0) return;
+  const handleProductsSelected = () => {
+    if (selectedProducts.length === 0) {
+      toast({
+        title: "Erro",
+        description: "Selecione pelo menos um produto para remover",
+        variant: "destructive",
+      });
+      return;
+    }
+    setStep(4); // Ir para seleção do usuário
+  };
 
-    const confirmed = confirm(`Tem certeza que deseja remover ${selectedProducts.length} produto(s)?`);
+  const handleRemoveProducts = async () => {
+    if (selectedProducts.length === 0 || !selectedUser) return;
+
+    const confirmed = confirm(`Tem certeza que deseja remover ${selectedProducts.length} produto(s)? Esta ação será registrada em nome de ${selectedUser}.`);
     if (!confirmed) return;
 
     setLoading(true);
     
     try {
+      // Buscar detalhes dos produtos antes de remover
+      const allProducts = await firebase.getProducts();
+      const productsToDelete = allProducts.filter(p => selectedProducts.includes(p.sku));
+      
+      // Remover produtos
       await firebase.removeProducts(selectedProducts);
+      
+      // Registrar auditoria
+      const storeName = localStorage.getItem('currentStore') || 'unknown';
+      await firebase.logProductDeletion(productsToDelete, selectedUser, storeName);
       
       toast({
         title: "Sucesso",
@@ -205,23 +231,65 @@ export function RemoveProductTab() {
                 
                 {selectedProducts.length > 0 && (
                   <Button 
-                    onClick={handleRemoveProducts}
-                    disabled={loading}
-                    className="w-full bg-destructive hover:bg-destructive/90 text-destructive-foreground font-semibold py-4 mt-6 transition-colors duration-200"
+                    onClick={handleProductsSelected}
+                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-4 mt-6 transition-colors duration-200"
                   >
-                    {loading ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                        Removendo...
-                      </>
-                    ) : (
-                      <>
-                        <Trash2 className="mr-2" size={16} />
-                        Remover {selectedProducts.length} Produto(s) Selecionado(s)
-                      </>
-                    )}
+                    Continuar com {selectedProducts.length} Produto(s) Selecionado(s)
                   </Button>
                 )}
+              </div>
+            )}
+            
+            {/* Step 4: Select User */}
+            {step >= 4 && selectedProducts.length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold mb-4">4. Quem está removendo os produtos?</h3>
+                <div className="space-y-4">
+                  <div className="p-4 bg-muted/20 rounded-lg">
+                    <div className="flex items-center mb-4">
+                      <User className="text-primary mr-3" size={24} />
+                      <span className="font-medium">Selecione o responsável pela remoção:</span>
+                    </div>
+                    <Select value={selectedUser} onValueChange={setSelectedUser}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Escolha o usuário responsável" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {patioBatelUsers.map((user) => (
+                          <SelectItem key={user} value={user}>
+                            {user}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="text-sm text-yellow-800">
+                      <strong>Importante:</strong> Esta ação será registrada no histórico de auditoria com o nome do usuário selecionado, data e hora da remoção.
+                    </p>
+                  </div>
+                  
+                  {selectedUser && (
+                    <Button 
+                      onClick={handleRemoveProducts}
+                      disabled={loading}
+                      className="w-full bg-destructive hover:bg-destructive/90 text-destructive-foreground font-semibold py-4 transition-colors duration-200"
+                    >
+                      {loading ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                          Removendo produtos...
+                        </>
+                      ) : (
+                        <>
+                          <Trash2 className="mr-2" size={16} />
+                          Confirmar Remoção ({selectedUser})
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
               </div>
             )}
           </div>

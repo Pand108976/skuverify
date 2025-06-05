@@ -162,5 +162,64 @@ export const firebase = {
     } catch (error) {
       console.error('Firebase error, produtos removidos apenas localmente:', error);
     }
+  },
+
+  // Log product deletion for audit
+  async logProductDeletion(products: Product[], userName: string, storeName: string): Promise<void> {
+    try {
+      const deletedCollectionName = `deleted_${storeName}`;
+      const timestamp = new Date();
+      
+      for (const product of products) {
+        const auditRecord = {
+          categoria: product.categoria,
+          sku: product.sku,
+          caixa: product.caixa,
+          deletedBy: userName,
+          deletedAt: timestamp,
+          originalCreatedAt: product.createdAt || null
+        };
+        
+        // Use timestamp + SKU as document ID to avoid conflicts
+        const docId = `${timestamp.getTime()}_${product.sku}`;
+        await setDoc(doc(db, deletedCollectionName, docId), auditRecord);
+        console.log(`Auditoria registrada em "${deletedCollectionName}":`, product.sku);
+      }
+    } catch (error) {
+      console.error('Erro ao registrar auditoria:', error);
+    }
+  },
+
+  // Auto-sync collections every hour
+  async startAutoSync(): Promise<void> {
+    // Sync immediately on start
+    this.syncCollections();
+    
+    // Then sync every hour (3600000 ms)
+    setInterval(() => {
+      this.syncCollections();
+    }, 3600000);
+    
+    console.log('Sincronização automática iniciada (a cada 1 hora)');
+  },
+
+  // Sync collections manually
+  async syncCollections(): Promise<void> {
+    try {
+      const storeId = getStoreCollection();
+      const localStorageKey = getLocalStorageKey();
+      
+      console.log('Iniciando sincronização automática...');
+      
+      // Get products from Firebase
+      const firebaseProducts = await this.getProductsFromFirebase();
+      
+      // Update localStorage with Firebase data
+      localStorage.setItem(localStorageKey, JSON.stringify(firebaseProducts));
+      
+      console.log(`Sincronização concluída: ${firebaseProducts.length} produtos sincronizados`);
+    } catch (error) {
+      console.error('Erro na sincronização automática:', error);
+    }
   }
 };

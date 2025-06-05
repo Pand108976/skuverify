@@ -8,6 +8,7 @@ import { AddProductTab } from "@/components/add-product-tab";
 import { RemoveProductTab } from "@/components/remove-product-tab";
 import { ProductModal } from "@/components/product-modal";
 import { FirebaseStatusTab } from "@/components/firebase-status-tab";
+import { firebase } from "@/lib/firebase";
 import type { Product } from "@/lib/types";
 
 interface InventoryPageProps {
