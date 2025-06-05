@@ -56,10 +56,10 @@ export function PendingTab() {
 
   // Função para verificar e corrigir caminhos de imagem
   const checkAndFixImage = async (product: Product): Promise<{ missing: boolean, correctPath?: string }> => {
-    const imageExtensions = ['jpg', 'jpeg', 'webp', 'png'];
+    const imageExtensions = ['webp', 'jpg', 'jpeg', 'png']; // Ordem de prioridade
     const basePath = `/images/${product.categoria}/${product.sku}`;
 
-    // Testa todas as extensões possíveis
+    // Testa todas as extensões possíveis na ordem de prioridade
     for (const ext of imageExtensions) {
       const imagePath = `${basePath}.${ext}`;
       try {
@@ -67,7 +67,6 @@ export function PendingTab() {
         if (response.ok) {
           // Imagem encontrada! Verifica se o caminho está correto no banco
           if (product.imagem !== imagePath) {
-            console.log(`Corrigindo caminho da imagem para ${product.sku}: ${product.imagem} → ${imagePath}`);
             return { missing: false, correctPath: imagePath };
           }
           return { missing: false };
@@ -77,13 +76,8 @@ export function PendingTab() {
       }
     }
 
-    // Nenhuma imagem encontrada
-    if (product.imagem && product.imagem !== '') {
-      console.log(`Imagem não encontrada para ${product.sku}, limpando campo: ${product.imagem}`);
-      return { missing: true, correctPath: '' };
-    }
-    
-    return { missing: true };
+    // Nenhuma imagem encontrada - produto realmente sem foto
+    return { missing: true, correctPath: product.imagem ? '' : undefined };
   };
 
   // Cache para evitar verificações desnecessárias
@@ -142,13 +136,35 @@ export function PendingTab() {
         localStorage.setItem('luxury_store_name', availableStores.find(s => s.id === selectedStore)?.name || selectedStore);
       }
       
-      // Carrega produtos
+      // Carrega produtos de ambas as fontes para comparar
       let products: Product[] = [];
+      let firebaseProducts: Product[] = [];
+      let localProducts: Product[] = [];
       
       try {
-        products = await firebase.getProductsFromFirebase();
+        firebaseProducts = await firebase.getProductsFromFirebase();
+        console.log(`Firebase: ${firebaseProducts.length} produtos carregados`);
       } catch (firebaseError) {
-        products = await firebase.getProducts();
+        console.log('Erro ao carregar do Firebase, usando apenas localStorage');
+      }
+      
+      try {
+        localProducts = await firebase.getProducts();
+        console.log(`LocalStorage: ${localProducts.length} produtos carregados`);
+      } catch (localError) {
+        console.log('Erro ao carregar do localStorage');
+      }
+      
+      // Usa Firebase como fonte principal, mas inclui produtos do localStorage que não estão no Firebase
+      products = firebaseProducts;
+      
+      // Identifica produtos que estão apenas no localStorage
+      const firebaseSKUs = new Set(firebaseProducts.map(p => p.sku));
+      const localOnlyProducts = localProducts.filter(p => !firebaseSKUs.has(p.sku));
+      
+      if (localOnlyProducts.length > 0) {
+        console.log(`Encontrados ${localOnlyProducts.length} produtos apenas no localStorage:`, localOnlyProducts.map(p => p.sku));
+        products = [...products, ...localOnlyProducts];
       }
       
       // Restaura configuração original se for admin
@@ -159,26 +175,36 @@ export function PendingTab() {
       
       const pending: PendingProduct[] = [];
       
-      // Verifica e corrige produtos pendentes
-      for (const product of products) {
-        const imageCheck = await checkAndFixImage(product);
-        const missingLink = !product.link || product.link === '' || product.link === undefined;
+      // Verifica produtos pendentes em lotes para melhor performance
+      const batchSize = 10;
+      for (let i = 0; i < products.length; i += batchSize) {
+        const batch = products.slice(i, i + batchSize);
         
-        // Se encontrou um caminho correto diferente, atualiza no Firebase
-        if (imageCheck.correctPath !== undefined && imageCheck.correctPath !== product.imagem) {
-          try {
-            await updateProductImage(product, imageCheck.correctPath);
-          } catch (error) {
-            console.error(`Erro ao atualizar imagem para ${product.sku}:`, error);
+        await Promise.all(batch.map(async (product) => {
+          const imageCheck = await checkAndFixImage(product);
+          const missingLink = !product.link || product.link === '' || product.link === undefined;
+          
+          // Se encontrou um caminho correto diferente, atualiza no Firebase
+          if (imageCheck.correctPath !== undefined && imageCheck.correctPath !== product.imagem) {
+            try {
+              await updateProductImage(product, imageCheck.correctPath);
+            } catch (error) {
+              console.error(`Erro ao atualizar imagem para ${product.sku}:`, error);
+            }
           }
-        }
+          
+          if (imageCheck.missing || missingLink) {
+            pending.push({
+              product,
+              missingImage: imageCheck.missing,
+              missingLink
+            });
+          }
+        }));
         
-        if (imageCheck.missing || missingLink) {
-          pending.push({
-            product,
-            missingImage: imageCheck.missing,
-            missingLink
-          });
+        // Pequena pausa entre lotes para não sobrecarregar
+        if (i + batchSize < products.length) {
+          await new Promise(resolve => setTimeout(resolve, 100));
         }
       }
       
