@@ -184,6 +184,10 @@ export function BulkImportTab() {
 
       console.log(`Iniciando importação em massa de ${productsData.length} produtos para Patio Batel...`);
 
+      // Temporariamente mudar para patiobatel para importação
+      const originalStoreId = localStorage.getItem('luxury_store_id');
+      localStorage.setItem('luxury_store_id', 'patiobatel');
+
       for (const product of productsData) {
         try {
           await firebase.addProduct({
@@ -197,6 +201,11 @@ export function BulkImportTab() {
           console.error(`Erro ao adicionar produto ${product.sku}:`, error);
           errorCount++;
         }
+      }
+
+      // Restaurar store ID original
+      if (originalStoreId) {
+        localStorage.setItem('luxury_store_id', originalStoreId);
       }
 
       setImportResult({ success: successCount, errors: errorCount });

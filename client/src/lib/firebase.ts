@@ -283,37 +283,19 @@ export const firebase = {
     
     try {
       for (const store of stores) {
-        // Check localStorage first
-        const localStorageKey = `luxury_products_${store.id}`;
-        const stored = localStorage.getItem(localStorageKey);
-        if (stored) {
-          const products: Product[] = JSON.parse(stored);
-          const found = products.find(p => p.sku.toLowerCase() === sku.toLowerCase());
-          if (found) {
+        try {
+          // Search in Firebase directly
+          const q = query(collection(db, store.id), where("sku", "==", sku));
+          const querySnapshot = await getDocs(q);
+          
+          querySnapshot.forEach((doc) => {
+            const product = { id: doc.id, ...doc.data() } as Product;
             results.push({
-              ...found,
+              ...product,
               storeName: store.name,
               storeId: store.id
             });
-          }
-        }
-        
-        // Also check Firebase for this store
-        try {
-          const docRef = doc(db, store.id, sku);
-          const docSnap = await getDoc(docRef);
-          
-          if (docSnap.exists()) {
-            const product = { id: docSnap.id, ...docSnap.data() } as Product;
-            // Only add if not already found in localStorage
-            if (!results.find(r => r.storeId === store.id && r.sku === product.sku)) {
-              results.push({
-                ...product,
-                storeName: store.name,
-                storeId: store.id
-              });
-            }
-          }
+          });
         } catch (error) {
           console.error(`Error searching in Firebase store ${store.id}:`, error);
         }
