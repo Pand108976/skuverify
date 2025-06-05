@@ -266,8 +266,8 @@ export function AdvancedImportTab() {
               <p><strong>Como usar:</strong></p>
               <p>1. Cole o array JavaScript completo no campo de texto</p>
               <p>2. Clique em "Extrair SKUs e Caixas" para processar os dados</p>
-              <p>3. Clique em "Importar" para adicionar ao Firebase do Patio Batel</p>
-              <p>4. Use o botão 🗑️ para limpar produtos importados incorretamente</p>
+              <p>3. Selecione a loja de destino (Patio Batel ou Village)</p>
+              <p>4. Clique em "Importar" para adicionar ao Firebase da loja selecionada</p>
             </div>
           </div>
         </CardContent>
