@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload, CheckCircle, AlertCircle, Trash2, Code } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Upload, CheckCircle, AlertCircle, Code, Store } from "lucide-react";
 import { firebase } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 
@@ -14,10 +15,15 @@ interface ExtractedProduct {
 export function AdvancedImportTab() {
   const [inputData, setInputData] = useState("");
   const [extractedProducts, setExtractedProducts] = useState<ExtractedProduct[]>([]);
+  const [selectedStore, setSelectedStore] = useState("patiobatel");
   const [importing, setImporting] = useState(false);
-  const [clearing, setClearing] = useState(false);
   const [importResult, setImportResult] = useState<{ success: number; errors: number } | null>(null);
   const { toast } = useToast();
+
+  const availableStores = [
+    { id: 'patiobatel', name: 'Patio Batel' },
+    { id: 'village', name: 'Village' }
+  ];
 
   const extractProductsFromArray = () => {
     try {
@@ -82,11 +88,12 @@ export function AdvancedImportTab() {
       let successCount = 0;
       let errorCount = 0;
 
-      console.log(`Iniciando importação de ${extractedProducts.length} produtos para Patio Batel...`);
+      const selectedStoreName = availableStores.find(store => store.id === selectedStore)?.name || selectedStore;
+      console.log(`Iniciando importação de ${extractedProducts.length} produtos para ${selectedStoreName}...`);
 
-      // Forçar para patiobatel
+      // Forçar para a loja selecionada
       const originalStoreId = localStorage.getItem('luxury_store_id');
-      localStorage.setItem('luxury_store_id', 'patiobatel');
+      localStorage.setItem('luxury_store_id', selectedStore);
 
       for (const product of extractedProducts) {
         try {
@@ -96,7 +103,7 @@ export function AdvancedImportTab() {
             caixa: product.caixa
           });
           successCount++;
-          console.log(`Produto ${product.sku} (Caixa ${product.caixa}) adicionado com sucesso ao Patio Batel`);
+          console.log(`Produto ${product.sku} (Caixa ${product.caixa}) adicionado com sucesso à ${selectedStoreName}`);
         } catch (error) {
           console.error(`Erro ao adicionar produto ${product.sku}:`, error);
           errorCount++;
@@ -112,7 +119,7 @@ export function AdvancedImportTab() {
       
       toast({
         title: "Importação Concluída",
-        description: `${successCount} produtos importados para Patio Batel. ${errorCount} erros.`,
+        description: `${successCount} produtos importados para ${selectedStoreName}. ${errorCount} erros.`,
         variant: successCount > 0 ? "default" : "destructive",
       });
 
@@ -128,68 +135,7 @@ export function AdvancedImportTab() {
     }
   };
 
-  const clearAllProducts = async () => {
-    setClearing(true);
-    try {
-      console.log("Limpando todos os produtos das coleções...");
-      
-      // Limpar da coleção admin (onde foram salvos incorretamente)
-      const originalStoreId = localStorage.getItem('luxury_store_id');
-      localStorage.setItem('luxury_store_id', 'admin');
-      
-      const adminProducts = await firebase.getProductsFromFirebase();
-      console.log(`Encontrados ${adminProducts.length} produtos na coleção admin para remoção`);
-      
-      for (const product of adminProducts) {
-        try {
-          await firebase.removeProducts([product.sku]);
-          console.log(`Produto ${product.sku} removido da coleção admin`);
-        } catch (error) {
-          console.error(`Erro ao remover ${product.sku} da admin:`, error);
-        }
-      }
-      
-      // Limpar da coleção patiobatel também
-      localStorage.setItem('luxury_store_id', 'patiobatel');
-      
-      const patioProducts = await firebase.getProductsFromFirebase();
-      console.log(`Encontrados ${patioProducts.length} produtos na coleção patiobatel para remoção`);
-      
-      for (const product of patioProducts) {
-        try {
-          await firebase.removeProducts([product.sku]);
-          console.log(`Produto ${product.sku} removido da coleção patiobatel`);
-        } catch (error) {
-          console.error(`Erro ao remover ${product.sku} do patiobatel:`, error);
-        }
-      }
-      
-      // Restaurar store ID original
-      if (originalStoreId) {
-        localStorage.setItem('luxury_store_id', originalStoreId);
-      }
-      
-      // Limpar localStorage também
-      localStorage.removeItem('luxury_products_admin');
-      localStorage.removeItem('luxury_products_patiobatel');
-      
-      toast({
-        title: "Limpeza Concluída",
-        description: "Todos os produtos foram removidos das coleções.",
-        variant: "default",
-      });
-      
-    } catch (error) {
-      console.error('Erro na limpeza:', error);
-      toast({
-        title: "Erro na Limpeza",
-        description: "Ocorreu um erro durante a limpeza.",
-        variant: "destructive",
-      });
-    } finally {
-      setClearing(false);
-    }
-  };
+
 
   return (
     <div className="space-y-6">
@@ -222,29 +168,14 @@ export function AdvancedImportTab() {
                 />
               </div>
 
-              <div className="flex gap-3">
-                <Button 
-                  onClick={extractProductsFromArray}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-                  disabled={!inputData.trim()}
-                >
-                  <Code className="mr-2" size={16} />
-                  Extrair SKUs e Caixas
-                </Button>
-                
-                <Button 
-                  onClick={clearAllProducts}
-                  disabled={clearing}
-                  variant="destructive"
-                  className="px-6"
-                >
-                  {clearing ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <Trash2 size={16} />
-                  )}
-                </Button>
-              </div>
+              <Button 
+                onClick={extractProductsFromArray}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                disabled={!inputData.trim()}
+              >
+                <Code className="mr-2" size={16} />
+                Extrair SKUs e Caixas
+              </Button>
             </div>
 
             {extractedProducts.length > 0 && (
@@ -269,23 +200,44 @@ export function AdvancedImportTab() {
                   </div>
                 </div>
 
-                <Button 
-                  onClick={handleBulkImport}
-                  disabled={importing}
-                  className="w-full gold-gradient text-white font-semibold py-4 hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300"
-                >
-                  {importing ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                      Importando para Patio Batel...
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="mr-2" size={16} />
-                      Importar {extractedProducts.length} produtos para Patio Batel
-                    </>
-                  )}
-                </Button>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      <Store className="inline mr-2" size={16} />
+                      Selecionar Loja de Destino:
+                    </label>
+                    <Select value={selectedStore} onValueChange={setSelectedStore}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Escolha a loja" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableStores.map((store) => (
+                          <SelectItem key={store.id} value={store.id}>
+                            {store.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <Button 
+                    onClick={handleBulkImport}
+                    disabled={importing}
+                    className="w-full gold-gradient text-white font-semibold py-4 hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300"
+                  >
+                    {importing ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                        Importando para {availableStores.find(s => s.id === selectedStore)?.name}...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="mr-2" size={16} />
+                        Importar {extractedProducts.length} produtos para {availableStores.find(s => s.id === selectedStore)?.name}
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
             )}
 
@@ -305,7 +257,7 @@ export function AdvancedImportTab() {
                 </div>
                 
                 <div className="text-sm text-muted-foreground text-center">
-                  Produtos importados para Patio Batel. Verifique o console para detalhes.
+                  Produtos importados para {availableStores.find(s => s.id === selectedStore)?.name}. Verifique o console para detalhes.
                 </div>
               </div>
             )}
