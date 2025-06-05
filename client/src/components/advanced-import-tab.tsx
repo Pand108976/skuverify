@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 interface ExtractedProduct {
   sku: string;
   caixa: string;
+  link?: string;
 }
 
 export function AdvancedImportTab() {
@@ -46,17 +47,19 @@ export function AdvancedImportTab() {
       const products: ExtractedProduct[] = [];
       
       for (const line of lines) {
-        // Procurar por padrão: sku: "valor", caixa: "valor"
+        // Procurar por padrão: sku: "valor", caixa: "valor", link: "valor"
         const skuMatch = line.match(/sku:\s*["']([^"']+)["']/);
         const caixaMatch = line.match(/caixa:\s*["']([^"']+)["']/);
+        const linkMatch = line.match(/link:\s*["']([^"']+)["']/);
         
         if (skuMatch && caixaMatch) {
           const sku = skuMatch[1];
           const caixa = caixaMatch[1];
+          const link = linkMatch ? linkMatch[1] : undefined;
           
           // Evitar duplicatas
           if (!products.find(p => p.sku === sku && p.caixa === caixa)) {
-            products.push({ sku, caixa });
+            products.push({ sku, caixa, link });
           }
         }
       }
@@ -64,15 +67,16 @@ export function AdvancedImportTab() {
       setExtractedProducts(products);
       
       if (products.length > 0) {
+        const linksCount = products.filter(p => p.link).length;
         toast({
           title: "Extração Concluída",
-          description: `${products.length} produtos únicos extraídos com sucesso.`,
+          description: `${products.length} produtos extraídos (${linksCount} com links).`,
           variant: "default",
         });
       } else {
         toast({
           title: "Nenhum Produto Encontrado",
-          description: "Verifique se o formato está correto: sku: \"valor\", caixa: \"valor\"",
+          description: "Verifique se o formato está correto: sku: \"valor\", caixa: \"valor\", link: \"valor\"",
           variant: "destructive",
         });
       }
@@ -115,7 +119,8 @@ export function AdvancedImportTab() {
           await firebase.addProduct({
             sku: product.sku,
             categoria: selectedCategory,
-            caixa: product.caixa
+            caixa: product.caixa,
+            link: product.link
           });
           successCount++;
           console.log(`Produto ${product.sku} (Caixa ${product.caixa}) adicionado com sucesso à ${selectedStoreName}`);
@@ -162,34 +167,26 @@ export function AdvancedImportTab() {
       return;
     }
 
+    // Verificar se há produtos extraídos para exportar
+    if (extractedProducts.length === 0) {
+      toast({
+        title: "Nenhum Produto Extraído",
+        description: "Primeiro extraia produtos do array JavaScript para poder exportar os dados.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setExporting(true);
     try {
-      // Buscar todos os produtos da loja selecionada
-      const originalStoreId = localStorage.getItem('luxury_store_id');
-      localStorage.setItem('luxury_store_id', selectedStore);
-      
-      const allProducts = await firebase.getProducts();
-      
-      if (originalStoreId) {
-        localStorage.setItem('luxury_store_id', originalStoreId);
-      }
 
-      if (allProducts.length === 0) {
-        toast({
-          title: "Nenhum Produto Encontrado",
-          description: `Não há produtos na loja ${availableStores.find(s => s.id === selectedStore)?.name}.`,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Criar dados de exportação baseados nas opções selecionadas
+      // Criar dados de exportação baseados nas opções selecionadas usando produtos extraídos
       let exportData: any;
       
       if (exportLinks && (exportSku || exportCaixas)) {
         // Exportação mista - array de objetos
         exportData = [];
-        allProducts.forEach(product => {
+        extractedProducts.forEach(product => {
           const productData: any = {};
           
           if (exportSku) {
@@ -209,7 +206,7 @@ export function AdvancedImportTab() {
       } else if (exportLinks && !exportSku && !exportCaixas) {
         // Exportação apenas de links - formato otimizado para sistema automático
         exportData = {};
-        allProducts.forEach(product => {
+        extractedProducts.forEach(product => {
           if (product.link) {
             exportData[product.sku] = product.link;
           }
@@ -217,7 +214,7 @@ export function AdvancedImportTab() {
       } else {
         // Exportação sem links - array de objetos
         exportData = [];
-        allProducts.forEach(product => {
+        extractedProducts.forEach(product => {
           const productData: any = {};
           
           if (exportSku) {
@@ -258,12 +255,13 @@ export function AdvancedImportTab() {
       URL.revokeObjectURL(url);
 
       const isAutomaticLinksFile = exportLinks && !exportSku && !exportCaixas;
+      const linksCount = extractedProducts.filter(p => p.link).length;
       
       toast({
         title: "Exportação Concluída",
         description: isAutomaticLinksFile 
-          ? `Arquivo 'product-links.json' criado! Coloque-o na pasta public para ativar links automáticos em todos os produtos.`
-          : `${allProducts.length} produtos exportados com os campos selecionados.`,
+          ? `Arquivo 'product-links.json' criado com ${linksCount} links! Coloque-o na pasta public para ativar links automáticos.`
+          : `${extractedProducts.length} produtos exportados com os campos selecionados.`,
       });
 
     } catch (error) {
