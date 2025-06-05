@@ -151,7 +151,95 @@ export function AdvancedImportTab() {
     }
   };
 
+  // Função para exportar dados seletivamente
+  const handleSelectiveExport = async () => {
+    if (!exportSku && !exportCaixas && !exportLinks) {
+      toast({
+        title: "Erro na Exportação",
+        description: "Selecione pelo menos um campo para exportar.",
+        variant: "destructive",
+      });
+      return;
+    }
 
+    setExporting(true);
+    try {
+      // Buscar todos os produtos da loja selecionada
+      const originalStoreId = localStorage.getItem('luxury_store_id');
+      localStorage.setItem('luxury_store_id', selectedStore);
+      
+      const allProducts = await firebase.getProducts();
+      
+      if (originalStoreId) {
+        localStorage.setItem('luxury_store_id', originalStoreId);
+      }
+
+      if (allProducts.length === 0) {
+        toast({
+          title: "Nenhum Produto Encontrado",
+          description: `Não há produtos na loja ${availableStores.find(s => s.id === selectedStore)?.name}.`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Criar dados de exportação baseados nas opções selecionadas
+      const exportData: any[] = [];
+      
+      allProducts.forEach(product => {
+        const productData: any = {};
+        
+        if (exportSku) {
+          productData.sku = product.sku;
+        }
+        
+        if (exportCaixas) {
+          productData.caixa = product.caixa;
+        }
+        
+        if (exportLinks && product.link) {
+          productData.link = product.link;
+        }
+        
+        exportData.push(productData);
+      });
+
+      // Criar arquivo JSON para download
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      
+      // Criar link de download
+      const link = document.createElement('a');
+      link.href = url;
+      
+      const selectedFields = [];
+      if (exportSku) selectedFields.push('sku');
+      if (exportCaixas) selectedFields.push('caixas');
+      if (exportLinks) selectedFields.push('links');
+      
+      link.download = `${selectedStore}_${selectedFields.join('_')}_export.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Exportação Concluída",
+        description: `${allProducts.length} produtos exportados com os campos selecionados.`,
+      });
+
+    } catch (error) {
+      console.error('Erro na exportação:', error);
+      toast({
+        title: "Erro na Exportação",
+        description: "Ocorreu um erro durante a exportação.",
+        variant: "destructive",
+      });
+    } finally {
+      setExporting(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -306,6 +394,115 @@ export function AdvancedImportTab() {
               <p>3. Selecione a loja de destino (Patio Batel ou Village)</p>
               <p>4. Selecione a categoria (Óculos ou Cintos)</p>
               <p>5. Clique em "Importar" para adicionar ao Firebase</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Seção de Exportação Seletiva */}
+      <Card className="premium-shadow">
+        <CardContent className="pt-6">
+          <div className="space-y-6">
+            <div className="text-center">
+              <div className="w-20 h-20 mx-auto bg-gradient-to-r from-blue-500 to-green-600 rounded-full flex items-center justify-center mb-4">
+                <Download className="text-white text-3xl" size={40} />
+              </div>
+              
+              <h2 className="text-2xl font-bold text-luxury-dark mb-2">Exportação Seletiva</h2>
+              <p className="text-muted-foreground">
+                Exporte dados específicos dos produtos em formato JSON
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              {/* Seleção da Loja para Exportação */}
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  <Store className="inline mr-2" size={16} />
+                  Loja para Exportar:
+                </label>
+                <Select value={selectedStore} onValueChange={setSelectedStore}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Escolha a loja" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableStores.map((store) => (
+                      <SelectItem key={store.id} value={store.id}>
+                        {store.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Opções de Campos para Exportar */}
+              <div>
+                <label className="block text-sm font-medium mb-3">
+                  Campos para Exportar:
+                </label>
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="export-sku"
+                      checked={exportSku}
+                      onCheckedChange={setExportSku}
+                    />
+                    <Label htmlFor="export-sku" className="text-sm font-medium">
+                      SKU dos Produtos
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="export-caixas"
+                      checked={exportCaixas}
+                      onCheckedChange={setExportCaixas}
+                    />
+                    <Label htmlFor="export-caixas" className="text-sm font-medium">
+                      Números das Caixas
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="export-links"
+                      checked={exportLinks}
+                      onCheckedChange={setExportLinks}
+                    />
+                    <Label htmlFor="export-links" className="text-sm font-medium">
+                      Links dos Produtos
+                    </Label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Botão de Exportação */}
+              <Button 
+                onClick={handleSelectiveExport}
+                disabled={exporting || (!exportSku && !exportCaixas && !exportLinks)}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300"
+              >
+                {exporting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                    Exportando dados de {availableStores.find(s => s.id === selectedStore)?.name}...
+                  </>
+                ) : (
+                  <>
+                    <Download className="mr-2" size={16} />
+                    Exportar Dados Selecionados
+                  </>
+                )}
+              </Button>
+
+              <div className="text-xs text-muted-foreground bg-blue-50 p-3 rounded">
+                <p><strong>Como usar a exportação:</strong></p>
+                <p>1. Selecione a loja da qual deseja exportar os dados</p>
+                <p>2. Marque os campos que deseja incluir na exportação</p>
+                <p>3. Clique em "Exportar Dados Selecionados"</p>
+                <p>4. O arquivo JSON será baixado automaticamente</p>
+                <p>5. Use os links exportados para configurar o botão "Visitar Site"</p>
+              </div>
             </div>
           </div>
         </CardContent>
