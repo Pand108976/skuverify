@@ -26,8 +26,20 @@ export function RemoveProductTab() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  // Usuários do Patio Batel
-  const patioBatelUsers = ['Milton', 'Henrique', 'Lucas', 'Adriana', 'Pedro'];
+  // Função para obter usuários baseado na loja atual
+  const getCurrentStoreUsers = () => {
+    const storeId = localStorage.getItem('luxury_store_id') || 'default';
+    
+    if (storeId === 'patiobatel') {
+      return ['Milton', 'Henrique', 'Lucas', 'Adriana', 'Pedro'];
+    } else if (storeId === 'village') {
+      return ['ADM'];
+    } else {
+      return ['ADM']; // Default para outras lojas
+    }
+  };
+
+  const availableUsers = getCurrentStoreUsers();
 
   useEffect(() => {
     if (selectedCategory) {
@@ -259,7 +271,7 @@ export function RemoveProductTab() {
                         <SelectValue placeholder="Escolha o usuário responsável" />
                       </SelectTrigger>
                       <SelectContent>
-                        {patioBatelUsers.map((user) => (
+                        {availableUsers.map((user) => (
                           <SelectItem key={user} value={user}>
                             {user}
                           </SelectItem>
