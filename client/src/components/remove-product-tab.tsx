@@ -170,13 +170,23 @@ export function RemoveProductTab() {
       });
       return;
     }
-    setStep(isAdmin ? 5 : 4); // Ir para seleção do usuário
+    
+    // Se for admin, automaticamente define o usuário como PAINEL_ADM e pula para remoção
+    if (isAdmin) {
+      setSelectedUser('PAINEL_ADM');
+      handleRemoveProducts();
+    } else {
+      setStep(4); // Ir para seleção do usuário apenas para lojas
+    }
   };
 
   const handleRemoveProducts = async () => {
-    if (selectedProducts.length === 0 || !selectedUser) return;
+    if (selectedProducts.length === 0 || (!selectedUser && !isAdmin)) return;
 
-    const confirmed = confirm(`Tem certeza que deseja remover ${selectedProducts.length} produto(s)? Esta ação será registrada em nome de ${selectedUser}.`);
+    // Define automaticamente o usuário se for admin
+    const userToLog = isAdmin ? 'PAINEL_ADM' : selectedUser;
+    
+    const confirmed = confirm(`Tem certeza que deseja remover ${selectedProducts.length} produto(s)? Esta ação será registrada em nome de ${userToLog}.`);
     if (!confirmed) return;
 
     setLoading(true);
@@ -197,7 +207,7 @@ export function RemoveProductTab() {
       
       // Registrar auditoria
       const storeName = isAdmin ? selectedStore : (localStorage.getItem('luxury_store_id') || 'unknown');
-      await firebase.logProductDeletion(productsToDelete, selectedUser, storeName);
+      await firebase.logProductDeletion(productsToDelete, userToLog, storeName);
       
       toast({
         title: "Sucesso",
@@ -211,7 +221,9 @@ export function RemoveProductTab() {
       setSelectedBox('');
       setProducts([]);
       setSelectedProducts([]);
-      setSelectedUser('');
+      if (!isAdmin) {
+        setSelectedUser('');
+      }
       
       // Restaura a loja original se for admin
       if (isAdmin && originalStoreId) {
