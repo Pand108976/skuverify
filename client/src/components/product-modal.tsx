@@ -34,7 +34,7 @@ export function ProductModal({ product, open, onClose }: ProductModalProps) {
         </DialogDescription>
         
         {/* Header compacto */}
-        <div className="relative bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4">
+        <div className="relative bg-gray-800 text-white p-4">
           <Button
             variant="ghost"
             size="sm"
@@ -50,7 +50,7 @@ export function ProductModal({ product, open, onClose }: ProductModalProps) {
             </div>
             <div>
               <h2 className="text-lg font-bold">Produto</h2>
-              <p className="text-blue-100 text-sm">Detalhes do item</p>
+              <p className="text-gray-300 text-sm">Detalhes do item</p>
             </div>
           </div>
         </div>
@@ -62,47 +62,41 @@ export function ProductModal({ product, open, onClose }: ProductModalProps) {
           {/* Informações em cards compactos */}
           <div className="space-y-3">
             {/* SKU */}
-            <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+            <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
               <div className="flex items-center space-x-2">
-                <Tag size={16} className="text-blue-600" />
+                <Tag size={16} className="text-gray-600" />
                 <div className="flex-1">
-                  <p className="text-xs font-medium text-blue-600 uppercase">SKU</p>
-                  <p className="font-bold text-blue-800">{product.sku}</p>
+                  <p className="text-xs font-medium text-gray-600 uppercase">SKU</p>
+                  <p className="font-bold text-gray-800">{product.sku}</p>
                 </div>
               </div>
             </div>
 
             {/* Categoria */}
-            <div className="bg-green-50 rounded-lg p-3 border border-green-200">
+            <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <FolderOpen size={16} className="text-green-600" />
+                  <FolderOpen size={16} className="text-gray-600" />
                   <div>
-                    <p className="text-xs font-medium text-green-600 uppercase">Categoria</p>
-                    <p className="font-semibold text-green-800">
+                    <p className="text-xs font-medium text-gray-600 uppercase">Categoria</p>
+                    <p className="font-semibold text-gray-800">
                       {product.categoria === 'oculos' ? 'Óculos' : 'Cintos'}
                     </p>
                   </div>
                 </div>
-                <Badge 
-                  className={`text-xs px-2 py-1 ${
-                    product.categoria === 'oculos' 
-                      ? 'bg-green-600 text-white' 
-                      : 'bg-amber-600 text-white'
-                  }`}
-                >
+                <Badge className="text-xs px-2 py-1 bg-gray-600 text-white">
                   {product.categoria === 'oculos' ? 'Óculos' : 'Cintos'}
                 </Badge>
               </div>
             </div>
 
             {/* Caixa */}
-            <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
+            <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
               <div className="flex items-center space-x-2">
-                <Package size={16} className="text-orange-600" />
+                <Package size={16} className="text-gray-600" />
                 <div className="flex-1">
-                  <p className="text-xs font-medium text-orange-600 uppercase">Localização</p>
-                  <p className="font-bold text-orange-800">Caixa {product.caixa}</p>
+                  <p className="text-xs font-medium text-gray-600 uppercase">Localização</p>
+                  <p className="font-bold text-gray-800">Caixa {product.caixa}</p>
                 </div>
               </div>
             </div>
