@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Save, Glasses, Shirt, Store } from "lucide-react";
+import { Plus, Save, Glasses, Shirt, Store, AlertTriangle, X, Check } from "lucide-react";
 import { firebase } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 
@@ -14,6 +14,8 @@ export function AddProductTab() {
   const [sku, setSku] = useState("");
   const [caixa, setCaixa] = useState("");
   const [loading, setLoading] = useState(false);
+  const [duplicateProduct, setDuplicateProduct] = useState<any>(null);
+  const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
   const { toast } = useToast();
 
   // Verificar se é admin
@@ -44,6 +46,29 @@ export function AddProductTab() {
     }
   };
 
+  // Função para verificar se SKU já existe
+  const checkForDuplicate = async (skuToCheck: string) => {
+    const originalStoreId = localStorage.getItem('luxury_store_id');
+    if (isAdmin && selectedStore) {
+      localStorage.setItem('luxury_store_id', selectedStore);
+    }
+    
+    try {
+      const existingProduct = await firebase.getProductBySku(skuToCheck.trim().toUpperCase());
+      
+      if (originalStoreId) {
+        localStorage.setItem('luxury_store_id', originalStoreId);
+      }
+      
+      return existingProduct;
+    } catch (error) {
+      if (originalStoreId) {
+        localStorage.setItem('luxury_store_id', originalStoreId);
+      }
+      return null;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -58,6 +83,32 @@ export function AddProductTab() {
 
     setLoading(true);
     
+    try {
+      // Verificar se o SKU já existe
+      const existingProduct = await checkForDuplicate(sku);
+      
+      if (existingProduct) {
+        setDuplicateProduct(existingProduct);
+        setShowDuplicateWarning(true);
+        setLoading(false);
+        return;
+      }
+
+      // Se não há duplicata, prosseguir com a adição
+      await addProductToFirebase();
+      
+    } catch (error) {
+      console.error('Error checking/adding product:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao processar o produto. Tente novamente.",
+        variant: "destructive",
+      });
+      setLoading(false);
+    }
+  };
+
+  const addProductToFirebase = async () => {
     try {
       // Se for admin, temporariamente muda para a loja selecionada
       const originalStoreId = localStorage.getItem('luxury_store_id');
@@ -84,6 +135,8 @@ export function AddProductTab() {
       setSelectedCategory('');
       setSku("");
       setCaixa("");
+      setShowDuplicateWarning(false);
+      setDuplicateProduct(null);
       
       // Restaura a loja original se for admin
       if (isAdmin && originalStoreId) {
@@ -99,6 +152,17 @@ export function AddProductTab() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCancelDuplicate = () => {
+    setShowDuplicateWarning(false);
+    setDuplicateProduct(null);
+  };
+
+  const handleProceedAnyway = async () => {
+    setShowDuplicateWarning(false);
+    setLoading(true);
+    await addProductToFirebase();
   };
 
   return (
@@ -221,6 +285,69 @@ export function AddProductTab() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Modal de Aviso de SKU Duplicado */}
+      {showDuplicateWarning && duplicateProduct && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl">
+            <div className="flex items-center mb-4">
+              <AlertTriangle className="text-orange-500 mr-3" size={24} />
+              <h3 className="text-lg font-bold text-gray-800">SKU Já Existe</h3>
+            </div>
+            
+            <div className="mb-6">
+              <p className="text-gray-600 mb-3">
+                O SKU <strong>{duplicateProduct.sku}</strong> já existe nesta loja:
+              </p>
+              
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm font-medium text-gray-600">SKU:</span>
+                    <span className="text-sm font-bold text-gray-800">{duplicateProduct.sku}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm font-medium text-gray-600">Categoria:</span>
+                    <span className="text-sm text-gray-800 capitalize">{duplicateProduct.categoria}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm font-medium text-gray-600">Localização Atual:</span>
+                    <span className="text-sm font-bold text-orange-600">Caixa {duplicateProduct.caixa}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <p className="text-gray-600 mt-3 text-sm">
+                Deseja cancelar ou prosseguir mesmo assim? (Isso criará um produto duplicado)
+              </p>
+            </div>
+            
+            <div className="flex gap-3">
+              <Button
+                onClick={handleCancelDuplicate}
+                variant="outline"
+                className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
+              >
+                <X size={16} className="mr-2" />
+                Cancelar
+              </Button>
+              
+              <Button
+                onClick={handleProceedAnyway}
+                className="flex-1 bg-orange-600 hover:bg-orange-700 text-white"
+                disabled={loading}
+              >
+                {loading ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                ) : (
+                  <Check size={16} className="mr-2" />
+                )}
+                Prosseguir Mesmo Assim
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
