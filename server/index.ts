@@ -9,6 +9,9 @@ app.use(express.urlencoded({ extended: false }));
 // Serve static images from the images directory
 app.use('/images', express.static('images'));
 
+// Serve static files from the public directory (for product-links.json)
+app.use(express.static('public'));
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
