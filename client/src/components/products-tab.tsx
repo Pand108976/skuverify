@@ -94,7 +94,7 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
                 />
               </div>
               <div className="p-4 bg-gradient-to-r from-background to-muted/10">
-                <h3 className="font-bold text-ferragamo-dark mb-1 text-lg">{product.sku}</h3>
+                <h3 className="font-bold text-luxury-dark mb-1 text-lg">{product.sku}</h3>
                 <p className="text-sm text-muted-foreground font-medium">Caixa: {product.caixa}</p>
                 <div className="mt-2 w-full h-1 gold-gradient rounded-full opacity-60"></div>
               </div>
