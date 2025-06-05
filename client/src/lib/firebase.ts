@@ -42,16 +42,33 @@ export const firebase = {
     const localStorageKey = getLocalStorageKey();
     
     try {
-      const querySnapshot = await getDocs(collection(db, storeId));
       const firebaseProducts: Product[] = [];
       
-      querySnapshot.forEach((doc) => {
-        firebaseProducts.push({ id: doc.id, ...doc.data() } as Product);
+      // Buscar produtos de óculos
+      const oculosRef = collection(db, storeId, 'oculos', 'products');
+      const oculosSnapshot = await getDocs(oculosRef);
+      oculosSnapshot.forEach((doc) => {
+        firebaseProducts.push({ 
+          id: doc.id, 
+          categoria: 'oculos',
+          ...doc.data() 
+        } as Product);
+      });
+      
+      // Buscar produtos de cintos
+      const cintosRef = collection(db, storeId, 'cintos', 'products');
+      const cintosSnapshot = await getDocs(cintosRef);
+      cintosSnapshot.forEach((doc) => {
+        firebaseProducts.push({ 
+          id: doc.id, 
+          categoria: 'cintos',
+          ...doc.data() 
+        } as Product);
       });
       
       // Atualiza localStorage com dados do Firebase
       localStorage.setItem(localStorageKey, JSON.stringify(firebaseProducts));
-      console.log(`${firebaseProducts.length} produtos sincronizados do Firebase para "${storeId}"`);
+      console.log(`${firebaseProducts.length} produtos sincronizados do Firebase para "${storeId}" (óculos + cintos)`);
       
       return firebaseProducts;
     } catch (error) {
@@ -77,13 +94,14 @@ export const firebase = {
       }
     }
     
-    // Só busca no Firebase se não encontrou no localStorage
+    // Busca no Firebase nas subcoleções de categorias
     try {
-      const docRef = doc(db, storeId, sku);
-      const docSnap = await getDoc(docRef);
+      // Buscar em óculos
+      let docRef = doc(db, storeId, 'oculos', 'products', sku);
+      let docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
-        const product = { id: docSnap.id, ...docSnap.data() } as Product;
+        const product = { id: docSnap.id, categoria: 'oculos', ...docSnap.data() } as Product;
         
         // Atualiza localStorage
         const products: Product[] = stored ? JSON.parse(stored) : [];
@@ -97,6 +115,27 @@ export const firebase = {
         
         return product;
       }
+      
+      // Buscar em cintos
+      docRef = doc(db, storeId, 'cintos', 'products', sku);
+      docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        const product = { id: docSnap.id, categoria: 'cintos', ...docSnap.data() } as Product;
+        
+        // Atualiza localStorage
+        const products: Product[] = stored ? JSON.parse(stored) : [];
+        const existingIndex = products.findIndex(p => p.sku === product.sku);
+        if (existingIndex >= 0) {
+          products[existingIndex] = product;
+        } else {
+          products.push(product);
+        }
+        localStorage.setItem(localStorageKey, JSON.stringify(products));
+        
+        return product;
+      }
+      
       return null;
     } catch (error) {
       console.error('Firebase error, using localStorage:', error);
@@ -119,7 +158,7 @@ export const firebase = {
     filteredProducts.push(newProduct);
     localStorage.setItem(localStorageKey, JSON.stringify(filteredProducts));
     
-    // Tenta salvar no Firebase em segundo plano na coleção da loja
+    // Tenta salvar no Firebase na subcoleção da categoria
     try {
       const firebaseData: any = {
         sku: product.sku,
@@ -133,8 +172,10 @@ export const firebase = {
         firebaseData.imagem = product.imagem;
       }
       
-      await setDoc(doc(db, storeId, product.sku), firebaseData);
-      console.log(`Produto salvo no Firebase na coleção "${storeId}":`, product.sku);
+      // Salva na subcoleção organizada: loja/categoria/products/sku
+      const categoryPath = product.categoria || 'oculos';
+      await setDoc(doc(db, storeId, categoryPath, 'products', product.sku), firebaseData);
+      console.log(`Produto salvo no Firebase em "${storeId}/${categoryPath}/products":`, product.sku);
     } catch (error) {
       console.error('Firebase error, dados salvos apenas localmente:', error);
     }
@@ -145,19 +186,25 @@ export const firebase = {
     const storeId = getStoreCollection();
     const localStorageKey = getLocalStorageKey();
     
-    // Remove from localStorage first
+    // Get products to remove (to know their categories)
     const stored = localStorage.getItem(localStorageKey);
+    let productsToRemove: Product[] = [];
+    
     if (stored) {
       const products: Product[] = JSON.parse(stored);
+      productsToRemove = products.filter(p => skus.includes(p.sku));
+      
+      // Remove from localStorage
       const filtered = products.filter(p => !skus.includes(p.sku));
       localStorage.setItem(localStorageKey, JSON.stringify(filtered));
     }
     
-    // Try to remove from Firebase
+    // Try to remove from Firebase subcollections
     try {
-      for (const sku of skus) {
-        await deleteDoc(doc(db, storeId, sku));
-        console.log(`Produto removido do Firebase na coleção "${storeId}":`, sku);
+      for (const product of productsToRemove) {
+        const categoryPath = product.categoria || 'oculos';
+        await deleteDoc(doc(db, storeId, categoryPath, 'products', product.sku));
+        console.log(`Produto removido do Firebase em "${storeId}/${categoryPath}/products":`, product.sku);
       }
     } catch (error) {
       console.error('Firebase error, produtos removidos apenas localmente:', error);
@@ -284,12 +331,31 @@ export const firebase = {
     try {
       for (const store of stores) {
         try {
-          // Search in Firebase directly
-          const q = query(collection(db, store.id), where("sku", "==", sku));
-          const querySnapshot = await getDocs(q);
+          // Buscar em óculos
+          const oculosQuery = query(
+            collection(db, store.id, 'oculos', 'products'), 
+            where("sku", "==", sku)
+          );
+          const oculosSnapshot = await getDocs(oculosQuery);
           
-          querySnapshot.forEach((doc) => {
-            const product = { id: doc.id, ...doc.data() } as Product;
+          oculosSnapshot.forEach((doc) => {
+            const product = { id: doc.id, categoria: 'oculos', ...doc.data() } as Product;
+            results.push({
+              ...product,
+              storeName: store.name,
+              storeId: store.id
+            });
+          });
+          
+          // Buscar em cintos
+          const cintosQuery = query(
+            collection(db, store.id, 'cintos', 'products'), 
+            where("sku", "==", sku)
+          );
+          const cintosSnapshot = await getDocs(cintosQuery);
+          
+          cintosSnapshot.forEach((doc) => {
+            const product = { id: doc.id, categoria: 'cintos', ...doc.data() } as Product;
             results.push({
               ...product,
               storeName: store.name,
@@ -301,7 +367,7 @@ export const firebase = {
         }
       }
       
-      console.log(`Global search for "${sku}": found ${results.length} results`);
+      console.log(`Global search for "${sku}": found ${results.length} results across categories`);
       return results;
     } catch (error) {
       console.error('Error in global search:', error);
