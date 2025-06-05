@@ -3,17 +3,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, Glasses, Shirt, User, ImageOff, Store } from "lucide-react";
+import { Trash2, Glasses, Shirt, User, Store } from "lucide-react";
+import { ProductImage } from "@/components/product-image";
 import { firebase } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import type { Product } from "@/lib/types";
-
-// Componente para imagem padrão quando não há foto
-const NoImagePlaceholder = ({ className }: { className?: string }) => (
-  <div className={`bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center ${className}`}>
-    <ImageOff size={16} className="text-gray-400" />
-  </div>
-);
 
 export function RemoveProductTab() {
   const [step, setStep] = useState(1);
@@ -337,7 +331,13 @@ export function RemoveProductTab() {
                         checked={selectedProducts.includes(product.sku)}
                         onCheckedChange={(checked) => handleProductToggle(product.sku, checked as boolean)}
                       />
-                      <NoImagePlaceholder className="w-12 h-12" />
+                      <ProductImage 
+                        sku={product.sku}
+                        categoria={product.categoria}
+                        imagePath={product.imagem}
+                        className="w-12 h-12"
+                        alt={`Produto ${product.sku}`}
+                      />
                       <div>
                         <label htmlFor={product.sku} className="font-semibold cursor-pointer">
                           {product.sku}

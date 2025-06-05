@@ -1,18 +1,9 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { Glasses, Shirt, ImageOff } from "lucide-react";
+import { Glasses, Shirt } from "lucide-react";
+import { ProductImage } from "@/components/product-image";
 import { firebase } from "@/lib/firebase";
 import type { Product } from "@/lib/types";
-
-// Componente para imagem padrão quando não há foto
-const NoImagePlaceholder = ({ className }: { className?: string }) => (
-  <div className={`bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center ${className}`}>
-    <ImageOff size={32} className="text-gray-400 mb-1" />
-    <p className="text-gray-500 text-xs font-medium text-center px-2">
-      Foto indisponível<br />no momento
-    </p>
-  </div>
-);
 
 interface ProductsTabProps {
   category: 'oculos' | 'cintos';
@@ -70,23 +61,7 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
     }
   };
 
-  const getProductImage = (categoria: string, sku: string) => {
-    if (categoria === 'oculos') {
-      const images = [
-        'https://images.unsplash.com/photo-1511499767150-a48a237f0083?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600',
-        'https://images.unsplash.com/photo-1506634572416-48cdfe530110?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600',
-        'https://images.unsplash.com/photo-1574258495973-f010dfbb5371?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600'
-      ];
-      return images[sku.length % images.length];
-    } else {
-      const images = [
-        'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600',
-        'https://images.unsplash.com/photo-1594223274512-ad4803739b7c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600',
-        'https://images.unsplash.com/photo-1624222247344-550fb60583dc?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600'
-      ];
-      return images[sku.length % images.length];
-    }
-  };
+
 
   const icon = category === 'oculos' ? <Glasses className="text-primary mr-3" size={24} /> : <Shirt className="text-primary mr-3" size={24} />;
   const title = category === 'oculos' ? 'Coleção de Óculos' : 'Coleção de Cintos';
@@ -127,7 +102,13 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
               onClick={() => onProductClick(product)}
             >
               <div className="aspect-[4/3] overflow-hidden bg-gradient-to-br from-muted/20 to-muted/40">
-                <NoImagePlaceholder className="w-full h-full" />
+                <ProductImage 
+                  sku={product.sku}
+                  categoria={product.categoria}
+                  imagePath={product.imagem}
+                  className="w-full h-full"
+                  alt={`Produto ${product.sku}`}
+                />
               </div>
               <div className="p-4 bg-gradient-to-r from-background to-muted/10">
                 <h3 className="font-bold text-luxury-dark mb-1 text-lg">{product.sku}</h3>
