@@ -3,7 +3,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Save, Glasses, Shirt } from "lucide-react";
 import { firebase } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
@@ -13,7 +12,6 @@ export function AddProductTab() {
   const [selectedCategory, setSelectedCategory] = useState<'oculos' | 'cintos' | ''>('');
   const [sku, setSku] = useState("");
   const [caixa, setCaixa] = useState("");
-  const [imagem, setImagem] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -37,16 +35,11 @@ export function AddProductTab() {
     setLoading(true);
     
     try {
-      const productData: any = {
+      const productData = {
         sku: sku.trim().toUpperCase(),
         categoria: selectedCategory as 'oculos' | 'cintos',
         caixa: caixa.trim(),
       };
-      
-      // Adiciona imagem apenas se fornecida
-      if (imagem && imagem.trim()) {
-        productData.imagem = imagem.trim();
-      }
       
       await firebase.addProduct(productData);
 
@@ -60,7 +53,6 @@ export function AddProductTab() {
       setSelectedCategory('');
       setSku("");
       setCaixa("");
-      setImagem("");
     } catch (error) {
       console.error('Error adding product:', error);
       toast({
@@ -74,14 +66,14 @@ export function AddProductTab() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-2xl mx-auto">
       <Card className="premium-shadow">
         <CardContent className="p-8">
           <div className="text-center mb-8">
             <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
               <Plus className="text-green-600 text-2xl" size={32} />
             </div>
-            <h2 className="text-2xl font-bold text-ferragamo-dark mb-2">Adicionar Produto</h2>
+            <h2 className="text-2xl font-bold text-luxury-dark mb-2">Adicionar Produto</h2>
             <p className="text-muted-foreground">Cadastre um novo produto no sistema</p>
           </div>
           
@@ -142,18 +134,6 @@ export function AddProductTab() {
                       required
                     />
                     <Label htmlFor="addBox" className="text-sm font-medium">Caixa de Armazenamento</Label>
-                  </div>
-                  
-                  <div className="floating-label">
-                    <Input
-                      id="addImage"
-                      type="url"
-                      value={imagem}
-                      onChange={(e) => setImagem(e.target.value)}
-                      className="luxury-input"
-                      placeholder=" "
-                    />
-                    <Label htmlFor="addImage" className="text-sm font-medium">URL da Imagem (opcional)</Label>
                   </div>
                   
                   <Button 
