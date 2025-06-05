@@ -223,6 +223,55 @@ export const firebase = {
     }
   },
 
+  // Bulk import products from JavaScript file
+  async bulkImportProducts(products: Array<{ sku: string; caixa: string }>, storeId: string = 'patiobatel'): Promise<void> {
+    try {
+      console.log(`Iniciando importação em massa de ${products.length} produtos para ${storeId}...`);
+      
+      let successCount = 0;
+      let errorCount = 0;
+      
+      for (const { sku, caixa } of products) {
+        try {
+          const product = {
+            sku,
+            categoria: 'oculos' as const,
+            caixa,
+            createdAt: new Date()
+          };
+          
+          // Add to Firebase
+          await setDoc(doc(db, storeId, sku), product);
+          
+          // Add to localStorage
+          const localStorageKey = `luxury_products_${storeId}`;
+          const stored = localStorage.getItem(localStorageKey);
+          const existingProducts: Product[] = stored ? JSON.parse(stored) : [];
+          
+          // Check if product already exists
+          const existingIndex = existingProducts.findIndex(p => p.sku === sku);
+          if (existingIndex >= 0) {
+            existingProducts[existingIndex] = { id: sku, ...product };
+          } else {
+            existingProducts.push({ id: sku, ...product });
+          }
+          
+          localStorage.setItem(localStorageKey, JSON.stringify(existingProducts));
+          
+          successCount++;
+          console.log(`Produto ${sku} (Caixa ${caixa}) adicionado com sucesso`);
+        } catch (error) {
+          console.error(`Erro ao adicionar produto ${sku}:`, error);
+          errorCount++;
+        }
+      }
+      
+      console.log(`Importação concluída: ${successCount} sucessos, ${errorCount} erros`);
+    } catch (error) {
+      console.error('Erro na importação em massa:', error);
+    }
+  },
+
   // Search product in all stores (admin only)
   async searchProductInAllStores(sku: string): Promise<Array<Product & { storeName: string; storeId: string }>> {
     const stores = [
