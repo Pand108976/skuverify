@@ -3,6 +3,16 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink, ImageOff } from "lucide-react";
 import type { Product } from "@/lib/types";
 
+// Componente para imagem padrão quando não há foto
+const NoImagePlaceholder = ({ className }: { className?: string }) => (
+  <div className={`bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center ${className}`}>
+    <ImageOff size={48} className="text-gray-400 mb-2" />
+    <p className="text-gray-500 text-sm font-medium text-center px-4">
+      Foto indisponível<br />no momento
+    </p>
+  </div>
+);
+
 interface ProductModalProps {
   product: Product | null;
   open: boolean;
@@ -40,11 +50,7 @@ export function ProductModal({ product, open, onClose }: ProductModalProps) {
         </DialogHeader>
         
         <div className="text-center space-y-6">
-          <img 
-            src={product.imagem || getProductImage(product.categoria, product.sku)}
-            alt={product.sku}
-            className="w-48 h-48 object-cover rounded-xl mx-auto premium-shadow"
-          />
+          <NoImagePlaceholder className="w-48 h-48 mx-auto rounded-xl" />
           
           <div className="space-y-3 text-left">
             <div className="bg-muted/20 p-4 rounded-lg">
