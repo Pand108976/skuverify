@@ -1,8 +1,18 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { Glasses, Shirt } from "lucide-react";
+import { Glasses, Shirt, ImageOff } from "lucide-react";
 import { firebase } from "@/lib/firebase";
 import type { Product } from "@/lib/types";
+
+// Componente para imagem padrão quando não há foto
+const NoImagePlaceholder = ({ className }: { className?: string }) => (
+  <div className={`bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center ${className}`}>
+    <ImageOff size={32} className="text-gray-400 mb-1" />
+    <p className="text-gray-500 text-xs font-medium text-center px-2">
+      Foto indisponível<br />no momento
+    </p>
+  </div>
+);
 
 interface ProductsTabProps {
   category: 'oculos' | 'cintos';
@@ -87,11 +97,7 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
               onClick={() => onProductClick(product)}
             >
               <div className="aspect-[4/3] overflow-hidden bg-gradient-to-br from-muted/20 to-muted/40">
-                <img 
-                  src={product.imagem || getProductImage(product.categoria, product.sku)}
-                  alt={product.sku}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                />
+                <NoImagePlaceholder className="w-full h-full" />
               </div>
               <div className="p-4 bg-gradient-to-r from-background to-muted/10">
                 <h3 className="font-bold text-luxury-dark mb-1 text-lg">{product.sku}</h3>

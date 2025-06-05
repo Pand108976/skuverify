@@ -3,9 +3,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Search, ExternalLink, AlertCircle } from "lucide-react";
+import { Search, ExternalLink, AlertCircle, ImageOff } from "lucide-react";
 import { firebase } from "@/lib/firebase";
 import type { Product } from "@/lib/types";
+
+// Componente para imagem padrão quando não há foto
+const NoImagePlaceholder = ({ className }: { className?: string }) => (
+  <div className={`bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center ${className}`}>
+    <ImageOff size={48} className="text-gray-400 mb-2" />
+    <p className="text-gray-500 text-sm font-medium text-center px-4">
+      Foto indisponível<br />no momento
+    </p>
+  </div>
+);
 
 export function SearchTab() {
   const [sku, setSku] = useState("");
@@ -124,11 +134,7 @@ export function SearchTab() {
             <div className="mt-8 p-6 bg-gradient-to-r from-primary to-yellow-400 rounded-xl text-white fade-in">
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <img 
-                    src={result.imagem || getProductImage(result.categoria, result.sku)} 
-                    alt={result.sku}
-                    className="w-full h-64 object-cover rounded-lg shadow-lg"
-                  />
+                  <NoImagePlaceholder className="w-full h-64" />
                 </div>
                 <div className="space-y-4">
                   <h3 className="text-2xl font-bold">{result.sku}</h3>
