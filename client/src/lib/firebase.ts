@@ -34,38 +34,7 @@ export const firebase = {
     const stored = localStorage.getItem(localStorageKey);
     let localProducts: Product[] = stored ? JSON.parse(stored) : [];
     
-    // Se localStorage estiver vazio, inicializa com produtos de exemplo
-    if (localProducts.length === 0) {
-      const sampleProducts: Product[] = [
-        {
-          id: `${storeId.toUpperCase()}001`,
-          sku: `${storeId.toUpperCase()}001`,
-          categoria: 'oculos',
-          caixa: 'A1',
-          imagem: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600',
-          createdAt: new Date()
-        },
-        {
-          id: `${storeId.toUpperCase()}002`,
-          sku: `${storeId.toUpperCase()}002`,
-          categoria: 'oculos',
-          caixa: 'A2',
-          imagem: 'https://images.unsplash.com/photo-1506634572416-48cdfe530110?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600',
-          createdAt: new Date()
-        },
-        {
-          id: `${storeId.toUpperCase()}003`,
-          sku: `${storeId.toUpperCase()}003`,
-          categoria: 'cintos',
-          caixa: 'B1',
-          imagem: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600',
-          createdAt: new Date()
-        }
-      ];
-      
-      localStorage.setItem(localStorageKey, JSON.stringify(sampleProducts));
-      localProducts = sampleProducts;
-    }
+    // Se localStorage estiver vazio, não adiciona produtos automáticos
     
     // Retorna produtos do localStorage instantaneamente
     return localProducts;
