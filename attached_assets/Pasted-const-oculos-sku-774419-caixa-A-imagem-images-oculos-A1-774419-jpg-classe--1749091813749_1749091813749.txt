@@ -1,0 +1,10 @@
+const oculos = [
+    { sku: "774419", caixa: "A", imagem: "./images/oculos/A1/774419.jpg", classe: "imagem-oculos", link: "https://www.ferragamo.com/shop/us/en/men/eyewear-man-usa/sunglasses-men-us/prisma-774419?srsltid=AfmBOoqxYhWX6ToPjFqGg7e9n5kat8K9XWgt6lJePHNjUQeItpXmXCHG" },
+    { sku: "774424", caixa: "A", imagem: "./images/oculos/A1/774424.jpg", classe: "imagem-oculos", link: "https://www.ferragamo.com/shop/us/en/men/eyewear-man-usa/ganci-rivets-774424?srsltid=AfmBOopVYsw0D6ENOBtU7Cc6TEFC4bHcMDy7Houhi4pTfQsrQ_ctCYv7" },
+    { sku: "774426", caixa: "A", imagem: "./images/oculos/A1/774426.jpg", classe: "imagem-oculos", link: "https://www.ferragamo.com/shop/eu/en/men/man-eyewear/sunglasses-men-eu-en/ganci-rivets-774426--24?srsltid=AfmBOop5Tz6MCggJiiNfPN2N7nYIUklCBQceOpgbDD3PPkTAHAdx0dz9" },
+    { sku: "774416", caixa: "A", imagem: "./images/oculos/A1/774416.jpg", classe: "imagem-oculos", link: "https://www.ferragamo.com/shop/us/en/men/eyewear-man-usa/prisma-774416?srsltid=AfmBOookmAWobCQ9Levn1opBSasTahFJIZgpfgS-bEkkbYTNidwke--R" },
+    { sku: "777070", caixa: "A", imagem: "./images/oculos/A1/777070.webp", classe: "imagem-oculos", link: "https://www.ferragamo.com/shop/eu/en/men/man-eyewear/prisma-777070--24?srsltid=AfmBOopyZo07GpBencmtsDkDygMjK14a-5Dd_70AxDleJ3oKzIPTTtpE" },
+    { sku: "777072", caixa: "A", imagem: "./images/oculos/A1/777072.webp", classe: "imagem-oculos", link: "https://www.ferragamo.com/shop/us/en/men/eyewear-man-usa/sunglasses-men-us/prisma-777072?srsltid=AfmBOorxjj0K-UwCy8d_1o2igQnTpoF44L43-du2XcdyzkL7qSUbQELn" },
+    { sku: "777073", caixa: "A", imagem: "./images/oculos/A1/777073.webp", classe: "imagem-oculos", link: "https://www.ferragamo.com/shop/us/en/men/eyewear-man-usa/sunglasses-men-us/prisma-777073?srsltid=AfmBOor4iX3fre1FrXlSO-TOyPVjb0EXyPk8_nEDcFemNGtS9xMVOiXT" },
+    { sku: "777066", caixa: "A", imagem: "./images/oculos/A1/777066.webp", classe: "imagem-oculos", link: "https://www.ferragamo.com/shop/us/en/men/eyewear-man-usa/sunglasses-men-us/prisma-777066?srsltid=AfmBOoo1wJG4_iYIk0UK-MN9hEtaGJMrO_Qb3iOMYVN64s9YkfDb_MDW" },
+    
