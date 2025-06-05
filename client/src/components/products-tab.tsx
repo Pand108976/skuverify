@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Glasses, Shirt, ExternalLink } from "lucide-react";
 import { ProductImage } from "@/components/product-image";
 import { firebase } from "@/lib/firebase";
@@ -113,6 +114,22 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
               <div className="p-4 bg-gradient-to-r from-background to-muted/10">
                 <h3 className="font-bold text-luxury-dark mb-1 text-lg">{product.sku}</h3>
                 <p className="text-sm text-muted-foreground font-medium">Caixa: {product.caixa}</p>
+                
+                {/* Botão Visitar Site */}
+                {product.link && (
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(product.link, '_blank');
+                    }}
+                    className="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white text-xs py-2"
+                    size="sm"
+                  >
+                    <ExternalLink size={12} className="mr-1" />
+                    Visitar Site
+                  </Button>
+                )}
+                
                 <div className="mt-2 w-full h-1 gold-gradient rounded-full opacity-60"></div>
               </div>
             </Card>

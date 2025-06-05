@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { X, Package, Tag, FolderOpen } from "lucide-react";
+import { X, Package, Tag, FolderOpen, ExternalLink } from "lucide-react";
 import { ProductImage } from "@/components/product-image";
 import type { Product } from "@/lib/types";
 
@@ -96,6 +96,18 @@ export function ProductModal({ product, open, onClose }: ProductModalProps) {
               </div>
             </div>
 
+            {/* Botão Visitar Site */}
+            {product.link && (
+              <div className="mt-4">
+                <Button
+                  onClick={() => window.open(product.link, '_blank')}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3"
+                >
+                  <ExternalLink size={16} className="mr-2" />
+                  Visitar Site do Produto
+                </Button>
+              </div>
+            )}
 
           </div>
 

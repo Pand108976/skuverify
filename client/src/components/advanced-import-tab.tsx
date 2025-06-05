@@ -3,7 +3,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, CheckCircle, AlertCircle, Code, Store, Tag } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Upload, CheckCircle, AlertCircle, Code, Store, Tag, Download } from "lucide-react";
 import { firebase } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 
@@ -19,6 +21,13 @@ export function AdvancedImportTab() {
   const [selectedCategory, setSelectedCategory] = useState<'oculos' | 'cintos'>('oculos');
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<{ success: number; errors: number } | null>(null);
+  
+  // Estados para exportação seletiva
+  const [exportSku, setExportSku] = useState(true);
+  const [exportCaixas, setExportCaixas] = useState(true);
+  const [exportLinks, setExportLinks] = useState(true);
+  const [exporting, setExporting] = useState(false);
+  
   const { toast } = useToast();
 
   const availableStores = [
