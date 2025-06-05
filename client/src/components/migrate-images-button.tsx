@@ -9,14 +9,29 @@ export function MigrateImagesButton() {
   const [isComplete, setIsComplete] = useState(false);
   const { toast } = useToast();
 
+  // Reset do botão para permitir nova execução
+  const resetButton = () => {
+    setIsComplete(false);
+  };
+
   const handleMigration = async () => {
     setIsLoading(true);
     try {
+      // Salva a loja atual
+      const currentStore = localStorage.getItem('luxury_store_id') || 'patiobatel';
+      
+      // Força atualização do patiobatel onde estão os produtos
+      localStorage.setItem('luxury_store_id', 'patiobatel');
+      
       await firebase.updateProductsWithImages();
+      
+      // Restaura a loja atual
+      localStorage.setItem('luxury_store_id', currentStore);
+      
       setIsComplete(true);
       toast({
         title: "Migração Concluída",
-        description: "Imagens integradas com sucesso nos produtos existentes",
+        description: "Imagens integradas com sucesso nos 241 produtos do Pátio Batel",
       });
     } catch (error) {
       console.error("Erro na migração:", error);
@@ -32,9 +47,12 @@ export function MigrateImagesButton() {
 
   if (isComplete) {
     return (
-      <Button disabled className="bg-green-600 text-white">
+      <Button 
+        onClick={resetButton}
+        className="bg-green-600 hover:bg-green-700 text-white"
+      >
         <Check className="mr-2" size={16} />
-        Imagens Integradas
+        Imagens Integradas - Clique para Executar Novamente
       </Button>
     );
   }
@@ -43,10 +61,10 @@ export function MigrateImagesButton() {
     <Button 
       onClick={handleMigration}
       disabled={isLoading}
-      className="bg-blue-600 hover:bg-blue-700 text-white"
+      className="bg-blue-600 hover:bg-blue-700 text-white py-4"
     >
       <Upload className="mr-2" size={16} />
-      {isLoading ? "Integrando..." : "Integrar Imagens"}
+      {isLoading ? "Integrando Imagens no Pátio Batel..." : "Integrar Imagens nos Produtos"}
     </Button>
   );
 }

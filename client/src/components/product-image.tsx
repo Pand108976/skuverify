@@ -56,9 +56,13 @@ export function ProductImage({ sku, categoria, imagePath, className = "", alt }:
         <img
           src={imagePath}
           alt={alt || `Produto ${sku}`}
-          className={`w-full h-full object-cover rounded-lg transition-opacity duration-200 ${
+          className={`w-full h-full object-contain bg-white rounded-lg transition-opacity duration-200 ${
             imageLoaded && !imageError ? 'opacity-100' : 'opacity-0'
           }`}
+          style={{ 
+            objectFit: 'contain',
+            objectPosition: 'center'
+          }}
           onLoad={handleImageLoad}
           onError={handleImageError}
         />
@@ -93,9 +97,13 @@ export function ProductImage({ sku, categoria, imagePath, className = "", alt }:
       <img
         src={imageSources[0]}
         alt={alt || `Produto ${sku}`}
-        className={`w-full h-full object-cover rounded-lg transition-opacity duration-200 ${
+        className={`w-full h-full object-contain bg-white rounded-lg transition-opacity duration-200 ${
           imageLoaded && !imageError ? 'opacity-100' : 'opacity-0'
         }`}
+        style={{ 
+          objectFit: 'contain',
+          objectPosition: 'center'
+        }}
         onLoad={handleImageLoad}
         onError={() => {
           // Se .webp falhar, tenta .jpg
