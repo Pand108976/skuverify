@@ -1,4 +1,4 @@
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X, Package, Tag, FolderOpen, ImageOff, Calendar } from "lucide-react";
@@ -27,141 +27,109 @@ export function ProductModal({ product, open, onClose }: ProductModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden border-0 shadow-2xl">
-        {/* Header com gradiente */}
-        <div className="relative bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 text-white p-8">
+      <DialogContent className="max-w-md mx-auto p-0 overflow-hidden">
+        <DialogTitle className="sr-only">Detalhes do Produto {product.sku}</DialogTitle>
+        <DialogDescription className="sr-only">
+          Informações detalhadas sobre o produto: SKU {product.sku}, categoria {product.categoria}, caixa {product.caixa}
+        </DialogDescription>
+        
+        {/* Header compacto */}
+        <div className="relative bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4">
           <Button
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="absolute top-4 right-4 text-white hover:bg-white/20 rounded-full w-10 h-10 p-0 transition-all duration-200"
+            className="absolute top-2 right-2 text-white hover:bg-white/20 rounded-full w-8 h-8 p-0"
           >
-            <X size={20} />
+            <X size={16} />
           </Button>
           
-          <div className="flex items-center space-x-4">
-            <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-              <Package className="text-white" size={28} />
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+              <Package className="text-white" size={20} />
             </div>
             <div>
-              <h2 className="text-3xl font-bold mb-1">Detalhes do Produto</h2>
-              <p className="text-blue-100 text-lg">Informações completas do item</p>
+              <h2 className="text-lg font-bold">Produto</h2>
+              <p className="text-blue-100 text-sm">Detalhes do item</p>
             </div>
           </div>
         </div>
 
-        <div className="p-8 bg-gradient-to-br from-gray-50 to-white">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Seção da Imagem */}
-            <div className="space-y-6">
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <ImageOff className="text-blue-600" size={16} />
+        <div className="p-4 space-y-4">
+          {/* Imagem placeholder compacta */}
+          <NoImagePlaceholder className="w-full h-32" />
+          
+          {/* Informações em cards compactos */}
+          <div className="space-y-3">
+            {/* SKU */}
+            <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+              <div className="flex items-center space-x-2">
+                <Tag size={16} className="text-blue-600" />
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-blue-600 uppercase">SKU</p>
+                  <p className="font-bold text-blue-800">{product.sku}</p>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-800">Visualização</h3>
               </div>
-              <NoImagePlaceholder className="w-full h-80 shadow-lg" />
             </div>
 
-            {/* Seção das Informações */}
-            <div className="space-y-6">
-              <div className="flex items-center space-x-3 mb-6">
-                <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                  <Tag className="text-purple-600" size={16} />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-800">Informações</h3>
-              </div>
-
-              {/* SKU Card */}
-              <div className="bg-white rounded-2xl p-6 shadow-lg border border-blue-100 hover:shadow-xl transition-all duration-300">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center">
-                      <Tag size={20} className="text-blue-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Código SKU</p>
-                      <p className="text-2xl font-bold text-gray-800">{product.sku}</p>
-                    </div>
+            {/* Categoria */}
+            <div className="bg-green-50 rounded-lg p-3 border border-green-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <FolderOpen size={16} className="text-green-600" />
+                  <div>
+                    <p className="text-xs font-medium text-green-600 uppercase">Categoria</p>
+                    <p className="font-semibold text-green-800">
+                      {product.categoria === 'oculos' ? 'Óculos' : 'Cintos'}
+                    </p>
                   </div>
                 </div>
-              </div>
-
-              {/* Categoria Card */}
-              <div className="bg-white rounded-2xl p-6 shadow-lg border border-green-100 hover:shadow-xl transition-all duration-300">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center">
-                      <FolderOpen size={20} className="text-green-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Categoria</p>
-                      <Badge 
-                        className={`mt-1 text-sm font-bold px-4 py-2 rounded-xl ${
-                          product.categoria === 'oculos' 
-                            ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white' 
-                            : 'bg-gradient-to-r from-amber-500 to-orange-500 text-white'
-                        }`}
-                      >
-                        {product.categoria === 'oculos' ? 'Óculos' : 'Cintos'}
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Caixa Card */}
-              <div className="bg-white rounded-2xl p-6 shadow-lg border border-orange-100 hover:shadow-xl transition-all duration-300">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl flex items-center justify-center">
-                      <Package size={20} className="text-orange-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Localização</p>
-                      <p className="text-xl font-bold text-orange-600">Caixa {product.caixa}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Data de Cadastro Card */}
-              {product.createdAt && (
-                <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
-                        <Calendar size={20} className="text-gray-600" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Cadastrado em</p>
-                        <p className="text-lg font-semibold text-gray-700">
-                          {new Date(product.createdAt).toLocaleDateString('pt-BR', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Botão de Fechar */}
-              <div className="pt-4">
-                <Button 
-                  onClick={onClose} 
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 rounded-2xl transition-all duration-300 hover:shadow-xl transform hover:scale-[1.02] text-lg"
+                <Badge 
+                  className={`text-xs px-2 py-1 ${
+                    product.categoria === 'oculos' 
+                      ? 'bg-green-600 text-white' 
+                      : 'bg-amber-600 text-white'
+                  }`}
                 >
-                  <X className="mr-2" size={20} />
-                  Fechar Detalhes
-                </Button>
+                  {product.categoria === 'oculos' ? 'Óculos' : 'Cintos'}
+                </Badge>
               </div>
             </div>
+
+            {/* Caixa */}
+            <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
+              <div className="flex items-center space-x-2">
+                <Package size={16} className="text-orange-600" />
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-orange-600 uppercase">Localização</p>
+                  <p className="font-bold text-orange-800">Caixa {product.caixa}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Data de cadastro se disponível */}
+            {product.createdAt && (
+              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                <div className="flex items-center space-x-2">
+                  <Calendar size={16} className="text-gray-600" />
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-gray-600 uppercase">Cadastrado</p>
+                    <p className="font-semibold text-gray-800 text-sm">
+                      {new Date(product.createdAt).toLocaleDateString('pt-BR')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
+
+          {/* Botão de fechar */}
+          <Button 
+            onClick={onClose} 
+            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 rounded-lg"
+          >
+            Fechar
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
