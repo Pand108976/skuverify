@@ -54,6 +54,36 @@ export function PendingTab() {
     setSelectedStore('patiobatel'); // Seleciona a primeira loja por padrão
   };
 
+  // Função para verificar se a imagem realmente existe
+  const checkImageExists = async (product: Product): Promise<boolean> => {
+    // Se não tem campo imagem definido, está ausente
+    if (!product.imagem || product.imagem === '' || product.imagem === undefined) {
+      return true; // Imagem ausente
+    }
+
+    // Lista de possíveis extensões de imagem
+    const imageExtensions = ['webp', 'jpg', 'jpeg', 'png'];
+    const basePath = `/images/${product.categoria}/${product.sku}`;
+
+    // Tenta carregar cada possível extensão
+    for (const ext of imageExtensions) {
+      const imagePath = `${basePath}.${ext}`;
+      try {
+        const response = await fetch(imagePath, { method: 'HEAD' });
+        if (response.ok) {
+          return false; // Imagem encontrada
+        }
+      } catch (error) {
+        // Continua tentando outras extensões
+      }
+    }
+
+    return true; // Nenhuma imagem encontrada
+  };
+
+  // Cache para evitar verificações desnecessárias
+  const imageCache = new Map<string, boolean>();
+
   const loadPendingProducts = async () => {
     setLoading(true);
     try {
@@ -92,11 +122,32 @@ export function PendingTab() {
       
       const pending: PendingProduct[] = [];
       
+      // Verifica produtos pendentes de forma mais eficiente
       for (const product of products) {
-        // Verifica se a imagem está realmente ausente
-        const missingImage = !product.imagem || product.imagem === '' || product.imagem === undefined;
+        // Verifica se a imagem está ausente de forma mais robusta
+        let missingImage = false;
         
-        // Verifica se o link está ausente  
+        // Se não tem campo imagem definido, está ausente
+        if (!product.imagem || product.imagem === '' || product.imagem === undefined) {
+          missingImage = true;
+        } else {
+          // Verifica se a imagem do produto existe fisicamente testando uma extensão comum
+          const cacheKey = `${product.categoria}/${product.sku}`;
+          if (imageCache.has(cacheKey)) {
+            missingImage = imageCache.get(cacheKey)!;
+          } else {
+            // Testa apenas .jpg primeiro para o SKU específico que você mencionou
+            const testPath = `/images/${product.categoria}/${product.sku}.jpg`;
+            try {
+              const response = await fetch(testPath, { method: 'HEAD' });
+              missingImage = !response.ok;
+            } catch {
+              missingImage = true;
+            }
+            imageCache.set(cacheKey, missingImage);
+          }
+        }
+        
         const missingLink = !product.link || product.link === '' || product.link === undefined;
         
         if (missingImage || missingLink) {
