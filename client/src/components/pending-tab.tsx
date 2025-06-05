@@ -54,35 +54,72 @@ export function PendingTab() {
     setSelectedStore('patiobatel'); // Seleciona a primeira loja por padrão
   };
 
-  // Função para verificar se a imagem realmente existe
-  const checkImageExists = async (product: Product): Promise<boolean> => {
-    // Se não tem campo imagem definido, está ausente
-    if (!product.imagem || product.imagem === '' || product.imagem === undefined) {
-      return true; // Imagem ausente
-    }
-
-    // Lista de possíveis extensões de imagem
-    const imageExtensions = ['webp', 'jpg', 'jpeg', 'png'];
+  // Função para verificar e corrigir caminhos de imagem
+  const checkAndFixImage = async (product: Product): Promise<{ missing: boolean, correctPath?: string }> => {
+    const imageExtensions = ['jpg', 'jpeg', 'webp', 'png'];
     const basePath = `/images/${product.categoria}/${product.sku}`;
 
-    // Tenta carregar cada possível extensão
+    // Testa todas as extensões possíveis
     for (const ext of imageExtensions) {
       const imagePath = `${basePath}.${ext}`;
       try {
         const response = await fetch(imagePath, { method: 'HEAD' });
         if (response.ok) {
-          return false; // Imagem encontrada
+          // Imagem encontrada! Verifica se o caminho está correto no banco
+          if (product.imagem !== imagePath) {
+            console.log(`Corrigindo caminho da imagem para ${product.sku}: ${product.imagem} → ${imagePath}`);
+            return { missing: false, correctPath: imagePath };
+          }
+          return { missing: false };
         }
       } catch (error) {
         // Continua tentando outras extensões
       }
     }
 
-    return true; // Nenhuma imagem encontrada
+    // Nenhuma imagem encontrada
+    if (product.imagem && product.imagem !== '') {
+      console.log(`Imagem não encontrada para ${product.sku}, limpando campo: ${product.imagem}`);
+      return { missing: true, correctPath: '' };
+    }
+    
+    return { missing: true };
   };
 
   // Cache para evitar verificações desnecessárias
   const imageCache = new Map<string, boolean>();
+
+  // Função para atualizar caminho da imagem no Firebase
+  const updateProductImage = async (product: Product, newImagePath: string) => {
+    try {
+      // Temporariamente muda para a loja do produto se for admin
+      const originalStoreId = localStorage.getItem('luxury_store_id');
+      const originalStoreName = localStorage.getItem('luxury_store_name');
+      
+      if (isAdmin && selectedStore) {
+        localStorage.setItem('luxury_store_id', selectedStore);
+        localStorage.setItem('luxury_store_name', availableStores.find(s => s.id === selectedStore)?.name || selectedStore);
+      }
+
+      // Atualiza o produto com o caminho correto da imagem
+      const updatedProduct = {
+        ...product,
+        imagem: newImagePath
+      };
+
+      await firebase.addProduct(updatedProduct);
+      console.log(`✓ Caminho da imagem atualizado para ${product.sku}: ${newImagePath}`);
+
+      // Restaura configuração original se for admin
+      if (isAdmin && originalStoreId && originalStoreName) {
+        localStorage.setItem('luxury_store_id', originalStoreId);
+        localStorage.setItem('luxury_store_name', originalStoreName);
+      }
+    } catch (error) {
+      console.error(`Erro ao atualizar imagem para ${product.sku}:`, error);
+      throw error;
+    }
+  };
 
   const loadPendingProducts = async () => {
     setLoading(true);
@@ -122,38 +159,24 @@ export function PendingTab() {
       
       const pending: PendingProduct[] = [];
       
-      // Verifica produtos pendentes de forma mais eficiente
+      // Verifica e corrige produtos pendentes
       for (const product of products) {
-        // Verifica se a imagem está ausente de forma mais robusta
-        let missingImage = false;
+        const imageCheck = await checkAndFixImage(product);
+        const missingLink = !product.link || product.link === '' || product.link === undefined;
         
-        // Se não tem campo imagem definido, está ausente
-        if (!product.imagem || product.imagem === '' || product.imagem === undefined) {
-          missingImage = true;
-        } else {
-          // Verifica se a imagem do produto existe fisicamente testando uma extensão comum
-          const cacheKey = `${product.categoria}/${product.sku}`;
-          if (imageCache.has(cacheKey)) {
-            missingImage = imageCache.get(cacheKey)!;
-          } else {
-            // Testa apenas .jpg primeiro para o SKU específico que você mencionou
-            const testPath = `/images/${product.categoria}/${product.sku}.jpg`;
-            try {
-              const response = await fetch(testPath, { method: 'HEAD' });
-              missingImage = !response.ok;
-            } catch {
-              missingImage = true;
-            }
-            imageCache.set(cacheKey, missingImage);
+        // Se encontrou um caminho correto diferente, atualiza no Firebase
+        if (imageCheck.correctPath !== undefined && imageCheck.correctPath !== product.imagem) {
+          try {
+            await updateProductImage(product, imageCheck.correctPath);
+          } catch (error) {
+            console.error(`Erro ao atualizar imagem para ${product.sku}:`, error);
           }
         }
         
-        const missingLink = !product.link || product.link === '' || product.link === undefined;
-        
-        if (missingImage || missingLink) {
+        if (imageCheck.missing || missingLink) {
           pending.push({
             product,
-            missingImage,
+            missingImage: imageCheck.missing,
             missingLink
           });
         }
