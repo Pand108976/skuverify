@@ -18,10 +18,13 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [storeName, setStoreName] = useState<string>('');
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
   useEffect(() => {
     const currentStoreName = localStorage.getItem('ferragamo_store_name') || 'Sistema';
+    const currentStoreId = localStorage.getItem('ferragamo_store_id') || '';
     setStoreName(currentStoreName);
+    setIsAdmin(currentStoreId === 'admin');
   }, []);
 
   const handleProductClick = (product: Product) => {
@@ -66,7 +69,7 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto p-6">
         <Tabs defaultValue="search" className="w-full">
-          <TabsList className="grid w-full grid-cols-6 bg-background border premium-shadow">
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-6' : 'grid-cols-5'} bg-background border premium-shadow`}>
             <TabsTrigger value="search" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
               <Search size={16} />
               <span className="hidden sm:inline">Pesquisar</span>
@@ -87,10 +90,12 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
               <Trash2 size={16} />
               <span className="hidden sm:inline">Remover</span>
             </TabsTrigger>
-            <TabsTrigger value="firebase" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
-              <Database size={16} />
-              <span className="hidden sm:inline">Firebase</span>
-            </TabsTrigger>
+            {isAdmin && (
+              <TabsTrigger value="firebase" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
+                <Database size={16} />
+                <span className="hidden sm:inline">Firebase</span>
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <div className="mt-6">
@@ -114,9 +119,11 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
               <RemoveProductTab />
             </TabsContent>
 
-            <TabsContent value="firebase" className="fade-in">
-              <FirebaseStatusTab />
-            </TabsContent>
+            {isAdmin && (
+              <TabsContent value="firebase" className="fade-in">
+                <FirebaseStatusTab />
+              </TabsContent>
+            )}
           </div>
         </Tabs>
       </main>
