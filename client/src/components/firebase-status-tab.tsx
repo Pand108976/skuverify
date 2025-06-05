@@ -12,12 +12,28 @@ export function FirebaseStatusTab() {
   const [firebaseStatus, setFirebaseStatus] = useState<'connected' | 'error' | 'checking'>('checking');
   const [lastSync, setLastSync] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const [storeCounts, setStoreCounts] = useState<{[key: string]: number}>({});
   const { toast } = useToast();
 
   useEffect(() => {
     loadLocalData();
     checkFirebaseStatus();
+    loadStoreProductCounts();
   }, []);
+
+  const loadStoreProductCounts = () => {
+    const stores = ['patiobatel', 'village', 'admin'];
+    const counts: {[key: string]: number} = {};
+    
+    stores.forEach(storeId => {
+      const localStorageKey = `luxury_products_${storeId}`;
+      const stored = localStorage.getItem(localStorageKey);
+      const products = stored ? JSON.parse(stored) : [];
+      counts[storeId] = products.length;
+    });
+    
+    setStoreCounts(counts);
+  };
 
   const loadLocalData = () => {
     const storeId = localStorage.getItem('luxury_store_id') || 'default';
@@ -63,6 +79,7 @@ export function FirebaseStatusTab() {
       });
       
       setFirebaseStatus('connected');
+      loadStoreProductCounts();
     } catch (error) {
       console.error('Sync error:', error);
       setFirebaseStatus('error');
@@ -103,6 +120,8 @@ export function FirebaseStatusTab() {
       if (storeId === currentStoreId) {
         await syncWithFirebase();
       }
+      
+      loadStoreProductCounts();
     } catch (error) {
       console.error('Sync error:', error);
       toast({
@@ -124,42 +143,19 @@ export function FirebaseStatusTab() {
       localStorage.setItem('luxury_store_id', storeId);
       localStorage.setItem('luxury_store_name', storeName);
       
-      const sampleProducts = [
-        {
-          sku: `${storeId.toUpperCase()}001`,
-          categoria: 'oculos' as 'oculos' | 'cintos',
-          caixa: 'A1',
-          imagem: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600'
-        },
-        {
-          sku: `${storeId.toUpperCase()}002`,
-          categoria: 'oculos' as 'oculos' | 'cintos',
-          caixa: 'A2',
-          imagem: 'https://images.unsplash.com/photo-1506634572416-48cdfe530110?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600'
-        },
-        {
-          sku: `${storeId.toUpperCase()}003`,
-          categoria: 'cintos' as 'oculos' | 'cintos',
-          caixa: 'B1',
-          imagem: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600'
-        }
-      ];
-
-      for (const product of sampleProducts) {
-        await firebase.addProduct(product);
-      }
+      // Apenas inicializa o localStorage vazio para a loja
+      const localStorageKey = `luxury_products_${storeId}`;
+      localStorage.setItem(localStorageKey, JSON.stringify([]));
 
       if (currentStoreId) localStorage.setItem('luxury_store_id', currentStoreId);
       if (currentStoreName) localStorage.setItem('luxury_store_name', currentStoreName);
 
       toast({
         title: "Coleção Criada",
-        description: `Coleção '${storeId}' criada no Firebase com produtos de exemplo`,
+        description: `Coleção '${storeId}' inicializada vazia no sistema`,
       });
 
-      if (storeId === currentStoreId) {
-        await syncWithFirebase();
-      }
+      loadStoreProductCounts();
     } catch (error) {
       console.error('Error creating collection:', error);
       toast({
@@ -278,25 +274,30 @@ export function FirebaseStatusTab() {
                         <p className="text-sm text-muted-foreground">Coleção: patiobatel</p>
                       </div>
                     </div>
-                    <div className="flex space-x-2">
-                      <Button 
-                        onClick={() => syncStoreData('patiobatel', 'Patio Batel')}
-                        disabled={loading}
-                        size="sm"
-                        variant="outline"
-                      >
-                        <RefreshCw className="mr-1" size={14} />
-                        Sync
-                      </Button>
-                      <Button 
-                        onClick={() => createStoreCollection('patiobatel', 'Patio Batel')}
-                        disabled={loading}
-                        size="sm"
-                        className="bg-blue-600 hover:bg-blue-700 text-white"
-                      >
-                        <Plus className="mr-1" size={14} />
-                        Criar
-                      </Button>
+                    <div className="flex items-center space-x-3">
+                      <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                        {storeCounts.patiobatel || 0} produtos
+                      </Badge>
+                      <div className="flex space-x-2">
+                        <Button 
+                          onClick={() => syncStoreData('patiobatel', 'Patio Batel')}
+                          disabled={loading}
+                          size="sm"
+                          variant="outline"
+                        >
+                          <RefreshCw className="mr-1" size={14} />
+                          Sync
+                        </Button>
+                        <Button 
+                          onClick={() => createStoreCollection('patiobatel', 'Patio Batel')}
+                          disabled={loading}
+                          size="sm"
+                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                        >
+                          <Plus className="mr-1" size={14} />
+                          Criar
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -313,25 +314,30 @@ export function FirebaseStatusTab() {
                         <p className="text-sm text-muted-foreground">Coleção: village</p>
                       </div>
                     </div>
-                    <div className="flex space-x-2">
-                      <Button 
-                        onClick={() => syncStoreData('village', 'Village')}
-                        disabled={loading}
-                        size="sm"
-                        variant="outline"
-                      >
-                        <RefreshCw className="mr-1" size={14} />
-                        Sync
-                      </Button>
-                      <Button 
-                        onClick={() => createStoreCollection('village', 'Village')}
-                        disabled={loading}
-                        size="sm"
-                        className="bg-green-600 hover:bg-green-700 text-white"
-                      >
-                        <Plus className="mr-1" size={14} />
-                        Criar
-                      </Button>
+                    <div className="flex items-center space-x-3">
+                      <Badge variant="secondary" className="bg-green-100 text-green-800">
+                        {storeCounts.village || 0} produtos
+                      </Badge>
+                      <div className="flex space-x-2">
+                        <Button 
+                          onClick={() => syncStoreData('village', 'Village')}
+                          disabled={loading}
+                          size="sm"
+                          variant="outline"
+                        >
+                          <RefreshCw className="mr-1" size={14} />
+                          Sync
+                        </Button>
+                        <Button 
+                          onClick={() => createStoreCollection('village', 'Village')}
+                          disabled={loading}
+                          size="sm"
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                        >
+                          <Plus className="mr-1" size={14} />
+                          Criar
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -348,16 +354,21 @@ export function FirebaseStatusTab() {
                         <p className="text-sm text-muted-foreground">Apenas sincronização</p>
                       </div>
                     </div>
-                    <div className="flex space-x-2">
-                      <Button 
-                        onClick={() => syncStoreData('admin', 'Administrador')}
-                        disabled={loading}
-                        size="sm"
-                        variant="outline"
-                      >
-                        <RefreshCw className="mr-1" size={14} />
-                        Sync
-                      </Button>
+                    <div className="flex items-center space-x-3">
+                      <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                        {storeCounts.admin || 0} produtos
+                      </Badge>
+                      <div className="flex space-x-2">
+                        <Button 
+                          onClick={() => syncStoreData('admin', 'Administrador')}
+                          disabled={loading}
+                          size="sm"
+                          variant="outline"
+                        >
+                          <RefreshCw className="mr-1" size={14} />
+                          Sync
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
