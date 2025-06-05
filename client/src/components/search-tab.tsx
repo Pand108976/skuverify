@@ -3,20 +3,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Search, ExternalLink, AlertCircle, ImageOff, Package, FolderOpen, Store } from "lucide-react";
+import { Search, ExternalLink, AlertCircle, Package, FolderOpen, Store } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { ProductImage } from "@/components/product-image";
 import { firebase } from "@/lib/firebase";
 import type { Product } from "@/lib/types";
-
-// Componente para imagem padrão quando não há foto
-const NoImagePlaceholder = ({ className }: { className?: string }) => (
-  <div className={`bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center ${className}`}>
-    <ImageOff size={48} className="text-gray-400 mb-2" />
-    <p className="text-gray-500 text-sm font-medium text-center px-4">
-      Foto indisponível<br />no momento
-    </p>
-  </div>
-);
 
 interface SearchTabProps {
   isAdmin?: boolean;
@@ -173,7 +164,13 @@ export function SearchTab({ isAdmin = false }: SearchTabProps) {
               <div className="p-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <NoImagePlaceholder className="w-full h-48 rounded-lg" />
+                    <ProductImage 
+                      sku={result.sku}
+                      categoria={result.categoria}
+                      imagePath={result.imagem}
+                      className="w-full h-48"
+                      alt={`Produto ${result.sku}`}
+                    />
                   </div>
                   <div className="space-y-4">
                     <h4 className="text-2xl font-bold text-gray-800">{result.sku}</h4>

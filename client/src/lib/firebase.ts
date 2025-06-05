@@ -25,7 +25,7 @@ const getLocalStorageKey = () => {
 };
 
 // Função para obter caminho da imagem baseado no SKU e categoria
-function getImagePath(sku: string, categoria: 'oculos' | 'cintos'): string | null {
+function getImagePath(sku: string, categoria: 'oculos' | 'cintos'): string | undefined {
   // Define as extensões possíveis em ordem de prioridade
   const extensions = ['.webp', '.jpg'];
   
@@ -35,7 +35,7 @@ function getImagePath(sku: string, categoria: 'oculos' | 'cintos'): string | nul
     return imagePath;
   }
   
-  return null;
+  return undefined;
 }
 
 export const firebase = {
@@ -177,7 +177,7 @@ export const firebase = {
     const newProduct = { 
       ...product, 
       id: product.sku, 
-      imagem: imagePath, 
+      imagem: imagePath || undefined, 
       createdAt: new Date() 
     };
     

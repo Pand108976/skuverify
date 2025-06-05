@@ -1,20 +1,9 @@
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { X, Package, Tag, FolderOpen, ImageOff } from "lucide-react";
+import { X, Package, Tag, FolderOpen } from "lucide-react";
+import { ProductImage } from "@/components/product-image";
 import type { Product } from "@/lib/types";
-
-// Componente para imagem padrão quando não há foto
-const NoImagePlaceholder = ({ className }: { className?: string }) => (
-  <div className={`bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center ${className}`}>
-    <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mb-3">
-      <ImageOff size={32} className="text-gray-400" />
-    </div>
-    <p className="text-gray-500 text-sm font-medium text-center px-4">
-      Imagem não disponível
-    </p>
-  </div>
-);
 
 interface ProductModalProps {
   product: Product | null;
@@ -56,8 +45,14 @@ export function ProductModal({ product, open, onClose }: ProductModalProps) {
         </div>
 
         <div className="p-4 space-y-4">
-          {/* Imagem placeholder compacta */}
-          <NoImagePlaceholder className="w-full h-32" />
+          {/* Imagem real do produto */}
+          <ProductImage 
+            sku={product.sku}
+            categoria={product.categoria}
+            imagePath={product.imagem}
+            className="w-full h-32"
+            alt={`Produto ${product.sku}`}
+          />
           
           {/* Informações em cards compactos */}
           <div className="space-y-3">
