@@ -184,25 +184,53 @@ export function AdvancedImportTab() {
       }
 
       // Criar dados de exportação baseados nas opções selecionadas
-      const exportData: any[] = [];
+      let exportData: any;
       
-      allProducts.forEach(product => {
-        const productData: any = {};
-        
-        if (exportSku) {
-          productData.sku = product.sku;
-        }
-        
-        if (exportCaixas) {
-          productData.caixa = product.caixa;
-        }
-        
-        if (exportLinks && product.link) {
-          productData.link = product.link;
-        }
-        
-        exportData.push(productData);
-      });
+      if (exportLinks && (exportSku || exportCaixas)) {
+        // Exportação mista - array de objetos
+        exportData = [];
+        allProducts.forEach(product => {
+          const productData: any = {};
+          
+          if (exportSku) {
+            productData.sku = product.sku;
+          }
+          
+          if (exportCaixas) {
+            productData.caixa = product.caixa;
+          }
+          
+          if (exportLinks && product.link) {
+            productData.link = product.link;
+          }
+          
+          exportData.push(productData);
+        });
+      } else if (exportLinks && !exportSku && !exportCaixas) {
+        // Exportação apenas de links - formato otimizado para sistema automático
+        exportData = {};
+        allProducts.forEach(product => {
+          if (product.link) {
+            exportData[product.sku] = product.link;
+          }
+        });
+      } else {
+        // Exportação sem links - array de objetos
+        exportData = [];
+        allProducts.forEach(product => {
+          const productData: any = {};
+          
+          if (exportSku) {
+            productData.sku = product.sku;
+          }
+          
+          if (exportCaixas) {
+            productData.caixa = product.caixa;
+          }
+          
+          exportData.push(productData);
+        });
+      }
 
       // Criar arquivo JSON para download
       const dataStr = JSON.stringify(exportData, null, 2);
@@ -218,15 +246,24 @@ export function AdvancedImportTab() {
       if (exportCaixas) selectedFields.push('caixas');
       if (exportLinks) selectedFields.push('links');
       
-      link.download = `${selectedStore}_${selectedFields.join('_')}_export.json`;
+      // Nome especial para arquivo de links automático
+      const filename = exportLinks && !exportSku && !exportCaixas 
+        ? 'product-links.json' 
+        : `${selectedStore}_${selectedFields.join('_')}_export.json`;
+      
+      link.download = filename;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
+      const isAutomaticLinksFile = exportLinks && !exportSku && !exportCaixas;
+      
       toast({
         title: "Exportação Concluída",
-        description: `${allProducts.length} produtos exportados com os campos selecionados.`,
+        description: isAutomaticLinksFile 
+          ? `Arquivo 'product-links.json' criado! Coloque-o na pasta public para ativar links automáticos em todos os produtos.`
+          : `${allProducts.length} produtos exportados com os campos selecionados.`,
       });
 
     } catch (error) {
@@ -501,7 +538,13 @@ export function AdvancedImportTab() {
                 <p>2. Marque os campos que deseja incluir na exportação</p>
                 <p>3. Clique em "Exportar Dados Selecionados"</p>
                 <p>4. O arquivo JSON será baixado automaticamente</p>
-                <p>5. Use os links exportados para configurar o botão "Visitar Site"</p>
+                <br />
+                <p><strong>Sistema Automático de Links:</strong></p>
+                <p>• Para ativar links automáticos: marque apenas "Links dos Produtos"</p>
+                <p>• Isso criará o arquivo "product-links.json" otimizado</p>
+                <p>• Coloque este arquivo na pasta public do servidor</p>
+                <p>• Todos os produtos terão seus links aplicados automaticamente</p>
+                <p>• Os botões "Visitar Site" aparecerão automaticamente para produtos com links</p>
               </div>
             </div>
           </div>

@@ -68,8 +68,17 @@ export const firebase = {
     const storeId = getStoreCollection();
     const localStorageKey = getLocalStorageKey();
     
+    // Carrega links automaticamente se ainda não foram carregados
+    await loadProductLinks();
+    
     const stored = localStorage.getItem(localStorageKey);
     let localProducts: Product[] = stored ? JSON.parse(stored) : [];
+    
+    // Aplica links automaticamente aos produtos que não têm link
+    localProducts = localProducts.map(product => ({
+      ...product,
+      link: product.link || getProductLink(product.sku)
+    }));
     
     return localProducts;
   },
@@ -78,6 +87,9 @@ export const firebase = {
   async getProductsFromFirebase(): Promise<Product[]> {
     const storeId = getStoreCollection();
     const localStorageKey = getLocalStorageKey();
+    
+    // Carrega links automaticamente antes de sincronizar
+    await loadProductLinks();
     
     try {
       const firebaseProducts: Product[] = [];
