@@ -3,10 +3,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, Glasses, Shirt, User } from "lucide-react";
+import { Trash2, Glasses, Shirt, User, ImageOff } from "lucide-react";
 import { firebase } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import type { Product } from "@/lib/types";
+
+// Componente para imagem padrão quando não há foto
+const NoImagePlaceholder = ({ className }: { className?: string }) => (
+  <div className={`bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center ${className}`}>
+    <ImageOff size={16} className="text-gray-400" />
+  </div>
+);
 
 export function RemoveProductTab() {
   const [step, setStep] = useState(1);
@@ -122,6 +129,7 @@ export function RemoveProductTab() {
       setSelectedBox('');
       setProducts([]);
       setSelectedProducts([]);
+      setSelectedUser('');
     } catch (error) {
       console.error('Error removing products:', error);
       toast({
@@ -214,11 +222,7 @@ export function RemoveProductTab() {
                         checked={selectedProducts.includes(product.sku)}
                         onCheckedChange={(checked) => handleProductToggle(product.sku, checked as boolean)}
                       />
-                      <img 
-                        src={product.imagem || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400'}
-                        alt={product.sku}
-                        className="w-12 h-12 object-cover rounded-lg"
-                      />
+                      <NoImagePlaceholder className="w-12 h-12" />
                       <div>
                         <label htmlFor={product.sku} className="font-semibold cursor-pointer">
                           {product.sku}

@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, ImageOff } from "lucide-react";
 import type { Product } from "@/lib/types";
@@ -47,6 +47,9 @@ export function ProductModal({ product, open, onClose }: ProductModalProps) {
           <DialogTitle className="text-2xl font-bold text-luxury-dark">
             Detalhes do Produto
           </DialogTitle>
+          <DialogDescription>
+            Visualize as informações completas do produto selecionado
+          </DialogDescription>
         </DialogHeader>
         
         <div className="text-center space-y-6">

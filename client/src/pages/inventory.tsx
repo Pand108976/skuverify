@@ -26,6 +26,9 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
     const currentStoreId = localStorage.getItem('luxury_store_id') || '';
     setStoreName(currentStoreName);
     setIsAdmin(currentStoreId === 'admin');
+    
+    // Iniciar sincronização automática
+    firebase.startAutoSync();
   }, []);
 
   const handleProductClick = (product: Product) => {
