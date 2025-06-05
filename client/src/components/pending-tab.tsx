@@ -26,26 +26,40 @@ export function PendingTab() {
   const loadPendingProducts = async () => {
     setLoading(true);
     try {
-      const products = await firebase.getProducts();
-      console.log('Total de produtos carregados:', products.length);
+      // Verifica qual loja está ativa
+      const currentStoreId = localStorage.getItem('luxury_store_id');
+      const currentStoreName = localStorage.getItem('luxury_store_name');
+      console.log('Carregando pendentes para loja:', currentStoreName, '(ID:', currentStoreId, ')');
+      
+      // Carrega produtos tanto do Firebase quanto localStorage
+      let products: Product[] = [];
+      
+      try {
+        products = await firebase.getProductsFromFirebase();
+        console.log('Produtos carregados do Firebase:', products.length);
+      } catch (firebaseError) {
+        console.log('Firebase indisponível, tentando localStorage...');
+        products = await firebase.getProducts();
+        console.log('Produtos carregados do localStorage:', products.length);
+      }
       
       const pending: PendingProduct[] = [];
       
       for (const product of products) {
         // Verifica se a imagem está realmente ausente
-        // Se não tem campo imagem ou está vazio, considera como ausente
         const missingImage = !product.imagem || product.imagem === '' || product.imagem === undefined;
         
-        // Verifica se o link está ausente
+        // Verifica se o link está ausente  
         const missingLink = !product.link || product.link === '' || product.link === undefined;
         
-        // Debug para alguns produtos
-        if (pending.length < 5) {
-          console.log(`Produto ${product.sku}:`, {
+        // Debug para os primeiros produtos
+        if (products.indexOf(product) < 3) {
+          console.log(`Debug produto ${product.sku}:`, {
             imagem: product.imagem,
             link: product.link,
             missingImage,
-            missingLink
+            missingLink,
+            categoria: product.categoria
           });
         }
         
@@ -59,6 +73,11 @@ export function PendingTab() {
       }
       
       console.log('Produtos pendentes encontrados:', pending.length);
+      console.log('Resumo por categoria:', {
+        oculos: pending.filter(p => p.product.categoria === 'oculos').length,
+        cintos: pending.filter(p => p.product.categoria === 'cintos').length
+      });
+      
       setPendingProducts(pending);
     } catch (error) {
       console.error('Erro ao carregar produtos pendentes:', error);
