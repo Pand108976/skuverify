@@ -32,7 +32,37 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
     try {
       const allProducts = await firebase.getProducts();
       const filteredProducts = allProducts.filter(p => p.categoria === category);
-      setProducts(filteredProducts);
+      
+      // Ordenar produtos por caixa (numérica) e depois por SKU
+      const sortedProducts = filteredProducts.sort((a, b) => {
+        const numA = parseInt(a.caixa, 10);
+        const numB = parseInt(b.caixa, 10);
+        
+        // Se ambos são números, ordena numericamente
+        if (!isNaN(numA) && !isNaN(numB)) {
+          if (numA !== numB) {
+            return numA - numB;
+          }
+        }
+        
+        // Se apenas um é número, o número vem primeiro
+        if (!isNaN(numA) && isNaN(numB)) {
+          return -1;
+        }
+        if (isNaN(numA) && !isNaN(numB)) {
+          return 1;
+        }
+        
+        // Se nenhum é número ou são iguais, ordena por caixa alfabeticamente
+        if (a.caixa !== b.caixa) {
+          return a.caixa.localeCompare(b.caixa);
+        }
+        
+        // Se caixas são iguais, ordena por SKU
+        return a.sku.localeCompare(b.sku);
+      });
+      
+      setProducts(sortedProducts);
     } catch (error) {
       console.error('Error loading products:', error);
     } finally {

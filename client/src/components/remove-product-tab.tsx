@@ -57,8 +57,31 @@ export function RemoveProductTab() {
     try {
       const allProducts = await firebase.getProducts();
       const categoryProducts = allProducts.filter(p => p.categoria === selectedCategory);
-      const uniqueBoxes = Array.from(new Set(categoryProducts.map(p => p.caixa))).sort();
-      setBoxes(uniqueBoxes);
+      const uniqueBoxes = Array.from(new Set(categoryProducts.map(p => p.caixa)));
+      
+      // Ordenação numérica correta
+      const sortedBoxes = uniqueBoxes.sort((a, b) => {
+        const numA = parseInt(a, 10);
+        const numB = parseInt(b, 10);
+        
+        // Se ambos são números, ordena numericamente
+        if (!isNaN(numA) && !isNaN(numB)) {
+          return numA - numB;
+        }
+        
+        // Se apenas um é número, o número vem primeiro
+        if (!isNaN(numA) && isNaN(numB)) {
+          return -1;
+        }
+        if (isNaN(numA) && !isNaN(numB)) {
+          return 1;
+        }
+        
+        // Se nenhum é número, ordena alfabeticamente
+        return a.localeCompare(b);
+      });
+      
+      setBoxes(sortedBoxes);
     } catch (error) {
       console.error('Error loading boxes:', error);
     }
