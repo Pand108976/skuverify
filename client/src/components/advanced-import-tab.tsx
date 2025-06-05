@@ -445,7 +445,7 @@ export function AdvancedImportTab() {
                     <Checkbox
                       id="export-sku"
                       checked={exportSku}
-                      onCheckedChange={setExportSku}
+                      onCheckedChange={(checked) => setExportSku(!!checked)}
                     />
                     <Label htmlFor="export-sku" className="text-sm font-medium">
                       SKU dos Produtos
@@ -456,7 +456,7 @@ export function AdvancedImportTab() {
                     <Checkbox
                       id="export-caixas"
                       checked={exportCaixas}
-                      onCheckedChange={setExportCaixas}
+                      onCheckedChange={(checked) => setExportCaixas(!!checked)}
                     />
                     <Label htmlFor="export-caixas" className="text-sm font-medium">
                       Números das Caixas
@@ -467,7 +467,7 @@ export function AdvancedImportTab() {
                     <Checkbox
                       id="export-links"
                       checked={exportLinks}
-                      onCheckedChange={setExportLinks}
+                      onCheckedChange={(checked) => setExportLinks(!!checked)}
                     />
                     <Label htmlFor="export-links" className="text-sm font-medium">
                       Links dos Produtos

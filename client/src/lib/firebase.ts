@@ -38,6 +38,30 @@ function getImagePath(sku: string, categoria: 'oculos' | 'cintos'): string | und
   return undefined;
 }
 
+// Sistema automático de links - carrega links de um arquivo JSON local
+let productLinksCache: Record<string, string> = {};
+
+async function loadProductLinks(): Promise<void> {
+  if (Object.keys(productLinksCache).length > 0) {
+    return; // Já carregado
+  }
+  
+  try {
+    const response = await fetch('/product-links.json');
+    if (response.ok) {
+      productLinksCache = await response.json();
+      console.log('Links de produtos carregados:', Object.keys(productLinksCache).length, 'produtos');
+    }
+  } catch (error) {
+    console.log('Arquivo de links não encontrado ou inválido');
+  }
+}
+
+// Função para obter link do produto baseado no SKU
+function getProductLink(sku: string): string | undefined {
+  return productLinksCache[sku];
+}
+
 export const firebase = {
   // Get all products (localStorage only for speed)
   async getProducts(): Promise<Product[]> {
@@ -64,11 +88,13 @@ export const firebase = {
       oculosSnapshot.forEach((doc) => {
         const data = doc.data();
         const imagePath = data.imagem || getImagePath(data.sku, 'oculos');
+        const productLink = data.link || getProductLink(data.sku);
         firebaseProducts.push({ 
           id: doc.id, 
           categoria: 'oculos',
           ...data,
-          imagem: imagePath
+          imagem: imagePath,
+          link: productLink
         } as Product);
       });
       
@@ -78,11 +104,13 @@ export const firebase = {
       cintosSnapshot.forEach((doc) => {
         const data = doc.data();
         const imagePath = data.imagem || getImagePath(data.sku, 'cintos');
+        const productLink = data.link || getProductLink(data.sku);
         firebaseProducts.push({ 
           id: doc.id, 
           categoria: 'cintos',
           ...data,
-          imagem: imagePath
+          imagem: imagePath,
+          link: productLink
         } as Product);
       });
       
