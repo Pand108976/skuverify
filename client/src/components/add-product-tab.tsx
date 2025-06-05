@@ -37,12 +37,18 @@ export function AddProductTab() {
     setLoading(true);
     
     try {
-      await firebase.addProduct({
+      const productData: any = {
         sku: sku.trim().toUpperCase(),
         categoria: selectedCategory as 'oculos' | 'cintos',
         caixa: caixa.trim(),
-        imagem: imagem.trim() || undefined,
-      });
+      };
+      
+      // Adiciona imagem apenas se fornecida
+      if (imagem && imagem.trim()) {
+        productData.imagem = imagem.trim();
+      }
+      
+      await firebase.addProduct(productData);
 
       toast({
         title: "Sucesso",

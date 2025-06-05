@@ -121,10 +121,19 @@ export const firebase = {
     
     // Tenta salvar no Firebase em segundo plano na coleção da loja
     try {
-      await setDoc(doc(db, storeId, product.sku), {
-        ...product,
+      const firebaseData: any = {
+        sku: product.sku,
+        categoria: product.categoria,
+        caixa: product.caixa,
         createdAt: new Date()
-      });
+      };
+      
+      // Adiciona imagem apenas se fornecida
+      if (product.imagem && product.imagem.trim()) {
+        firebaseData.imagem = product.imagem;
+      }
+      
+      await setDoc(doc(db, storeId, product.sku), firebaseData);
       console.log(`Produto salvo no Firebase na coleção "${storeId}":`, product.sku);
     } catch (error) {
       console.error('Firebase error, dados salvos apenas localmente:', error);
