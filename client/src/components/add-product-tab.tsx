@@ -3,21 +3,38 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Save, Glasses, Shirt } from "lucide-react";
+import { Plus, Save, Glasses, Shirt, Store } from "lucide-react";
 import { firebase } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 
 export function AddProductTab() {
   const [step, setStep] = useState(1);
+  const [selectedStore, setSelectedStore] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'oculos' | 'cintos' | ''>('');
   const [sku, setSku] = useState("");
   const [caixa, setCaixa] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
+  // Verificar se é admin
+  const isAdmin = localStorage.getItem('luxury_store_id') === 'admin';
+  
+  const availableStores = [
+    { id: 'patiobatel', name: 'Patio Batel' },
+    { id: 'village', name: 'Village' }
+  ];
+
+  const handleStoreSelect = (storeId: string) => {
+    setSelectedStore(storeId);
+    setSelectedCategory('');
+    setSku('');
+    setCaixa('');
+    setStep(2);
+  };
+
   const handleCategorySelect = (category: 'oculos' | 'cintos') => {
     setSelectedCategory(category);
-    setStep(2);
+    setStep(isAdmin ? 3 : 2);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -30,7 +47,7 @@ export function AddProductTab() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!sku.trim() || !selectedCategory || !caixa.trim()) {
+    if (!sku.trim() || !selectedCategory || !caixa.trim() || (isAdmin && !selectedStore)) {
       toast({
         title: "Erro",
         description: "Preencha todos os campos obrigatórios",
@@ -42,6 +59,12 @@ export function AddProductTab() {
     setLoading(true);
     
     try {
+      // Se for admin, temporariamente muda para a loja selecionada
+      const originalStoreId = localStorage.getItem('luxury_store_id');
+      if (isAdmin && selectedStore) {
+        localStorage.setItem('luxury_store_id', selectedStore);
+      }
+      
       const productData = {
         sku: sku.trim().toUpperCase(),
         categoria: selectedCategory as 'oculos' | 'cintos',
@@ -57,9 +80,15 @@ export function AddProductTab() {
 
       // Reset form
       setStep(1);
+      setSelectedStore('');
       setSelectedCategory('');
       setSku("");
       setCaixa("");
+      
+      // Restaura a loja original se for admin
+      if (isAdmin && originalStoreId) {
+        localStorage.setItem('luxury_store_id', originalStoreId);
+      }
     } catch (error) {
       console.error('Error adding product:', error);
       toast({
@@ -85,10 +114,33 @@ export function AddProductTab() {
           </div>
           
           <div className="space-y-6">
-            {/* Step 1: Select Category */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4">1. Selecione a Categoria:</h3>
-              <div className="grid grid-cols-2 gap-4">
+            {/* Step 1: Select Store (Admin only) */}
+            {isAdmin && (
+              <div>
+                <h3 className="text-lg font-semibold mb-4">1. Selecione a Loja:</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {availableStores.map((store) => (
+                    <Button
+                      key={store.id}
+                      variant={selectedStore === store.id ? 'default' : 'outline'}
+                      className={`p-6 h-auto ${selectedStore === store.id ? 'gold-gradient text-white' : 'border-2 hover:border-primary'}`}
+                      onClick={() => handleStoreSelect(store.id)}
+                    >
+                      <div className="text-center">
+                        <Store className="mx-auto mb-3" size={32} />
+                        <p className="font-semibold">{store.name}</p>
+                      </div>
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Step 2: Select Category */}
+            {((!isAdmin && step >= 1) || (isAdmin && step >= 2)) && (
+              <div>
+                <h3 className="text-lg font-semibold mb-4">{isAdmin ? '2' : '1'}. Selecione a Categoria:</h3>
+                <div className="grid grid-cols-2 gap-4">
                 <Button
                   variant={selectedCategory === 'oculos' ? 'default' : 'outline'}
                   className={`p-6 h-auto ${selectedCategory === 'oculos' ? 'gold-gradient text-white' : 'border-2 hover:border-primary'}`}
@@ -109,13 +161,14 @@ export function AddProductTab() {
                     <p className="font-semibold">Cintos</p>
                   </div>
                 </Button>
+                </div>
               </div>
-            </div>
+            )}
             
-            {/* Step 2: Product Details */}
-            {step >= 2 && selectedCategory && (
+            {/* Step 3: Product Details */}
+            {((!isAdmin && step >= 2) || (isAdmin && step >= 3)) && selectedCategory && (
               <div>
-                <h3 className="text-lg font-semibold mb-4">2. Dados do Produto:</h3>
+                <h3 className="text-lg font-semibold mb-4">{isAdmin ? '3' : '2'}. Dados do Produto:</h3>
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="floating-label">
                     <Input
