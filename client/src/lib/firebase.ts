@@ -373,5 +373,63 @@ export const firebase = {
       console.error('Error in global search:', error);
       return [];
     }
+  },
+
+  // Migrate existing products to hierarchical structure
+  async migrateExistingProducts(): Promise<void> {
+    const stores = ['patiobatel', 'village'];
+    
+    try {
+      console.log('Iniciando migração de produtos para estrutura hierárquica...');
+      
+      for (const storeId of stores) {
+        console.log(`Migrando produtos da loja: ${storeId}`);
+        
+        // Buscar produtos na estrutura antiga (diretamente na coleção da loja)
+        const oldCollectionRef = collection(db, storeId);
+        const snapshot = await getDocs(oldCollectionRef);
+        
+        let migratedCount = 0;
+        
+        for (const docSnap of snapshot.docs) {
+          const productData = docSnap.data();
+          const sku = docSnap.id;
+          
+          // Pular se for documento de sessão ou outro tipo
+          if (!productData.categoria || !productData.caixa) {
+            console.log(`Pulando documento não-produto: ${sku}`);
+            continue;
+          }
+          
+          const categoria = productData.categoria || 'oculos';
+          
+          // Criar na nova estrutura hierárquica
+          const newDocRef = doc(db, storeId, categoria, 'products', sku);
+          await setDoc(newDocRef, {
+            sku: productData.sku || sku,
+            categoria: categoria,
+            caixa: productData.caixa,
+            createdAt: productData.createdAt || new Date(),
+            ...(productData.imagem && { imagem: productData.imagem })
+          });
+          
+          // Remover da estrutura antiga
+          await deleteDoc(docSnap.ref);
+          
+          migratedCount++;
+          console.log(`Produto migrado: ${sku} → ${storeId}/${categoria}/products`);
+        }
+        
+        console.log(`Migração da loja ${storeId} concluída: ${migratedCount} produtos`);
+      }
+      
+      console.log('Migração de todos os produtos concluída!');
+      
+      // Sincronizar após migração
+      await this.syncCollections();
+      
+    } catch (error) {
+      console.error('Erro na migração:', error);
+    }
   }
 };
