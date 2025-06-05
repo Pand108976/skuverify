@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { Glasses, Shirt } from "lucide-react";
+import { Glasses, Shirt, ExternalLink } from "lucide-react";
 import { ProductImage } from "@/components/product-image";
 import { firebase } from "@/lib/firebase";
 import type { Product } from "@/lib/types";

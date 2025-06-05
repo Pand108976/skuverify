@@ -196,6 +196,19 @@ export function SearchTab({ isAdmin = false }: SearchTabProps) {
                         </div>
                       </div>
                     </div>
+                    
+                    {/* Botão Visitar Site */}
+                    {result.link && (
+                      <div className="mt-4 pt-4 border-t border-gray-200">
+                        <Button
+                          onClick={() => window.open(result.link, '_blank')}
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3"
+                        >
+                          <ExternalLink size={16} className="mr-2" />
+                          Visitar Site do Produto
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -254,6 +267,19 @@ export function SearchTab({ isAdmin = false }: SearchTabProps) {
                             </div>
                           </div>
                         </div>
+                        
+                        {/* Botão Visitar Site */}
+                        {product.link && (
+                          <div className="mt-4 pt-4 border-t border-gray-200">
+                            <Button
+                              onClick={() => window.open(product.link, '_blank')}
+                              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3"
+                            >
+                              <ExternalLink size={16} className="mr-2" />
+                              Visitar Site do Produto
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

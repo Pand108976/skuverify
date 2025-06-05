@@ -4,6 +4,7 @@ export interface Product {
   categoria: 'oculos' | 'cintos';
   caixa: string;
   imagem?: string;
+  link?: string;
   createdAt?: Date;
 }
 

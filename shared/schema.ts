@@ -8,6 +8,7 @@ export const products = pgTable("products", {
   categoria: text("categoria").notNull(),
   caixa: text("caixa").notNull(),
   imagem: text("imagem"),
+  link: text("link"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -23,6 +24,7 @@ export const insertProductSchema = createInsertSchema(products).pick({
   categoria: true,
   caixa: true,
   imagem: true,
+  link: true,
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
