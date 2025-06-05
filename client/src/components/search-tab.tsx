@@ -222,7 +222,13 @@ export function SearchTab({ isAdmin = false }: SearchTabProps) {
                   <div className="p-6">
                     <div className="grid md:grid-cols-2 gap-6">
                       <div>
-                        <NoImagePlaceholder className="w-full h-48 rounded-lg" />
+                        <ProductImage 
+                          sku={product.sku}
+                          categoria={product.categoria}
+                          imagePath={product.imagem}
+                          className="w-full h-48"
+                          alt={`Produto ${product.sku}`}
+                        />
                       </div>
                       <div className="space-y-4">
                         <h4 className="text-2xl font-bold text-gray-800">{product.sku}</h4>

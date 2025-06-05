@@ -404,6 +404,62 @@ export const firebase = {
   },
 
   // Migrate existing products to hierarchical structure
+  // Atualiza produtos existentes com caminhos de imagem
+  async updateProductsWithImages(): Promise<void> {
+    console.log("Atualizando produtos existentes com imagens...");
+    
+    try {
+      const storeId = getStoreCollection();
+      
+      // Buscar produtos existentes
+      const ocolosRef = collection(db, storeId, 'oculos', 'products');
+      const cintosRef = collection(db, storeId, 'cintos', 'products');
+      
+      const [ocolosSnapshot, cintosSnapshot] = await Promise.all([
+        getDocs(ocolosRef),
+        getDocs(cintosRef)
+      ]);
+      
+      console.log(`Encontrados ${ocolosSnapshot.size} óculos e ${cintosSnapshot.size} cintos`);
+      
+      let updatedCount = 0;
+      
+      // Atualizar óculos com imagens
+      for (const doc of ocolosSnapshot.docs) {
+        const data = doc.data();
+        const imagePath = getImagePath(data.sku, 'oculos');
+        if (imagePath) {
+          await setDoc(doc.ref, {
+            ...data,
+            imagem: imagePath
+          });
+          updatedCount++;
+        }
+      }
+      
+      // Atualizar cintos com imagens
+      for (const doc of cintosSnapshot.docs) {
+        const data = doc.data();
+        const imagePath = getImagePath(data.sku, 'cintos');
+        if (imagePath) {
+          await setDoc(doc.ref, {
+            ...data,
+            imagem: imagePath
+          });
+          updatedCount++;
+        }
+      }
+      
+      console.log(`Atualização concluída: ${updatedCount} produtos atualizados com imagens`);
+      
+      // Força sincronização para atualizar localStorage
+      await this.getProductsFromFirebase();
+    } catch (error) {
+      console.error("Erro na atualização de imagens:", error);
+      throw error;
+    }
+  },
+
   async migrateExistingProducts(): Promise<void> {
     const stores = ['patiobatel', 'village'];
     
