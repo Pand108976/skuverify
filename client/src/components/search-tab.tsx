@@ -164,7 +164,7 @@ export function SearchTab({ isAdmin = false }: SearchTabProps) {
           
           {result && (
             <div className="mt-8 bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden fade-in">
-              <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4">
+              <div className="bg-gray-800 text-white p-4">
                 <h3 className="text-xl font-bold flex items-center">
                   <Package className="mr-2" size={20} />
                   Produto Encontrado
@@ -179,31 +179,25 @@ export function SearchTab({ isAdmin = false }: SearchTabProps) {
                     <h4 className="text-2xl font-bold text-gray-800">{result.sku}</h4>
                     
                     <div className="space-y-3">
-                      <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                      <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
                         <div className="flex items-center space-x-2">
-                          <FolderOpen size={16} className="text-blue-600" />
+                          <FolderOpen size={16} className="text-gray-600" />
                           <div>
-                            <p className="text-xs font-medium text-blue-600 uppercase">Categoria</p>
-                            <p className="font-semibold text-blue-800 capitalize">{result.categoria}</p>
+                            <p className="text-xs font-medium text-gray-600 uppercase">Categoria</p>
+                            <p className="font-semibold text-gray-800 capitalize">{result.categoria}</p>
                           </div>
                         </div>
                       </div>
                       
-                      <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
+                      <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
                         <div className="flex items-center space-x-2">
-                          <Package size={16} className="text-orange-600" />
+                          <Package size={16} className="text-gray-600" />
                           <div>
-                            <p className="text-xs font-medium text-orange-600 uppercase">Localização</p>
-                            <p className="font-semibold text-orange-800">Caixa {result.caixa}</p>
+                            <p className="text-xs font-medium text-gray-600 uppercase">Localização</p>
+                            <p className="font-semibold text-gray-800">Caixa {result.caixa}</p>
                           </div>
                         </div>
                       </div>
-                    </div>
-                    
-                    <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
-                      <p className="text-sm text-green-700 font-medium">
-                        ✓ Produto encontrado no inventário
-                      </p>
                     </div>
                   </div>
                 </div>
@@ -217,13 +211,13 @@ export function SearchTab({ isAdmin = false }: SearchTabProps) {
               <h3 className="text-lg font-semibold text-luxury-dark">Resultados Encontrados em Todas as Lojas</h3>
               {globalResults.map((product, index) => (
                 <div key={`${product.storeId}-${product.sku}-${index}`} className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden">
-                  <div className="bg-gradient-to-r from-purple-500 to-pink-600 text-white p-4">
+                  <div className="bg-gray-700 text-white p-4">
                     <div className="flex items-center justify-between">
                       <h3 className="text-xl font-bold flex items-center">
                         <Store className="mr-2" size={20} />
                         {product.storeName}
                       </h3>
-                      <Badge className="bg-white/20 text-white border-white/30">
+                      <Badge className="bg-gray-500 text-white">
                         Global
                       </Badge>
                     </div>
@@ -237,31 +231,25 @@ export function SearchTab({ isAdmin = false }: SearchTabProps) {
                         <h4 className="text-2xl font-bold text-gray-800">{product.sku}</h4>
                         
                         <div className="space-y-3">
-                          <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
                             <div className="flex items-center space-x-2">
-                              <FolderOpen size={16} className="text-blue-600" />
+                              <FolderOpen size={16} className="text-gray-600" />
                               <div>
-                                <p className="text-xs font-medium text-blue-600 uppercase">Categoria</p>
-                                <p className="font-semibold text-blue-800 capitalize">{product.categoria}</p>
+                                <p className="text-xs font-medium text-gray-600 uppercase">Categoria</p>
+                                <p className="font-semibold text-gray-800 capitalize">{product.categoria}</p>
                               </div>
                             </div>
                           </div>
                           
-                          <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
+                          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
                             <div className="flex items-center space-x-2">
-                              <Package size={16} className="text-orange-600" />
+                              <Package size={16} className="text-gray-600" />
                               <div>
-                                <p className="text-xs font-medium text-orange-600 uppercase">Localização</p>
-                                <p className="font-semibold text-orange-800">Caixa {product.caixa}</p>
+                                <p className="text-xs font-medium text-gray-600 uppercase">Localização</p>
+                                <p className="font-semibold text-gray-800">Caixa {product.caixa}</p>
                               </div>
                             </div>
                           </div>
-                        </div>
-                        
-                        <div className="mt-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
-                          <p className="text-sm text-purple-700 font-medium">
-                            ✓ Encontrado em {product.storeName}
-                          </p>
                         </div>
                       </div>
                     </div>
