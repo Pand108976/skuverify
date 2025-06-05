@@ -21,9 +21,8 @@ export function SearchTab() {
         setCountdown(countdown - 1);
       }, 1000);
     } else if (countdown === 0 && result) {
+      // Limpa apenas o campo de entrada, mantém o resultado
       setSku("");
-      setResult(null);
-      setNotFound(false);
     }
     
     return () => clearTimeout(timer);
@@ -31,6 +30,11 @@ export function SearchTab() {
 
   const handleSearch = async () => {
     if (!sku.trim()) return;
+    
+    // Limpa resultados anteriores ao iniciar nova busca
+    setResult(null);
+    setNotFound(false);
+    setCountdown(0);
     
     const product = await firebase.getProductBySku(sku.trim());
     
