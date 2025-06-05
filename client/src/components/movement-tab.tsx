@@ -5,20 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRightLeft, Search, Store, Package, ArrowRight, CheckCircle, AlertCircle, ImageOff } from "lucide-react";
+import { ArrowRightLeft, Search, Store, Package, ArrowRight, CheckCircle, AlertCircle } from "lucide-react";
+import { ProductImage } from "@/components/product-image";
 import { firebase } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import type { Product } from "@/lib/types";
-
-// Componente para imagem padrão
-const NoImagePlaceholder = ({ className }: { className?: string }) => (
-  <div className={`bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center ${className}`}>
-    <ImageOff size={32} className="text-gray-400 mb-1" />
-    <p className="text-gray-500 text-xs font-medium text-center px-2">
-      Foto indisponível<br />no momento
-    </p>
-  </div>
-);
 
 export function MovementTab() {
   const [step, setStep] = useState(1);
@@ -281,7 +272,13 @@ export function MovementTab() {
                 <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 mb-6">
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <NoImagePlaceholder className="w-full h-48" />
+                      <ProductImage 
+                        sku={foundProduct.sku}
+                        categoria={foundProduct.categoria}
+                        imagePath={foundProduct.imagem}
+                        className="w-full h-48"
+                        alt={`Produto ${foundProduct.sku}`}
+                      />
                     </div>
                     <div className="space-y-4">
                       <div>
