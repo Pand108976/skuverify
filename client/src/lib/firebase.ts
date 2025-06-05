@@ -24,6 +24,20 @@ const getLocalStorageKey = () => {
   return `luxury_products_${storeId}`;
 };
 
+// Função para obter caminho da imagem baseado no SKU e categoria
+function getImagePath(sku: string, categoria: 'oculos' | 'cintos'): string | null {
+  // Define as extensões possíveis em ordem de prioridade
+  const extensions = ['.webp', '.jpg'];
+  
+  // Retorna o primeiro caminho encontrado
+  for (const ext of extensions) {
+    const imagePath = `/images/${categoria}/${sku}${ext}`;
+    return imagePath;
+  }
+  
+  return null;
+}
+
 export const firebase = {
   // Get all products (localStorage only for speed)
   async getProducts(): Promise<Product[]> {
@@ -48,10 +62,13 @@ export const firebase = {
       const oculosRef = collection(db, storeId, 'oculos', 'products');
       const oculosSnapshot = await getDocs(oculosRef);
       oculosSnapshot.forEach((doc) => {
+        const data = doc.data();
+        const imagePath = data.imagem || getImagePath(data.sku, 'oculos');
         firebaseProducts.push({ 
           id: doc.id, 
           categoria: 'oculos',
-          ...doc.data() 
+          ...data,
+          imagem: imagePath
         } as Product);
       });
       
@@ -59,10 +76,13 @@ export const firebase = {
       const cintosRef = collection(db, storeId, 'cintos', 'products');
       const cintosSnapshot = await getDocs(cintosRef);
       cintosSnapshot.forEach((doc) => {
+        const data = doc.data();
+        const imagePath = data.imagem || getImagePath(data.sku, 'cintos');
         firebaseProducts.push({ 
           id: doc.id, 
           categoria: 'cintos',
-          ...doc.data() 
+          ...data,
+          imagem: imagePath
         } as Product);
       });
       
@@ -148,10 +168,18 @@ export const firebase = {
     const storeId = getStoreCollection();
     const localStorageKey = getLocalStorageKey();
     
+    // Adiciona automaticamente o caminho da imagem se não fornecido
+    const imagePath = product.imagem || getImagePath(product.sku, product.categoria);
+    
     // Atualiza localStorage primeiro para velocidade
     const stored = localStorage.getItem(localStorageKey);
     const products: Product[] = stored ? JSON.parse(stored) : [];
-    const newProduct = { ...product, id: product.sku, createdAt: new Date() };
+    const newProduct = { 
+      ...product, 
+      id: product.sku, 
+      imagem: imagePath, 
+      createdAt: new Date() 
+    };
     
     // Remove produto existente com mesmo SKU se houver
     const filteredProducts = products.filter(p => p.sku !== product.sku);
@@ -167,9 +195,9 @@ export const firebase = {
         createdAt: new Date()
       };
       
-      // Adiciona imagem apenas se fornecida
-      if (product.imagem && product.imagem.trim()) {
-        firebaseData.imagem = product.imagem;
+      // Adiciona imagem se disponível
+      if (imagePath) {
+        firebaseData.imagem = imagePath;
       }
       
       // Salva na subcoleção organizada: loja/categoria/products/sku
