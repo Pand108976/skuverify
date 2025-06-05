@@ -39,13 +39,8 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
   };
 
   const handleLogout = () => {
-    const confirmed = confirm('Tem certeza que deseja sair?');
-    if (confirmed) {
-      // Limpa dados da sessão
-      localStorage.removeItem('luxury_store_id');
-      localStorage.removeItem('luxury_store_name');
-      onLogout();
-    }
+    // Agora o logout é tratado pelo App.tsx que mantém a persistência
+    onLogout();
   };
 
   return (
