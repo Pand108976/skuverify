@@ -115,7 +115,7 @@ export function RemoveProductTab() {
       await firebase.removeProducts(selectedProducts);
       
       // Registrar auditoria
-      const storeName = localStorage.getItem('currentStore') || 'unknown';
+      const storeName = localStorage.getItem('luxury_store_id') || 'unknown';
       await firebase.logProductDeletion(productsToDelete, selectedUser, storeName);
       
       toast({
