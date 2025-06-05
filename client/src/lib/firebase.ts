@@ -25,19 +25,41 @@ const getLocalStorageKey = () => {
 };
 
 export const firebase = {
-  // Get all products
+  // Get all products (localStorage only for speed)
   async getProducts(): Promise<Product[]> {
     const storeId = getStoreCollection();
     const localStorageKey = getLocalStorageKey();
     
-    // Primeiro tenta localStorage para velocidade
     const stored = localStorage.getItem(localStorageKey);
     let localProducts: Product[] = stored ? JSON.parse(stored) : [];
     
-    // Se localStorage estiver vazio, não adiciona produtos automáticos
-    
-    // Retorna produtos do localStorage instantaneamente
     return localProducts;
+  },
+
+  // Get all products from Firebase (for sync operations)
+  async getProductsFromFirebase(): Promise<Product[]> {
+    const storeId = getStoreCollection();
+    const localStorageKey = getLocalStorageKey();
+    
+    try {
+      const querySnapshot = await getDocs(collection(db, storeId));
+      const firebaseProducts: Product[] = [];
+      
+      querySnapshot.forEach((doc) => {
+        firebaseProducts.push({ id: doc.id, ...doc.data() } as Product);
+      });
+      
+      // Atualiza localStorage com dados do Firebase
+      localStorage.setItem(localStorageKey, JSON.stringify(firebaseProducts));
+      console.log(`${firebaseProducts.length} produtos sincronizados do Firebase para "${storeId}"`);
+      
+      return firebaseProducts;
+    } catch (error) {
+      console.error('Erro ao buscar produtos do Firebase:', error);
+      // Retorna dados locais se Firebase falhar
+      const stored = localStorage.getItem(localStorageKey);
+      return stored ? JSON.parse(stored) : [];
+    }
   },
 
   // Get product by SKU

@@ -63,10 +63,8 @@ export function FirebaseStatusTab() {
     setLoading(true);
     try {
       const storeId = localStorage.getItem('luxury_store_id') || 'default';
-      const localStorageKey = `luxury_products_${storeId}`;
       
-      localStorage.removeItem(localStorageKey);
-      const products = await firebase.getProducts();
+      const products = await firebase.getProductsFromFirebase();
       setLocalProducts(products);
       
       const now = new Date().toISOString();
@@ -99,16 +97,17 @@ export function FirebaseStatusTab() {
       const currentStoreId = localStorage.getItem('luxury_store_id');
       const currentStoreName = localStorage.getItem('luxury_store_name');
       
+      // Temporariamente muda para a loja que queremos sincronizar
       localStorage.setItem('luxury_store_id', storeId);
       localStorage.setItem('luxury_store_name', storeName);
       
-      const localStorageKey = `luxury_products_${storeId}`;
-      localStorage.removeItem(localStorageKey);
-      const products = await firebase.getProducts();
+      // Busca dados do Firebase para essa loja
+      const products = await firebase.getProductsFromFirebase();
       
       const now = new Date().toISOString();
       localStorage.setItem(`luxury_last_sync_${storeId}`, now);
       
+      // Restaura a loja original
       if (currentStoreId) localStorage.setItem('luxury_store_id', currentStoreId);
       if (currentStoreName) localStorage.setItem('luxury_store_name', currentStoreName);
       
@@ -117,8 +116,10 @@ export function FirebaseStatusTab() {
         description: `${products.length} produtos sincronizados da loja ${storeName}`,
       });
       
+      // Se sincronizou a loja atual, recarrega a interface
       if (storeId === currentStoreId) {
-        await syncWithFirebase();
+        setLocalProducts(products);
+        loadLocalData();
       }
       
       loadStoreProductCounts();
@@ -354,21 +355,16 @@ export function FirebaseStatusTab() {
                         <p className="text-sm text-muted-foreground">Apenas sincronização</p>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <Badge variant="secondary" className="bg-purple-100 text-purple-800">
-                        {storeCounts.admin || 0} produtos
-                      </Badge>
-                      <div className="flex space-x-2">
-                        <Button 
-                          onClick={() => syncStoreData('admin', 'Administrador')}
-                          disabled={loading}
-                          size="sm"
-                          variant="outline"
-                        >
-                          <RefreshCw className="mr-1" size={14} />
-                          Sync
-                        </Button>
-                      </div>
+                    <div className="flex space-x-2">
+                      <Button 
+                        onClick={() => syncStoreData('admin', 'Administrador')}
+                        disabled={loading}
+                        size="sm"
+                        variant="outline"
+                      >
+                        <RefreshCw className="mr-1" size={14} />
+                        Sync
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
