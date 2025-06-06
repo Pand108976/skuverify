@@ -72,7 +72,7 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto p-6">
         <Tabs defaultValue="search" className="w-full">
-          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-7' : 'grid-cols-6'} bg-background border premium-shadow`}>
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-8' : 'grid-cols-5'} bg-background border premium-shadow`}>
             <TabsTrigger value="search" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
               <Search size={16} />
               <span className="hidden sm:inline">Pesquisar</span>
@@ -98,10 +98,12 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
               <Plus size={16} />
               <span className="hidden sm:inline">Adicionar</span>
             </TabsTrigger>
-            <TabsTrigger value="remove" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
-              <Trash2 size={16} />
-              <span className="hidden sm:inline">Remover</span>
-            </TabsTrigger>
+            {isAdmin && (
+              <TabsTrigger value="remove" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
+                <Trash2 size={16} />
+                <span className="hidden sm:inline">Remover</span>
+              </TabsTrigger>
+            )}
             {isAdmin && (
               <>
                 <TabsTrigger value="movement" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
@@ -145,9 +147,11 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
               <AddProductTab />
             </TabsContent>
 
-            <TabsContent value="remove" className="fade-in">
-              <RemoveProductTab />
-            </TabsContent>
+            {isAdmin && (
+              <TabsContent value="remove" className="fade-in">
+                <RemoveProductTab />
+              </TabsContent>
+            )}
 
             {isAdmin && (
               <>
