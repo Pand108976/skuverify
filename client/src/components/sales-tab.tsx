@@ -57,6 +57,10 @@ export function SalesTab() {
 
     setConfirming(true);
     try {
+      // Registra a venda no log de auditoria
+      const storeName = localStorage.getItem('luxury_store_name') || 'Loja';
+      await firebase.logProductDeletion([foundProduct], 'VENDA', storeName);
+
       // Remove o produto do estoque
       await firebase.removeProducts([foundProduct.sku]);
 
