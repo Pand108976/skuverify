@@ -107,6 +107,10 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
             )}
             {isAdmin && (
               <>
+                <TabsTrigger value="promotions" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
+                  <Percent size={16} />
+                  <span className="hidden sm:inline">Promoções</span>
+                </TabsTrigger>
                 <TabsTrigger value="movement" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
                   <ArrowRightLeft size={16} />
                   <span className="hidden sm:inline">Movimentar</span>
@@ -156,6 +160,9 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
 
             {isAdmin && (
               <>
+                <TabsContent value="promotions" className="fade-in">
+                  <PromotionsTab localProducts={[]} setLocalProducts={() => {}} />
+                </TabsContent>
                 <TabsContent value="movement" className="fade-in">
                   <MovementTab />
                 </TabsContent>

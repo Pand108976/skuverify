@@ -165,9 +165,16 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
                           <div className="p-4 space-y-3">
                             <div className="flex justify-between items-start">
                               <h3 className="font-bold text-ferragamo-dark">SKU {product.sku}</h3>
-                              <span className="text-xs bg-pink-100 text-pink-700 px-2 py-1 rounded-full">
-                                Caixa {product.caixa}
-                              </span>
+                              <div className="flex flex-col gap-1">
+                                <span className="text-xs bg-pink-100 text-pink-700 px-2 py-1 rounded-full">
+                                  Caixa {product.caixa}
+                                </span>
+                                {product.onSale && (
+                                  <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-semibold">
+                                    PROMOÇÃO
+                                  </span>
+                                )}
+                              </div>
                             </div>
                             {product.link && (
                               <Button
@@ -220,9 +227,16 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
                           <div className="p-4 space-y-3">
                             <div className="flex justify-between items-start">
                               <h3 className="font-bold text-ferragamo-dark">SKU {product.sku}</h3>
-                              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-                                Caixa {product.caixa}
-                              </span>
+                              <div className="flex flex-col gap-1">
+                                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                                  Caixa {product.caixa}
+                                </span>
+                                {product.onSale && (
+                                  <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-semibold">
+                                    PROMOÇÃO
+                                  </span>
+                                )}
+                              </div>
                             </div>
                             {product.link && (
                               <Button

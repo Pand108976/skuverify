@@ -161,7 +161,10 @@ export function PromotionsTab({ localProducts, setLocalProducts }: PromotionsTab
                 saleUpdatedAt: new Date().toISOString()
               };
               
-              await firebase.saveProductToFirebase(storeProducts[productIndex]);
+              await firebase.updateProduct(storeProducts[productIndex].sku, {
+                onSale: true,
+                saleUpdatedAt: new Date().toISOString()
+              });
               updatedCount++;
             }
           }
@@ -244,7 +247,10 @@ export function PromotionsTab({ localProducts, setLocalProducts }: PromotionsTab
                 saleUpdatedAt: new Date().toISOString()
               };
               
-              await firebase.saveProductToFirebase(storeProducts[productIndex]);
+              await firebase.updateProduct(storeProducts[productIndex].sku, {
+                onSale: false,
+                saleUpdatedAt: new Date().toISOString()
+              });
             }
           }
           
