@@ -233,6 +233,7 @@ export function MovementTab() {
                           onKeyPress={handleKeyPress}
                           className="luxury-input text-lg py-4"
                           placeholder=" "
+                          inputMode="numeric"
                         />
                         <Label htmlFor="movementSku" className="text-lg font-medium">
                           Digite o SKU para mover

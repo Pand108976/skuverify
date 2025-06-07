@@ -173,6 +173,7 @@ export function SalesTab() {
                   onKeyPress={handleKeyPress}
                   className="text-lg h-12 flex-1"
                   disabled={loading}
+                  inputMode="numeric"
                 />
                 <Button
                   onClick={handleSearch}

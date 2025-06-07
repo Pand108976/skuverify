@@ -275,6 +275,7 @@ export function PhotoUploadTab({}: PhotoUploadTabProps) {
                 onChange={(e) => setSku(e.target.value.toUpperCase())}
                 placeholder="Digite o SKU (ex: 774419)"
                 className="uppercase"
+                inputMode="numeric"
               />
             </div>
 

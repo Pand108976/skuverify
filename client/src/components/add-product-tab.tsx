@@ -244,6 +244,7 @@ export function AddProductTab() {
                       className="luxury-input"
                       placeholder=" "
                       required
+                      inputMode="numeric"
                     />
                     <Label htmlFor="addSku" className="text-sm font-medium">SKU do Produto</Label>
                   </div>
