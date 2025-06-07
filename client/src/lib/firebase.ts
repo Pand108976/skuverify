@@ -47,6 +47,7 @@ async function getValidImagePath(sku: string, categoria: 'oculos' | 'cintos'): P
     try {
       const response = await fetch(imagePath, { method: 'HEAD' });
       if (response.ok) {
+        console.log(`Imagem encontrada para ${sku}: ${imagePath}`);
         return imagePath;
       }
     } catch (error) {
@@ -54,6 +55,7 @@ async function getValidImagePath(sku: string, categoria: 'oculos' | 'cintos'): P
     }
   }
   
+  console.log(`Nenhuma imagem encontrada para ${sku} em ${categoria}`);
   return undefined;
 }
 
@@ -581,6 +583,13 @@ export const firebase = {
     const localStorageKey = getLocalStorageKey();
     localStorage.removeItem(localStorageKey);
     console.log("Cache limpo, aplicando detecção dinâmica de imagens...");
+    console.log("Verificando todas as imagens disponíveis...");
     await this.getProductsFromFirebase();
+  },
+
+  // Initialize and apply dynamic image detection to all products
+  async initializeImageDetection(): Promise<void> {
+    console.log("Inicializando detecção dinâmica de imagens para todos os produtos...");
+    await this.forceRefreshImages();
   }
 };
