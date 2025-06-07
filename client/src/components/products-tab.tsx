@@ -25,8 +25,19 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
       const allProducts = await firebase.getProducts();
       const filteredProducts = allProducts.filter(p => p.categoria === category);
       
+      // Detectar e remover duplicatas por SKU
+      const uniqueProducts = filteredProducts.reduce((acc: Product[], current) => {
+        const existingProduct = acc.find(product => product.sku === current.sku);
+        if (!existingProduct) {
+          acc.push(current);
+        } else {
+          console.warn(`SKU duplicado encontrado e removido: ${current.sku}`);
+        }
+        return acc;
+      }, []);
+      
       // Ordenar produtos por caixa (numérica) e depois por SKU
-      const sortedProducts = filteredProducts.sort((a, b) => {
+      const sortedProducts = uniqueProducts.sort((a, b) => {
         const numA = parseInt(a.caixa, 10);
         const numB = parseInt(b.caixa, 10);
         
