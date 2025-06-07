@@ -114,21 +114,35 @@ export function PhotoUploadTab({}: PhotoUploadTabProps) {
       const correctExtension = getCorrectExtension(category);
       const fileName = `${category}/${sku}${correctExtension}`;
       
-      // For now, we'll update the product directly without uploading to storage
-      // This will save the image path to the Firebase document
-      
       if (existingProduct) {
-        // Update existing product with image path in the correct store
-        await firebase.updateProductImagePath(existingProduct.id!, fileName, category, existingProduct.storeId);
+        // Save image to local project folder and update Firebase
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        formData.append('fileName', fileName);
+        formData.append('category', category);
+        formData.append('sku', sku);
+        formData.append('storeId', existingProduct.storeId);
+        formData.append('productId', existingProduct.id!);
+        
+        const response = await fetch('/api/upload-photo', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to upload photo');
+        }
+        
+        const result = await response.json();
         
         toast({
           title: "Foto adicionada",
-          description: `Foto do produto SKU ${sku} foi atualizada com sucesso na loja ${existingProduct.storeName}.`,
+          description: `Foto do produto SKU ${sku} foi salva na pasta local e atualizada no Firebase da loja ${existingProduct.storeName}.`,
         });
       } else {
         toast({
           title: "Produto não encontrado",
-          description: `Produto SKU ${sku} não existe. Adicione o produto primeiro na aba "Adicionar".`,
+          description: `Produto SKU ${sku} não existe em nenhuma loja. Adicione o produto primeiro na aba "Adicionar".`,
           variant: "destructive",
         });
         return;
