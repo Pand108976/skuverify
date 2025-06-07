@@ -114,15 +114,13 @@ export function PhotoUploadTab({}: PhotoUploadTabProps) {
       const correctExtension = getCorrectExtension(category);
       const fileName = `${category}/${sku}${correctExtension}`;
       
-      // Upload image to Firebase Storage
-      const imageUrl = await firebase.uploadImage(selectedFile, fileName);
+      // For now, we'll update the product directly without uploading to storage
+      // This will save the image path to the Firebase document
       
       if (existingProduct) {
-        // Update existing product with image
-        await firebase.updateProduct(existingProduct.id!, {
-          ...existingProduct,
-          imagem: fileName,
-        });
+        // Update existing product with image path
+        const storeId = localStorage.getItem('luxury_store_id') || 'admin';
+        await firebase.updateProductImagePath(existingProduct.id!, fileName, category, storeId);
         
         toast({
           title: "Foto adicionada",

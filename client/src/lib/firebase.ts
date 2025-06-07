@@ -653,12 +653,20 @@ export const firebase = {
 
       const productRef = doc(db, storeId, categoria, 'products', productId);
       await updateDoc(productRef, updatedProduct);
-      
-      // Update local storage
-      this.syncToLocalStorage();
     } catch (error) {
       console.error('Error updating product:', error);
       throw new Error('Failed to update product');
+    }
+  },
+
+  // Update product image path specifically
+  async updateProductImagePath(productId: string, imagePath: string, category: 'oculos' | 'cintos', storeId: string): Promise<void> {
+    try {
+      const productRef = doc(db, storeId, category, 'products', productId);
+      await updateDoc(productRef, { imagem: imagePath });
+    } catch (error) {
+      console.error('Error updating product image:', error);
+      throw new Error('Failed to update product image');
     }
   }
 };
