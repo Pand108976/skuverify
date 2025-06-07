@@ -59,9 +59,11 @@ export function PromotionsTab({ localProducts, setLocalProducts }: PromotionsTab
         
         try {
           const storeProducts = await firebase.getProductsFromFirebase();
+          console.log(`Searching in store ${storeId}: found ${storeProducts.length} products`);
           
           for (const sku of skus) {
             const foundProduct = storeProducts.find(p => p.sku === sku);
+            console.log(`Looking for SKU ${sku} in store ${storeId}:`, foundProduct ? 'FOUND' : 'NOT FOUND');
             if (foundProduct) {
               results.push({
                 sku: foundProduct.sku,
@@ -343,6 +345,26 @@ export function PromotionsTab({ localProducts, setLocalProducts }: PromotionsTab
                     disabled={loading}
                   >
                     Limpar
+                  </Button>
+                  <Button 
+                    onClick={async () => {
+                      // Load some sample SKUs from the database
+                      const currentStoreId = localStorage.getItem('luxury_store_id');
+                      localStorage.setItem('luxury_store_id', 'patiobatel');
+                      try {
+                        const products = await firebase.getProductsFromFirebase();
+                        const sampleSkus = products.slice(0, 3).map(p => p.sku).join('\n');
+                        setSkuInput(sampleSkus);
+                        console.log('Sample SKUs loaded:', sampleSkus);
+                      } catch (error) {
+                        console.error('Error loading sample SKUs:', error);
+                      }
+                      if (currentStoreId) localStorage.setItem('luxury_store_id', currentStoreId);
+                    }}
+                    variant="outline"
+                    disabled={loading}
+                  >
+                    Carregar SKUs de Exemplo
                   </Button>
                 </div>
               </CardContent>
