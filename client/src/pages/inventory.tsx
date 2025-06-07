@@ -8,7 +8,7 @@ import { AddProductTab } from "@/components/add-product-tab";
 import { RemoveProductTab } from "@/components/remove-product-tab";
 import { ProductModal } from "@/components/product-modal";
 import { FirebaseStatusTab } from "@/components/firebase-status-tab";
-import { AdvancedImportTab } from "@/components/advanced-import-tab";
+import { PhotoUploadTab } from "@/components/photo-upload-tab";
 import { MovementTab } from "@/components/movement-tab";
 import { SalesTab } from "@/components/sales-tab";
 
@@ -110,9 +110,9 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
                   <ArrowRightLeft size={16} />
                   <span className="hidden sm:inline">Movimentar</span>
                 </TabsTrigger>
-                <TabsTrigger value="import" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
+                <TabsTrigger value="photos" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
                   <Upload size={16} />
-                  <span className="hidden sm:inline">Importar</span>
+                  <span className="hidden sm:inline">Fotos</span>
                 </TabsTrigger>
                 <TabsTrigger value="firebase" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
                   <Database size={16} />
@@ -158,8 +158,8 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
                 <TabsContent value="movement" className="fade-in">
                   <MovementTab />
                 </TabsContent>
-                <TabsContent value="import" className="fade-in">
-                  <AdvancedImportTab />
+                <TabsContent value="photos" className="fade-in">
+                  <PhotoUploadTab />
                 </TabsContent>
                 <TabsContent value="firebase" className="fade-in">
                   <FirebaseStatusTab />

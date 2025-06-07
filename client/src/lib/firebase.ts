@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, doc, setDoc, deleteDoc, getDocs, getDoc, query, where } from 'firebase/firestore';
+import { getFirestore, collection, doc, setDoc, deleteDoc, getDocs, getDoc, query, where, updateDoc } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import type { Product } from './types';
 
 const firebaseConfig = {
@@ -13,6 +14,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
+export const storage = getStorage(app);
 
 const getStoreCollection = () => {
   const storeId = localStorage.getItem('luxury_store_id') || 'default';
@@ -624,5 +626,39 @@ export const firebase = {
   async initializeImageDetection(): Promise<void> {
     console.log("Inicializando detecção dinâmica de imagens para todos os produtos...");
     await this.forceRefreshImages();
+  },
+
+  // Upload image to Firebase Storage
+  async uploadImage(file: File, fileName: string): Promise<string> {
+    try {
+      const imageRef = ref(storage, fileName);
+      const snapshot = await uploadBytes(imageRef, file);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      return downloadURL;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      throw new Error('Failed to upload image');
+    }
+  },
+
+  // Update existing product
+  async updateProduct(productId: string, updatedProduct: Partial<Product>): Promise<void> {
+    try {
+      const storeId = getStoreCollection();
+      const categoria = updatedProduct.categoria;
+      
+      if (!categoria) {
+        throw new Error('Category is required for product update');
+      }
+
+      const productRef = doc(db, storeId, categoria, 'products', productId);
+      await updateDoc(productRef, updatedProduct);
+      
+      // Update local storage
+      this.syncToLocalStorage();
+    } catch (error) {
+      console.error('Error updating product:', error);
+      throw new Error('Failed to update product');
+    }
   }
 };
