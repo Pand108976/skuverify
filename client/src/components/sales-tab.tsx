@@ -12,9 +12,17 @@ import type { Product } from "@/lib/types";
 export function SalesTab() {
   const [searchSku, setSearchSku] = useState("");
   const [foundProduct, setFoundProduct] = useState<Product | null>(null);
+  const [foundProducts, setFoundProducts] = useState<Array<Product & { storeName: string; storeId: string }>>([]);
+  const [selectedProduct, setSelectedProduct] = useState<(Product & { storeName: string; storeId: string }) | null>(null);
   const [loading, setLoading] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const { toast } = useToast();
+
+  React.useEffect(() => {
+    const storeId = localStorage.getItem('luxury_store_id') || '';
+    setIsAdmin(storeId === 'admin');
+  }, []);
 
   const handleSearch = async () => {
     if (!searchSku.trim()) {
@@ -27,18 +35,40 @@ export function SalesTab() {
     }
 
     setLoading(true);
+    setFoundProduct(null);
+    setFoundProducts([]);
+    setSelectedProduct(null);
+    
     try {
-      const product = await firebase.getProductBySku(searchSku.trim().toUpperCase());
-      
-      if (product) {
-        setFoundProduct(product);
+      if (isAdmin) {
+        // Admin: search across all stores
+        const products = await firebase.searchProductInAllStores(searchSku.trim().toUpperCase());
+        
+        if (products.length > 0) {
+          setFoundProducts(products);
+          if (products.length === 1) {
+            setSelectedProduct(products[0]);
+          }
+        } else {
+          toast({
+            title: "Produto não encontrado",
+            description: `SKU ${searchSku.toUpperCase()} não foi encontrado em nenhuma loja`,
+            variant: "destructive",
+          });
+        }
       } else {
-        setFoundProduct(null);
-        toast({
-          title: "Produto não encontrado",
-          description: `SKU ${searchSku.toUpperCase()} não está no estoque`,
-          variant: "destructive",
-        });
+        // Regular store: search only in current store
+        const product = await firebase.getProductBySku(searchSku.trim().toUpperCase());
+        
+        if (product) {
+          setFoundProduct(product);
+        } else {
+          toast({
+            title: "Produto não encontrado",
+            description: `SKU ${searchSku.toUpperCase()} não está no estoque`,
+            variant: "destructive",
+          });
+        }
       }
     } catch (error) {
       console.error('Erro na busca:', error);
@@ -53,25 +83,37 @@ export function SalesTab() {
   };
 
   const handleSaleConfirmation = async () => {
-    if (!foundProduct) return;
+    const productToSell = isAdmin ? selectedProduct : foundProduct;
+    if (!productToSell) return;
 
     setConfirming(true);
     try {
-      // Registra a venda no log de auditoria
-      const storeName = localStorage.getItem('luxury_store_name') || 'Loja';
-      await firebase.logProductDeletion([foundProduct], 'VENDA', storeName);
+      if (isAdmin && selectedProduct) {
+        // Admin selling from specific store
+        await firebase.logProductDeletion([selectedProduct], 'VENDA', selectedProduct.storeName);
+        await firebase.removeProductFromSpecificStore(selectedProduct.sku, selectedProduct.storeId, selectedProduct.categoria);
+        
+        toast({
+          title: "Venda Confirmada! ✅",
+          description: `Produto ${selectedProduct.sku} removido do estoque da ${selectedProduct.storeName}`,
+        });
+      } else {
+        // Regular store sale
+        const storeName = localStorage.getItem('luxury_store_name') || 'Loja';
+        await firebase.logProductDeletion([foundProduct!], 'VENDA', storeName);
+        await firebase.removeProducts([foundProduct!.sku]);
+        
+        toast({
+          title: "Venda Confirmada! ✅",
+          description: `Produto ${foundProduct!.sku} removido do estoque`,
+        });
+      }
 
-      // Remove o produto do estoque
-      await firebase.removeProducts([foundProduct.sku]);
-
-      toast({
-        title: "Venda Confirmada! ✅",
-        description: `Produto ${foundProduct.sku} removido do estoque`,
-      });
-
-      // Reset do formulário
+      // Reset form
       setSearchSku("");
       setFoundProduct(null);
+      setFoundProducts([]);
+      setSelectedProduct(null);
     } catch (error) {
       console.error('Erro ao confirmar venda:', error);
       toast({

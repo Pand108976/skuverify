@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Glasses, Shirt, ExternalLink } from "lucide-react";
+import { Glasses, Shirt, ExternalLink, ChevronUp } from "lucide-react";
 import { ProductImage } from "@/components/product-image";
 import { firebase } from "@/lib/firebase";
 import type { Product } from "@/lib/types";
@@ -14,10 +14,20 @@ interface ProductsTabProps {
 export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
     loadProducts();
   }, [category]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 400);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const loadProducts = async () => {
     setLoading(true);
@@ -80,6 +90,10 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
     const masculineBelts = products.filter(p => !feminineBoxes.includes(p.caixa));
     
     return { feminineBelts, masculineBelts };
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
 
@@ -276,6 +290,17 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
             </Card>
           ))}
         </div>
+      )}
+
+      {/* Scroll to Top Button */}
+      {showScrollTop && (
+        <Button
+          onClick={scrollToTop}
+          className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full shadow-lg gold-gradient hover:shadow-xl transition-all duration-300"
+          size="sm"
+        >
+          <ChevronUp size={20} className="text-white" />
+        </Button>
       )}
     </div>
   );
