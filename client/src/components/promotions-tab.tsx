@@ -47,28 +47,28 @@ export function PromotionsTab({ localProducts, setLocalProducts }: PromotionsTab
     const skus = skuInput.split(/[\n,;]/).map(s => s.trim()).filter(Boolean);
 
     try {
-      const stores = ['patiobatel', 'village'];
+      const stores = [
+        { id: 'patiobatel', name: 'Patio Batel' },
+        { id: 'village', name: 'Village' }
+      ];
       
-      for (const storeId of stores) {
-        // Temporarily switch store context
-        const currentStoreId = localStorage.getItem('luxury_store_id');
-        const currentStoreName = localStorage.getItem('luxury_store_name');
-        
-        localStorage.setItem('luxury_store_id', storeId);
-        localStorage.setItem('luxury_store_name', storeId === 'patiobatel' ? 'Patio Batel' : 'Village');
-        
+      for (const store of stores) {
         try {
-          const storeProducts = await firebase.getProductsFromFirebase();
-          console.log(`Searching in store ${storeId}: found ${storeProducts.length} products`);
+          // Get stored products for this store from localStorage
+          const localStorageKey = `luxury_products_${store.id}`;
+          const stored = localStorage.getItem(localStorageKey);
+          const storeProducts = stored ? JSON.parse(stored) : [];
+          
+          console.log(`Searching in store ${store.id}: found ${storeProducts.length} products in localStorage`);
           
           for (const sku of skus) {
-            const foundProduct = storeProducts.find(p => p.sku === sku);
-            console.log(`Looking for SKU ${sku} in store ${storeId}:`, foundProduct ? 'FOUND' : 'NOT FOUND');
+            const foundProduct = storeProducts.find((p: any) => p.sku === sku);
             if (foundProduct) {
+              console.log(`SKU ${sku} found in ${store.name}`);
               results.push({
                 sku: foundProduct.sku,
                 categoria: foundProduct.categoria,
-                store: storeId === 'patiobatel' ? 'Patio Batel' : 'Village',
+                store: store.name,
                 brand: foundProduct.brand,
                 model: foundProduct.model,
                 isOnSale: foundProduct.onSale || false
@@ -76,12 +76,8 @@ export function PromotionsTab({ localProducts, setLocalProducts }: PromotionsTab
             }
           }
         } catch (error) {
-          console.error(`Error searching in store ${storeId}:`, error);
+          console.error(`Error searching in store ${store.id}:`, error);
         }
-        
-        // Restore original store context
-        if (currentStoreId) localStorage.setItem('luxury_store_id', currentStoreId);
-        if (currentStoreName) localStorage.setItem('luxury_store_name', currentStoreName);
       }
 
       setSearchResults(results);
@@ -95,7 +91,7 @@ export function PromotionsTab({ localProducts, setLocalProducts }: PromotionsTab
       } else {
         toast({
           title: "Busca Concluída",
-          description: `${results.length} produtos encontrados em ${stores.length} lojas`,
+          description: `${results.length} produtos encontrados`,
         });
       }
     } catch (error) {
@@ -140,55 +136,41 @@ export function PromotionsTab({ localProducts, setLocalProducts }: PromotionsTab
     setLoading(true);
 
     try {
-      const stores = ['patiobatel', 'village'];
+      const stores = [
+        { id: 'patiobatel', name: 'Patio Batel' },
+        { id: 'village', name: 'Village' }
+      ];
       let updatedCount = 0;
 
-      for (const storeId of stores) {
-        // Switch store context
-        const currentStoreId = localStorage.getItem('luxury_store_id');
-        const currentStoreName = localStorage.getItem('luxury_store_name');
-        
-        localStorage.setItem('luxury_store_id', storeId);
-        localStorage.setItem('luxury_store_name', storeId === 'patiobatel' ? 'Patio Batel' : 'Village');
-        
+      for (const store of stores) {
         try {
-          const storeProducts = await firebase.getProductsFromFirebase();
+          // Update localStorage directly
+          const localStorageKey = `luxury_products_${store.id}`;
+          const stored = localStorage.getItem(localStorageKey);
+          const storeProducts = stored ? JSON.parse(stored) : [];
           
           for (const sku of skusToPromote) {
-            const productIndex = storeProducts.findIndex(p => p.sku === sku);
+            const productIndex = storeProducts.findIndex((p: any) => p.sku === sku);
             if (productIndex !== -1) {
               storeProducts[productIndex] = {
                 ...storeProducts[productIndex],
                 onSale: true,
                 saleUpdatedAt: new Date().toISOString()
               };
-              
-              await firebase.updateProduct(storeProducts[productIndex].sku, {
-                onSale: true,
-                saleUpdatedAt: new Date().toISOString()
-              });
               updatedCount++;
+              console.log(`Marked SKU ${sku} as promotion in ${store.name}`);
             }
           }
           
-          // Update local storage for this store
-          const localStorageKey = `luxury_products_${storeId}`;
+          // Save updated products back to localStorage
           localStorage.setItem(localStorageKey, JSON.stringify(storeProducts));
           
         } catch (error) {
-          console.error(`Error updating store ${storeId}:`, error);
+          console.error(`Error updating store ${store.id}:`, error);
         }
-        
-        // Restore store context
-        if (currentStoreId) localStorage.setItem('luxury_store_id', currentStoreId);
-        if (currentStoreName) localStorage.setItem('luxury_store_name', currentStoreName);
       }
 
-      // Refresh current store data
-      const currentProducts = await firebase.getProductsFromFirebase();
-      setLocalProducts(currentProducts);
-
-      // Update search results to reflect new sale status
+      // Update search results to show new sale status
       setSearchResults(prev => 
         prev.map(result => ({
           ...result,
@@ -198,7 +180,7 @@ export function PromotionsTab({ localProducts, setLocalProducts }: PromotionsTab
 
       toast({
         title: "Promoções Aplicadas",
-        description: `${skusToPromote.length} produtos marcados como promoção em todas as lojas`,
+        description: `${skusToPromote.length} produtos marcados como promoção`,
       });
 
       setSkusToPromote([]);
@@ -207,7 +189,7 @@ export function PromotionsTab({ localProducts, setLocalProducts }: PromotionsTab
       console.error('Error applying promotions:', error);
       toast({
         title: "Erro ao Aplicar Promoções",
-        description: "Verifique sua conexão com o Firebase",
+        description: "Erro interno do sistema",
         variant: "destructive",
       });
     } finally {
@@ -228,47 +210,35 @@ export function PromotionsTab({ localProducts, setLocalProducts }: PromotionsTab
     setLoading(true);
 
     try {
-      const stores = ['patiobatel', 'village'];
+      const stores = [
+        { id: 'patiobatel', name: 'Patio Batel' },
+        { id: 'village', name: 'Village' }
+      ];
 
-      for (const storeId of stores) {
-        const currentStoreId = localStorage.getItem('luxury_store_id');
-        const currentStoreName = localStorage.getItem('luxury_store_name');
-        
-        localStorage.setItem('luxury_store_id', storeId);
-        localStorage.setItem('luxury_store_name', storeId === 'patiobatel' ? 'Patio Batel' : 'Village');
-        
+      for (const store of stores) {
         try {
-          const storeProducts = await firebase.getProductsFromFirebase();
+          const localStorageKey = `luxury_products_${store.id}`;
+          const stored = localStorage.getItem(localStorageKey);
+          const storeProducts = stored ? JSON.parse(stored) : [];
           
           for (const sku of skusToPromote) {
-            const productIndex = storeProducts.findIndex(p => p.sku === sku);
+            const productIndex = storeProducts.findIndex((p: any) => p.sku === sku);
             if (productIndex !== -1) {
               storeProducts[productIndex] = {
                 ...storeProducts[productIndex],
                 onSale: false,
                 saleUpdatedAt: new Date().toISOString()
               };
-              
-              await firebase.updateProduct(storeProducts[productIndex].sku, {
-                onSale: false,
-                saleUpdatedAt: new Date().toISOString()
-              });
+              console.log(`Removed SKU ${sku} from promotion in ${store.name}`);
             }
           }
           
-          const localStorageKey = `luxury_products_${storeId}`;
           localStorage.setItem(localStorageKey, JSON.stringify(storeProducts));
           
         } catch (error) {
-          console.error(`Error updating store ${storeId}:`, error);
+          console.error(`Error updating store ${store.id}:`, error);
         }
-        
-        if (currentStoreId) localStorage.setItem('luxury_store_id', currentStoreId);
-        if (currentStoreName) localStorage.setItem('luxury_store_name', currentStoreName);
       }
-
-      const currentProducts = await firebase.getProductsFromFirebase();
-      setLocalProducts(currentProducts);
 
       setSearchResults(prev => 
         prev.map(result => ({
@@ -279,7 +249,7 @@ export function PromotionsTab({ localProducts, setLocalProducts }: PromotionsTab
 
       toast({
         title: "Produtos Removidos da Promoção",
-        description: `${skusToPromote.length} produtos removidos da promoção em todas as lojas`,
+        description: `${skusToPromote.length} produtos removidos da promoção`,
       });
 
       setSkusToPromote([]);
@@ -288,7 +258,7 @@ export function PromotionsTab({ localProducts, setLocalProducts }: PromotionsTab
       console.error('Error removing from sale:', error);
       toast({
         title: "Erro ao Remover da Promoção",
-        description: "Verifique sua conexão com o Firebase",
+        description: "Erro interno do sistema",
         variant: "destructive",
       });
     } finally {
@@ -345,26 +315,6 @@ export function PromotionsTab({ localProducts, setLocalProducts }: PromotionsTab
                     disabled={loading}
                   >
                     Limpar
-                  </Button>
-                  <Button 
-                    onClick={async () => {
-                      // Load some sample SKUs from the database
-                      const currentStoreId = localStorage.getItem('luxury_store_id');
-                      localStorage.setItem('luxury_store_id', 'patiobatel');
-                      try {
-                        const products = await firebase.getProductsFromFirebase();
-                        const sampleSkus = products.slice(0, 3).map(p => p.sku).join('\n');
-                        setSkuInput(sampleSkus);
-                        console.log('Sample SKUs loaded:', sampleSkus);
-                      } catch (error) {
-                        console.error('Error loading sample SKUs:', error);
-                      }
-                      if (currentStoreId) localStorage.setItem('luxury_store_id', currentStoreId);
-                    }}
-                    variant="outline"
-                    disabled={loading}
-                  >
-                    Carregar SKUs de Exemplo
                   </Button>
                 </div>
               </CardContent>
