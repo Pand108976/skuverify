@@ -6,6 +6,7 @@ export interface Product {
   imagem?: string;
   link?: string;
   createdAt?: Date;
+  lastModified?: Date;
   onSale?: boolean;
   saleUpdatedAt?: string;
   brand?: string;

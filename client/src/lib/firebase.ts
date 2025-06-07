@@ -821,13 +821,18 @@ export const firebase = {
     }
   },
 
-  // Automatic synchronization functions
+  // Incremental synchronization functions
   async autoSyncFromFirebase(): Promise<void> {
     const storeId = getStoreCollection();
     const localStorageKey = getLocalStorageKey();
     
     try {
-      console.log(`Sincronização automática iniciada para ${storeId}...`);
+      console.log(`Sincronização incremental iniciada para ${storeId}...`);
+      
+      // Get current localStorage data
+      const stored = localStorage.getItem(localStorageKey);
+      const currentProducts = stored ? JSON.parse(stored) : [];
+      const currentProductsMap = new Map(currentProducts.map((p: Product) => [p.sku, p]));
       
       // Get current localStorage timestamp
       const lastSyncKey = `${localStorageKey}_last_sync`;
@@ -843,54 +848,77 @@ export const firebase = {
         getDocs(cintosRef)
       ]);
       
-      const firebaseProducts: Product[] = [];
+      let newProductsCount = 0;
+      let updatedProductsCount = 0;
       
-      // Process glasses
-      ocolosSnapshot.docs.forEach(doc => {
-        const data = doc.data();
-        const product: Product = {
-          id: doc.id,
-          sku: data.sku,
-          categoria: 'oculos' as const,
-          caixa: data.caixa,
-          imagem: data.imagem,
-          link: data.link,
-          onSale: data.onSale || false,
-          saleUpdatedAt: data.saleUpdatedAt?.toDate?.(),
-          brand: data.brand,
-          model: data.model,
-          createdAt: data.createdAt?.toDate?.() || new Date()
-        };
-        firebaseProducts.push(product);
+      // Process Firebase data and merge with local data
+      const processProducts = (snapshot: any, categoria: 'oculos' | 'cintos') => {
+        snapshot.docs.forEach((doc: any) => {
+          const data = doc.data();
+          const firebaseProduct: Product = {
+            id: doc.id,
+            sku: data.sku,
+            categoria,
+            caixa: data.caixa,
+            imagem: data.imagem,
+            link: data.link,
+            onSale: data.onSale || false,
+            saleUpdatedAt: data.saleUpdatedAt?.toDate?.(),
+            brand: data.brand,
+            model: data.model,
+            createdAt: data.createdAt?.toDate?.() || new Date(),
+            lastModified: data.lastModified?.toDate?.() || new Date()
+          };
+          
+          const existingProduct = currentProductsMap.get(data.sku);
+          
+          if (!existingProduct) {
+            // New product
+            currentProductsMap.set(data.sku, firebaseProduct);
+            newProductsCount++;
+          } else {
+            // Always update from Firebase to keep data fresh
+            currentProductsMap.set(data.sku, firebaseProduct);
+            updatedProductsCount++;
+          }
+        });
+      };
+      
+      // Process both categories
+      processProducts(ocolosSnapshot, 'oculos');
+      processProducts(cintosSnapshot, 'cintos');
+      
+      // Check for products that exist locally but not in Firebase (deleted products)
+      const firebaseSkus = new Set();
+      [...ocolosSnapshot.docs, ...cintosSnapshot.docs].forEach(doc => {
+        firebaseSkus.add(doc.data().sku);
       });
       
-      // Process belts
-      cintosSnapshot.docs.forEach(doc => {
-        const data = doc.data();
-        const product: Product = {
-          id: doc.id,
-          sku: data.sku,
-          categoria: 'cintos' as const,
-          caixa: data.caixa,
-          imagem: data.imagem,
-          link: data.link,
-          onSale: data.onSale || false,
-          saleUpdatedAt: data.saleUpdatedAt?.toDate?.(),
-          brand: data.brand,
-          model: data.model,
-          createdAt: data.createdAt?.toDate?.() || new Date()
-        };
-        firebaseProducts.push(product);
+      let deletedProductsCount = 0;
+      const skusToDelete: string[] = [];
+      
+      currentProducts.forEach((product: Product) => {
+        if (!firebaseSkus.has(product.sku)) {
+          // Product exists locally but not in Firebase - it was deleted
+          skusToDelete.push(String(product.sku));
+          deletedProductsCount++;
+        }
       });
       
-      // Update localStorage with Firebase data
-      localStorage.setItem(localStorageKey, JSON.stringify(firebaseProducts));
+      // Remove deleted products
+      skusToDelete.forEach(sku => {
+        currentProductsMap.delete(sku);
+      });
+      
+      // Convert map back to array and save
+      const mergedProducts = Array.from(currentProductsMap.values());
+      localStorage.setItem(localStorageKey, JSON.stringify(mergedProducts));
       localStorage.setItem(lastSyncKey, new Date().toISOString());
       
-      console.log(`${firebaseProducts.length} produtos sincronizados automaticamente do Firebase para "${storeId}"`);
+      console.log(`Sincronização incremental concluída para "${storeId}": ${newProductsCount} novos, ${updatedProductsCount} atualizados, ${deletedProductsCount} removidos, ${mergedProducts.length} total`);
       
     } catch (error) {
-      console.error('Erro na sincronização automática:', error);
+      console.error('Erro na sincronização incremental:', error);
     }
   },
 
