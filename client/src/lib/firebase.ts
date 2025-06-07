@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, doc, setDoc, deleteDoc, getDocs, getDoc, query, where, updateDoc } from 'firebase/firestore';
+import { getFirestore, collection, doc, setDoc, deleteDoc, getDocs, getDoc, query, where, updateDoc, limit } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import type { Product } from './types';
 
@@ -718,6 +718,67 @@ export const firebase = {
     } catch (error) {
       console.error('Error removing product from specific store:', error);
       throw new Error('Failed to remove product from store');
+    }
+  },
+
+  // Check if store collections exist
+  async checkStoreCollectionExists(storeId: string): Promise<{ oculos: boolean; cintos: boolean }> {
+    try {
+      const ocolosRef = collection(db, storeId, 'oculos', 'products');
+      const cintosRef = collection(db, storeId, 'cintos', 'products');
+      
+      const [ocolosSnapshot, cintosSnapshot] = await Promise.all([
+        getDocs(ocolosRef),
+        getDocs(cintosRef)
+      ]);
+      
+      return {
+        oculos: !ocolosSnapshot.empty,
+        cintos: !cintosSnapshot.empty
+      };
+    } catch (error) {
+      console.error(`Error checking collections for ${storeId}:`, error);
+      return { oculos: false, cintos: false };
+    }
+  },
+
+  // Create store collections in Firebase
+  async createStoreCollections(storeId: string): Promise<void> {
+    try {
+      console.log(`Criando coleções para a loja: ${storeId}`);
+      
+      // Create initial document for oculos collection
+      const ocolosRef = doc(db, storeId, 'oculos', 'products', '_init');
+      await setDoc(ocolosRef, {
+        _placeholder: true,
+        createdAt: new Date(),
+        message: `Coleção de óculos criada para ${storeId}`
+      });
+      
+      // Create initial document for cintos collection
+      const cintosRef = doc(db, storeId, 'cintos', 'products', '_init');
+      await setDoc(cintosRef, {
+        _placeholder: true,
+        createdAt: new Date(),
+        message: `Coleção de cintos criada para ${storeId}`
+      });
+      
+      console.log(`Coleções criadas com sucesso para ${storeId}`);
+      
+      // Remove placeholder documents after a short delay
+      setTimeout(async () => {
+        try {
+          await deleteDoc(ocolosRef);
+          await deleteDoc(cintosRef);
+          console.log(`Documentos placeholder removidos para ${storeId}`);
+        } catch (error) {
+          console.error('Error removing placeholder docs:', error);
+        }
+      }, 2000);
+      
+    } catch (error) {
+      console.error(`Error creating collections for ${storeId}:`, error);
+      throw new Error(`Falha ao criar coleções para ${storeId}`);
     }
   },
 

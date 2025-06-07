@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Database, Wifi, WifiOff, RefreshCw, Eye, Upload, Store } from "lucide-react";
+import { Database, Wifi, WifiOff, RefreshCw, Eye, Upload, Store, Plus } from "lucide-react";
 import { firebase } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 
@@ -15,7 +15,24 @@ export function FirebaseStatusTab() {
   const [loading, setLoading] = useState(false);
   const [storeCounts, setStoreCounts] = useState<{[key: string]: number}>({});
   const [isAdmin, setIsAdmin] = useState(false);
+  const [storeCollectionStatus, setStoreCollectionStatus] = useState<{[key: string]: { oculos: boolean; cintos: boolean }}>({});
+  const [creatingCollections, setCreatingCollections] = useState<{[key: string]: boolean}>({});
   const { toast } = useToast();
+
+  const checkAllStoreCollections = async () => {
+    const stores = ['patiobatel', 'village', 'jk', 'iguatemi'];
+    const status: {[key: string]: { oculos: boolean; cintos: boolean }} = {};
+    
+    try {
+      for (const storeId of stores) {
+        const collectionStatus = await firebase.checkStoreCollectionExists(storeId);
+        status[storeId] = collectionStatus;
+      }
+      setStoreCollectionStatus(status);
+    } catch (error) {
+      console.error('Error checking store collections:', error);
+    }
+  };
 
   useEffect(() => {
     const currentStoreId = localStorage.getItem('luxury_store_id') || '';
@@ -23,6 +40,7 @@ export function FirebaseStatusTab() {
     loadLocalData();
     checkFirebaseStatus();
     loadStoreProductCounts();
+    checkAllStoreCollections();
   }, []);
 
   const loadStoreProductCounts = () => {
@@ -151,6 +169,33 @@ export function FirebaseStatusTab() {
         title: "Dados Limpos",
         description: "Dados locais foram removidos",
       });
+    }
+  };
+
+  const createStoreCollection = async (storeId: string, storeName: string) => {
+    setCreatingCollections(prev => ({ ...prev, [storeId]: true }));
+    
+    try {
+      await firebase.createStoreCollections(storeId);
+      
+      toast({
+        title: "Coleção Criada",
+        description: `Coleções criadas com sucesso para ${storeName}`,
+      });
+      
+      // Recheck collections status
+      await checkAllStoreCollections();
+      loadStoreProductCounts();
+      
+    } catch (error) {
+      console.error('Error creating collections:', error);
+      toast({
+        title: "Erro ao Criar Coleção",
+        description: `Falha ao criar coleções para ${storeName}`,
+        variant: "destructive",
+      });
+    } finally {
+      setCreatingCollections(prev => ({ ...prev, [storeId]: false }));
     }
   };
 
@@ -322,15 +367,37 @@ export function FirebaseStatusTab() {
                         {storeCounts.jk || 0} produtos
                       </Badge>
                       <div className="flex space-x-2">
-                        <Button 
-                          onClick={() => syncStoreData('jk', 'JK')}
-                          disabled={loading}
-                          size="sm"
-                          variant="outline"
-                        >
-                          <RefreshCw className="mr-1" size={14} />
-                          Sync
-                        </Button>
+                        {storeCollectionStatus.jk && (storeCollectionStatus.jk.oculos || storeCollectionStatus.jk.cintos) ? (
+                          <Button 
+                            onClick={() => syncStoreData('jk', 'JK')}
+                            disabled={loading}
+                            size="sm"
+                            variant="outline"
+                          >
+                            <RefreshCw className="mr-1" size={14} />
+                            Sync
+                          </Button>
+                        ) : (
+                          <Button 
+                            onClick={() => createStoreCollection('jk', 'JK')}
+                            disabled={creatingCollections.jk}
+                            size="sm"
+                            variant="default"
+                            className="bg-orange-600 hover:bg-orange-700 text-white"
+                          >
+                            {creatingCollections.jk ? (
+                              <>
+                                <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin mr-1" />
+                                Criando...
+                              </>
+                            ) : (
+                              <>
+                                <Plus className="mr-1" size={14} />
+                                Criar Coleção
+                              </>
+                            )}
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </div>
