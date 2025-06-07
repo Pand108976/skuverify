@@ -93,7 +93,11 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
                   <span className="hidden sm:inline">Óculos</span>
                 </TabsTrigger>
                 <TabsTrigger value="belts" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
-                  <MoreHorizontal size={16} />
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="10" width="20" height="4" rx="2"/>
+                    <rect x="15" y="8" width="4" height="8" rx="1"/>
+                    <circle cx="17" cy="12" r="1"/>
+                  </svg>
                   <span className="hidden sm:inline">Cintos</span>
                 </TabsTrigger>
               </>
