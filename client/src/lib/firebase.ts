@@ -402,7 +402,9 @@ export const firebase = {
   async searchProductInAllStores(sku: string): Promise<Array<Product & { storeName: string; storeId: string }>> {
     const stores = [
       { id: 'patiobatel', name: 'Patio Batel' },
-      { id: 'village', name: 'Village' }
+      { id: 'village', name: 'Village' },
+      { id: 'jk', name: 'JK' },
+      { id: 'iguatemi', name: 'Iguatemi' }
     ];
     
     const results: Array<Product & { storeName: string; storeId: string }> = [];
