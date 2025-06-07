@@ -682,7 +682,8 @@ export const firebase = {
         sku: product.sku,
         categoria: product.categoria,
         caixa: product.caixa,
-        createdAt: product.createdAt || new Date()
+        createdAt: product.createdAt || new Date(),
+        lastModified: new Date() // Track modifications
       };
       
       // Add optional fields if they exist
@@ -694,6 +695,17 @@ export const firebase = {
       if (product.model) firebaseData.model = product.model;
       
       await setDoc(productRef, firebaseData);
+      
+      // Trigger immediate sync after critical operations
+      setTimeout(async () => {
+        try {
+          await this.autoSyncFromFirebase();
+          console.log('Sincronização imediata após salvamento executada');
+        } catch (error) {
+          console.error('Erro na sincronização imediata:', error);
+        }
+      }, 1000);
+      
     } catch (error) {
       console.error('Error saving product to Firebase:', error);
       throw new Error('Failed to save product to Firebase');
@@ -725,6 +737,22 @@ export const firebase = {
         localStorage.setItem(localStorageKey, JSON.stringify(updatedProducts));
         console.log(`Product ${sku} removed from localStorage for store ${storeId}`);
       }
+      
+      // Trigger immediate sync for all stores after critical operations
+      setTimeout(async () => {
+        try {
+          // Sync the specific store that had the product removed
+          const originalStoreId = localStorage.getItem('luxury_store_id');
+          localStorage.setItem('luxury_store_id', storeId);
+          await this.autoSyncFromFirebase();
+          if (originalStoreId) {
+            localStorage.setItem('luxury_store_id', originalStoreId);
+          }
+          console.log(`Sincronização imediata após remoção executada para ${storeId}`);
+        } catch (error) {
+          console.error('Erro na sincronização imediata após remoção:', error);
+        }
+      }, 1000);
       
     } catch (error) {
       console.error('Error removing product from specific store:', error);
@@ -878,28 +906,43 @@ export const firebase = {
     const timeDiff = now.getTime() - lastSyncTime.getTime();
     const minutesSinceSync = timeDiff / (1000 * 60);
     
-    // Auto sync if more than 5 minutes since last sync
-    return minutesSinceSync > 5;
+    // Auto sync if more than 2 minutes since last sync (more aggressive)
+    return minutesSinceSync > 2;
   },
 
   async startPeriodicSync(): Promise<void> {
-    // Auto sync every 10 minutes
+    // Auto sync every 2 minutes (very frequent for immediate updates)
     setInterval(async () => {
-      if (await this.shouldAutoSync()) {
+      try {
         await this.autoSyncFromFirebase();
+        console.log('Sincronização automática em segundo plano executada');
+      } catch (error) {
+        console.error('Erro na sincronização automática:', error);
+        // Retry once if failed
+        setTimeout(async () => {
+          try {
+            await this.autoSyncFromFirebase();
+            console.log('Retry de sincronização automática bem-sucedido');
+          } catch (retryError) {
+            console.error('Retry de sincronização falhou:', retryError);
+          }
+        }, 30000); // Retry after 30 seconds
       }
-    }, 10 * 60 * 1000);
+    }, 2 * 60 * 1000);
   },
 
   async initializeAutoSync(): Promise<void> {
-    // Initial sync when page loads
-    if (await this.shouldAutoSync()) {
+    // Always sync when page loads
+    try {
       await this.autoSyncFromFirebase();
+      console.log('Sincronização inicial concluída');
+    } catch (error) {
+      console.error('Erro na sincronização inicial:', error);
     }
     
     // Start periodic background sync
     await this.startPeriodicSync();
     
-    console.log('Sistema de sincronização automática inicializado');
+    console.log('Sistema de sincronização automática inicializado - sync a cada 2 minutos + eventos de foco');
   }
 };

@@ -41,7 +41,38 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
       await firebase.initializeAutoSync();
     };
     
+    // Add visibility change listener for immediate sync when tab becomes visible
+    const handleVisibilityChange = async () => {
+      if (!document.hidden) {
+        try {
+          await firebase.autoSyncFromFirebase();
+          console.log('Sincronização automática executada - aba voltou ao foco');
+        } catch (error) {
+          console.error('Erro na sincronização por visibilidade:', error);
+        }
+      }
+    };
+    
+    // Add focus listener for immediate sync when window gets focus
+    const handleFocus = async () => {
+      try {
+        await firebase.autoSyncFromFirebase();
+        console.log('Sincronização automática executada - janela recebeu foco');
+      } catch (error) {
+        console.error('Erro na sincronização por foco:', error);
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+    
     initializeApp();
+    
+    // Cleanup listeners
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   const handleProductClick = (product: Product) => {
