@@ -42,14 +42,10 @@ function App() {
   };
 
   const handleLogout = () => {
-    // Limpar apenas se confirmado pelo usuário
-    const confirmed = confirm('Tem certeza que deseja sair? Você precisará fazer login novamente.');
-    if (confirmed) {
-      localStorage.removeItem('luxury_store_id');
-      localStorage.removeItem('luxury_store_name');
-      localStorage.removeItem('luxury_login_time');
-      setIsLoggedIn(false);
-    }
+    localStorage.removeItem('luxury_store_id');
+    localStorage.removeItem('luxury_store_name');
+    localStorage.removeItem('luxury_login_time');
+    setIsLoggedIn(false);
   };
 
   // Mostrar loading durante verificação inicial
