@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Database, Wifi, WifiOff, RefreshCw, Eye, Upload, Store, Plus } from "lucide-react";
 import { firebase } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
-import { MigrateImagesButton } from "@/components/migrate-images-button";
+
 import type { Product } from "@/lib/types";
 
 export function FirebaseStatusTab() {
@@ -382,7 +382,7 @@ export function FirebaseStatusTab() {
 
 
             {/* Ações Gerais */}
-            <div className={`grid gap-4 ${isAdmin ? 'md:grid-cols-2' : 'md:grid-cols-3'}`}>
+            <div className={`grid gap-4 ${isAdmin ? 'md:grid-cols-1' : 'md:grid-cols-2'}`}>
               {!isAdmin && (
                 <Button 
                   onClick={syncWithFirebase}
@@ -403,7 +403,7 @@ export function FirebaseStatusTab() {
                 </Button>
               )}
 
-              <MigrateImagesButton />
+
 
               <Button 
                 onClick={openFirebaseConsole}
