@@ -173,7 +173,14 @@ export function SearchTab({ isAdmin = false }: SearchTabProps) {
                     />
                   </div>
                   <div className="space-y-4">
-                    <h4 className="text-2xl font-bold text-gray-800">{result.sku}</h4>
+                    <div className="flex justify-between items-start">
+                      <h4 className="text-2xl font-bold text-gray-800">{result.sku}</h4>
+                      {result.onSale && (
+                        <span className="text-sm bg-orange-100 text-orange-700 px-3 py-1 rounded-full font-semibold">
+                          PROMOÇÃO
+                        </span>
+                      )}
+                    </div>
                     
                     <div className="space-y-3">
                       <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
@@ -244,7 +251,14 @@ export function SearchTab({ isAdmin = false }: SearchTabProps) {
                         />
                       </div>
                       <div className="space-y-4">
-                        <h4 className="text-2xl font-bold text-gray-800">{product.sku}</h4>
+                        <div className="flex justify-between items-start">
+                          <h4 className="text-2xl font-bold text-gray-800">{product.sku}</h4>
+                          {product.onSale && (
+                            <span className="text-sm bg-orange-100 text-orange-700 px-3 py-1 rounded-full font-semibold">
+                              PROMOÇÃO
+                            </span>
+                          )}
+                        </div>
                         
                         <div className="space-y-3">
                           <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">

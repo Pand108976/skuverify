@@ -281,7 +281,14 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
                 />
               </div>
               <div className="p-4 bg-gradient-to-r from-background to-muted/10">
-                <h3 className="font-bold text-luxury-dark mb-1 text-lg">{product.sku}</h3>
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="font-bold text-luxury-dark text-lg">{product.sku}</h3>
+                  {product.onSale && (
+                    <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-semibold">
+                      PROMOÇÃO
+                    </span>
+                  )}
+                </div>
                 <p className="text-sm text-muted-foreground font-medium">Caixa: {product.caixa}</p>
                 
                 {/* Botão Visitar Site */}
