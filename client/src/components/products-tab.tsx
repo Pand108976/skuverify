@@ -130,7 +130,7 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
                       </div>
                       <div>
                         <h3 className="text-xl font-bold text-ferragamo-dark">Cintos Femininos</h3>
-                        <p className="text-muted-foreground">Caixas 44, 48, 49, 50, 51 • {feminineBelts.length} produtos</p>
+                        <p className="text-muted-foreground">{feminineBelts.length} produtos</p>
                       </div>
                     </div>
                     <div className="grid grid-cols-3 gap-6">
@@ -185,7 +185,7 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
                       </div>
                       <div>
                         <h3 className="text-xl font-bold text-ferragamo-dark">Cintos Masculinos</h3>
-                        <p className="text-muted-foreground">Demais caixas • {masculineBelts.length} produtos</p>
+                        <p className="text-muted-foreground">{masculineBelts.length} produtos</p>
                       </div>
                     </div>
                     <div className="grid grid-cols-3 gap-6">
