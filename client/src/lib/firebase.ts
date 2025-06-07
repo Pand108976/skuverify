@@ -670,6 +670,34 @@ export const firebase = {
     }
   },
 
+  // Save/update product to Firebase
+  async saveProductToFirebase(product: Product): Promise<void> {
+    try {
+      const storeId = getStoreCollection();
+      const productRef = doc(db, storeId, product.categoria, 'products', product.sku);
+      
+      const firebaseData: any = {
+        sku: product.sku,
+        categoria: product.categoria,
+        caixa: product.caixa,
+        createdAt: product.createdAt || new Date()
+      };
+      
+      // Add optional fields if they exist
+      if (product.imagem) firebaseData.imagem = product.imagem;
+      if (product.link) firebaseData.link = product.link;
+      if (product.onSale !== undefined) firebaseData.onSale = product.onSale;
+      if (product.saleUpdatedAt) firebaseData.saleUpdatedAt = product.saleUpdatedAt;
+      if (product.brand) firebaseData.brand = product.brand;
+      if (product.model) firebaseData.model = product.model;
+      
+      await setDoc(productRef, firebaseData);
+    } catch (error) {
+      console.error('Error saving product to Firebase:', error);
+      throw new Error('Failed to save product to Firebase');
+    }
+  },
+
   // Remove product from specific store (for admin multi-store sales)
   async removeProductFromSpecificStore(sku: string, storeId: string, category: 'oculos' | 'cintos'): Promise<void> {
     try {

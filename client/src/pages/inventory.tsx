@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Crown, Search, Glasses, Shirt, Plus, Trash2, LogOut, Database, Upload, ArrowRightLeft, ShoppingCart } from "lucide-react";
+import { Crown, Search, Glasses, Shirt, Plus, Trash2, LogOut, Database, Upload, ArrowRightLeft, ShoppingCart, Percent } from "lucide-react";
 import { SearchTab } from "@/components/search-tab";
 import { ProductsTab } from "@/components/products-tab";
 import { AddProductTab } from "@/components/add-product-tab";
@@ -11,6 +11,7 @@ import { FirebaseStatusTab } from "@/components/firebase-status-tab";
 import { PhotoUploadTab } from "@/components/photo-upload-tab";
 import { MovementTab } from "@/components/movement-tab";
 import { SalesTab } from "@/components/sales-tab";
+import { PromotionsTab } from "@/components/promotions-tab";
 
 import { firebase } from "@/lib/firebase";
 import type { Product } from "@/lib/types";
