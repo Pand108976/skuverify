@@ -26,7 +26,7 @@ export function FirebaseStatusTab() {
   }, []);
 
   const loadStoreProductCounts = () => {
-    const stores = ['patiobatel', 'village', 'admin'];
+    const stores = ['patiobatel', 'village', 'jk', 'iguatemi', 'admin'];
     const counts: {[key: string]: number} = {};
     
     stores.forEach(storeId => {
@@ -300,6 +300,68 @@ export function FirebaseStatusTab() {
                           Sync
                         </Button>
 
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* JK */}
+              <Card className="border-l-4 border-l-orange-500">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <Store className="text-orange-600" size={20} />
+                      <div>
+                        <h4 className="font-semibold">JK</h4>
+                        <p className="text-sm text-muted-foreground">Coleção: jk</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <Badge variant="secondary" className="bg-orange-100 text-orange-800">
+                        {storeCounts.jk || 0} produtos
+                      </Badge>
+                      <div className="flex space-x-2">
+                        <Button 
+                          onClick={() => syncStoreData('jk', 'JK')}
+                          disabled={loading}
+                          size="sm"
+                          variant="outline"
+                        >
+                          <RefreshCw className="mr-1" size={14} />
+                          Sync
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Iguatemi */}
+              <Card className="border-l-4 border-l-teal-500">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <Store className="text-teal-600" size={20} />
+                      <div>
+                        <h4 className="font-semibold">Iguatemi</h4>
+                        <p className="text-sm text-muted-foreground">Coleção: iguatemi</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <Badge variant="secondary" className="bg-teal-100 text-teal-800">
+                        {storeCounts.iguatemi || 0} produtos
+                      </Badge>
+                      <div className="flex space-x-2">
+                        <Button 
+                          onClick={() => syncStoreData('iguatemi', 'Iguatemi')}
+                          disabled={loading}
+                          size="sm"
+                          variant="outline"
+                        >
+                          <RefreshCw className="mr-1" size={14} />
+                          Sync
+                        </Button>
                       </div>
                     </div>
                   </div>

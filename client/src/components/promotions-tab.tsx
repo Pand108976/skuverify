@@ -140,7 +140,9 @@ export function PromotionsTab({ localProducts, setLocalProducts }: PromotionsTab
     try {
       const stores = [
         { id: 'patiobatel', name: 'Patio Batel' },
-        { id: 'village', name: 'Village' }
+        { id: 'village', name: 'Village' },
+        { id: 'jk', name: 'JK' },
+        { id: 'iguatemi', name: 'Iguatemi' }
       ];
       let updatedCount = 0;
 
@@ -214,7 +216,9 @@ export function PromotionsTab({ localProducts, setLocalProducts }: PromotionsTab
     try {
       const stores = [
         { id: 'patiobatel', name: 'Patio Batel' },
-        { id: 'village', name: 'Village' }
+        { id: 'village', name: 'Village' },
+        { id: 'jk', name: 'JK' },
+        { id: 'iguatemi', name: 'Iguatemi' }
       ];
 
       for (const store of stores) {

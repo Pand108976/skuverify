@@ -512,7 +512,7 @@ export const firebase = {
   },
 
   async migrateExistingProducts(): Promise<void> {
-    const stores = ['patiobatel', 'village'];
+    const stores = ['patiobatel', 'village', 'jk', 'iguatemi'];
     
     try {
       console.log('Iniciando migração de produtos para estrutura hierárquica...');
