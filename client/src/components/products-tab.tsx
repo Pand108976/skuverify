@@ -73,6 +73,15 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
     }
   };
 
+  // Separar cintos femininos e masculinos
+  const getCategorizedBelts = () => {
+    const feminineBoxes = ['44', '48', '49', '50', '51'];
+    const feminineBelts = products.filter(p => feminineBoxes.includes(p.caixa));
+    const masculineBelts = products.filter(p => !feminineBoxes.includes(p.caixa));
+    
+    return { feminineBelts, masculineBelts };
+  };
+
 
 
   const icon = category === 'oculos' ? <Glasses className="text-primary mr-3" size={24} /> : <Shirt className="text-primary mr-3" size={24} />;
@@ -105,7 +114,128 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
           <h3 className="text-lg font-semibold text-muted-foreground mb-2">Nenhum produto encontrado</h3>
           <p className="text-muted-foreground">Adicione produtos desta categoria para visualizá-los aqui</p>
         </div>
+      ) : category === 'cintos' ? (
+        // Layout especial para cintos com divisão por gênero
+        <div>
+          {(() => {
+            const { feminineBelts, masculineBelts } = getCategorizedBelts();
+            return (
+              <>
+                {/* Seção Feminina */}
+                {feminineBelts.length > 0 && (
+                  <div className="mb-12">
+                    <div className="flex items-center mb-6">
+                      <div className="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center mr-4">
+                        <span className="text-pink-600 font-bold">♀</span>
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-ferragamo-dark">Cintos Femininos</h3>
+                        <p className="text-muted-foreground">Caixas 44, 48, 49, 50, 51 • {feminineBelts.length} produtos</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-6">
+                      {feminineBelts.map((product, index) => (
+                        <Card 
+                          key={`feminine-${product.sku}-${index}`}
+                          className="product-card overflow-hidden cursor-pointer premium-shadow hover:shadow-xl transition-all duration-300 border-pink-200"
+                          onClick={() => onProductClick(product)}
+                        >
+                          <div className="aspect-[4/3] overflow-hidden bg-gradient-to-br from-pink-50 to-pink-100">
+                            <ProductImage 
+                              sku={product.sku}
+                              categoria={product.categoria}
+                              imagePath={product.imagem}
+                              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                            />
+                          </div>
+                          <div className="p-4 space-y-3">
+                            <div className="flex justify-between items-start">
+                              <h3 className="font-bold text-ferragamo-dark">SKU {product.sku}</h3>
+                              <span className="text-xs bg-pink-100 text-pink-700 px-2 py-1 rounded-full">
+                                Caixa {product.caixa}
+                              </span>
+                            </div>
+                            {product.link && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="w-full"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  window.open(product.link, '_blank');
+                                }}
+                              >
+                                <ExternalLink size={14} className="mr-2" />
+                                Ver Produto
+                              </Button>
+                            )}
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Seção Masculina */}
+                {masculineBelts.length > 0 && (
+                  <div>
+                    <div className="flex items-center mb-6">
+                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                        <span className="text-blue-600 font-bold">♂</span>
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-ferragamo-dark">Cintos Masculinos</h3>
+                        <p className="text-muted-foreground">Demais caixas • {masculineBelts.length} produtos</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-6">
+                      {masculineBelts.map((product, index) => (
+                        <Card 
+                          key={`masculine-${product.sku}-${index}`}
+                          className="product-card overflow-hidden cursor-pointer premium-shadow hover:shadow-xl transition-all duration-300 border-blue-200"
+                          onClick={() => onProductClick(product)}
+                        >
+                          <div className="aspect-[4/3] overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100">
+                            <ProductImage 
+                              sku={product.sku}
+                              categoria={product.categoria}
+                              imagePath={product.imagem}
+                              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                            />
+                          </div>
+                          <div className="p-4 space-y-3">
+                            <div className="flex justify-between items-start">
+                              <h3 className="font-bold text-ferragamo-dark">SKU {product.sku}</h3>
+                              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                                Caixa {product.caixa}
+                              </span>
+                            </div>
+                            {product.link && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="w-full"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  window.open(product.link, '_blank');
+                                }}
+                              >
+                                <ExternalLink size={14} className="mr-2" />
+                                Ver Produto
+                              </Button>
+                            )}
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            );
+          })()}
+        </div>
       ) : (
+        // Layout padrão para óculos
         <div className="grid grid-cols-3 gap-6">
           {products.map((product, index) => (
             <Card 
