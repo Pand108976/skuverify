@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Crown, Search, Glasses, Plus, Trash2, LogOut, Database, Upload, ArrowRightLeft, ShoppingCart, Percent, Minus, Circle } from "lucide-react";
+import { Crown, Search, Glasses, Plus, Trash2, LogOut, Database, Upload, ArrowRightLeft, ShoppingCart, Percent, MoreHorizontal, Square } from "lucide-react";
 import { SearchTab } from "@/components/search-tab";
 import { ProductsTab } from "@/components/products-tab";
 import { AddProductTab } from "@/components/add-product-tab";
@@ -93,7 +93,7 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
                   <span className="hidden sm:inline">Óculos</span>
                 </TabsTrigger>
                 <TabsTrigger value="belts" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
-                  <Circle size={16} />
+                  <MoreHorizontal size={16} />
                   <span className="hidden sm:inline">Cintos</span>
                 </TabsTrigger>
               </>
