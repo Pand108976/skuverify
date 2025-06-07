@@ -291,7 +291,11 @@ export function RemoveProductTab() {
                   onClick={() => handleCategorySelect('cintos')}
                 >
                   <div className="text-center">
-                    <Shirt className="mx-auto mb-3" size={32} />
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-3">
+                      <rect x="2" y="10" width="20" height="4" rx="2"/>
+                      <rect x="15" y="8" width="4" height="8" rx="1"/>
+                      <circle cx="17" cy="12" r="1"/>
+                    </svg>
                     <p className="font-semibold">Cintos</p>
                   </div>
                 </Button>

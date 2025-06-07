@@ -338,7 +338,11 @@ export function PendingTab() {
             {/* Estatísticas Cintos */}
             <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
               <div className="flex items-center mb-3">
-                <Shirt className="text-amber-600 mr-2" size={20} />
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-600 mr-2">
+                  <rect x="2" y="10" width="20" height="4" rx="2"/>
+                  <rect x="15" y="8" width="4" height="8" rx="1"/>
+                  <circle cx="17" cy="12" r="1"/>
+                </svg>
                 <h3 className="font-semibold text-amber-800">Cintos</h3>
               </div>
               <div className="space-y-2">
@@ -368,7 +372,11 @@ export function PendingTab() {
             Óculos ({counts.oculos.total})
           </TabsTrigger>
           <TabsTrigger value="cintos" className="flex items-center">
-            <Shirt size={16} className="mr-2" />
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+              <rect x="2" y="10" width="20" height="4" rx="2"/>
+              <rect x="15" y="8" width="4" height="8" rx="1"/>
+              <circle cx="17" cy="12" r="1"/>
+            </svg>
             Cintos ({counts.cintos.total})
           </TabsTrigger>
         </TabsList>

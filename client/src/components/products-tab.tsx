@@ -98,7 +98,13 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
 
 
 
-  const icon = category === 'oculos' ? <Glasses className="text-primary mr-3" size={24} /> : <Shirt className="text-primary mr-3" size={24} />;
+  const icon = category === 'oculos' ? <Glasses className="text-primary mr-3" size={24} /> : (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary mr-3">
+      <rect x="2" y="10" width="20" height="4" rx="2"/>
+      <rect x="15" y="8" width="4" height="8" rx="1"/>
+      <circle cx="17" cy="12" r="1"/>
+    </svg>
+  );
   const title = category === 'oculos' ? 'Coleção de Óculos' : 'Coleção de Cintos';
 
   if (loading) {
