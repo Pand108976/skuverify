@@ -24,14 +24,16 @@ const getLocalStorageKey = () => {
   return `luxury_products_${storeId}`;
 };
 
-// Função para obter caminho da imagem baseado no SKU e categoria (apenas .jpg)
+// Função para obter caminho da imagem baseado no SKU e categoria
 function getImagePath(sku: string, categoria: 'oculos' | 'cintos'): string | undefined {
-  return `/images/${categoria}/${sku}.jpg`;
+  const extension = categoria === 'oculos' ? '.jpg' : '.webp';
+  return `/images/${categoria}/${sku}${extension}`;
 }
 
-// Função para verificar se a imagem .jpg existe
+// Função para verificar se a imagem existe com a extensão correta
 async function getValidImagePath(sku: string, categoria: 'oculos' | 'cintos'): Promise<string | undefined> {
-  const imagePath = `/images/${categoria}/${sku}.jpg`;
+  const extension = categoria === 'oculos' ? '.jpg' : '.webp';
+  const imagePath = `/images/${categoria}/${sku}${extension}`;
   
   try {
     const response = await fetch(imagePath, { method: 'HEAD' });
@@ -573,14 +575,14 @@ export const firebase = {
     await this.getProductsFromFirebase();
   },
 
-  // Update all Firebase products to use .jpg paths only
-  async updateAllProductsToJpg(): Promise<void> {
-    console.log("Atualizando todos os produtos para usar apenas caminhos .jpg...");
+  // Update all Firebase products to use correct extensions (.jpg for glasses, .webp for belts)
+  async updateAllProductsToCorrectExtensions(): Promise<void> {
+    console.log("Atualizando produtos: óculos para .jpg e cintos para .webp...");
     
     try {
       const storeId = getStoreCollection();
       
-      // Update glasses products
+      // Update glasses products to .jpg
       const oculosRef = collection(db, storeId, 'oculos', 'products');
       const oculosSnapshot = await getDocs(oculosRef);
       
@@ -594,27 +596,27 @@ export const firebase = {
         });
       }
       
-      // Update belt products
+      // Update belt products to .webp
       const cintosRef = collection(db, storeId, 'cintos', 'products');
       const cintosSnapshot = await getDocs(cintosRef);
       
       for (const doc of cintosSnapshot.docs) {
         const data = doc.data();
-        const jpgPath = `/images/cintos/${data.sku}.jpg`;
+        const webpPath = `/images/cintos/${data.sku}.webp`;
         
         await setDoc(doc.ref, {
           ...data,
-          imagem: jpgPath
+          imagem: webpPath
         });
       }
       
-      console.log(`Firebase atualizado: ${oculosSnapshot.size} óculos e ${cintosSnapshot.size} cintos agora usam .jpg`);
+      console.log(`Firebase atualizado: ${oculosSnapshot.size} óculos (.jpg) e ${cintosSnapshot.size} cintos (.webp)`);
       
       // Force refresh to apply changes
       await this.forceRefreshImages();
       
     } catch (error) {
-      console.error("Erro ao atualizar produtos para .jpg:", error);
+      console.error("Erro ao atualizar produtos:", error);
     }
   },
 

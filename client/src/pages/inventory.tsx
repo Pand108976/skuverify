@@ -31,8 +31,8 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
     setStoreName(currentStoreName);
     setIsAdmin(currentStoreId === 'admin');
     
-    // Atualizar Firebase para usar apenas .jpg e iniciar sincronização
-    firebase.updateAllProductsToJpg();
+    // Atualizar Firebase: óculos para .jpg e cintos para .webp
+    firebase.updateAllProductsToCorrectExtensions();
   }, []);
 
   const handleProductClick = (product: Product) => {
