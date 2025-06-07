@@ -255,8 +255,8 @@ export const firebase = {
       };
       
       // Adiciona imagem se disponível
-      if (imagePath) {
-        firebaseData.imagem = imagePath;
+      if (validImagePath) {
+        firebaseData.imagem = validImagePath;
       }
       
       // Salva na subcoleção organizada: loja/categoria/products/sku
@@ -574,5 +574,13 @@ export const firebase = {
     } catch (error) {
       console.error('Erro na migração:', error);
     }
+  },
+
+  // Force refresh with dynamic image detection
+  async forceRefreshImages(): Promise<void> {
+    const localStorageKey = getLocalStorageKey();
+    localStorage.removeItem(localStorageKey);
+    console.log("Cache limpo, aplicando detecção dinâmica de imagens...");
+    await this.getProductsFromFirebase();
   }
 };
