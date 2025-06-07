@@ -128,6 +128,8 @@ export function SalesTab() {
 
   const handleCancel = () => {
     setFoundProduct(null);
+    setFoundProducts([]);
+    setSelectedProduct(null);
     setSearchSku("");
   };
 
@@ -193,8 +195,84 @@ export function SalesTab() {
         </CardContent>
       </Card>
 
-      {/* Produto Encontrado */}
-      {foundProduct && (
+      {/* Multiple Stores Found (Admin Only) */}
+      {isAdmin && foundProducts.length > 1 && (
+        <Card className="premium-shadow border-2 border-blue-200">
+          <CardHeader className="bg-blue-50">
+            <CardTitle className="text-blue-800 flex items-center">
+              <Search className="mr-2" size={24} />
+              Produto encontrado em {foundProducts.length} lojas
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <p className="text-sm text-gray-600 mb-4">
+              Selecione a loja de onde deseja confirmar a venda:
+            </p>
+            <div className="space-y-3">
+              {foundProducts.map((product, index) => (
+                <div
+                  key={`${product.storeId}-${index}`}
+                  className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                    selectedProduct?.storeId === product.storeId && selectedProduct?.id === product.id
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-blue-300'
+                  }`}
+                  onClick={() => setSelectedProduct(product)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium text-gray-800">{product.storeName}</h4>
+                      <p className="text-sm text-gray-600">
+                        {product.categoria} • Caixa {product.caixa}
+                      </p>
+                    </div>
+                    <div className="flex-shrink-0">
+                      <ProductImage 
+                        sku={product.sku}
+                        categoria={product.categoria}
+                        imagePath={product.imagem}
+                        className="w-12 h-12 rounded object-cover border"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            {selectedProduct && (
+              <div className="flex gap-4 mt-6">
+                <Button
+                  onClick={handleCancel}
+                  variant="outline"
+                  size="lg"
+                  className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
+                >
+                  <X size={20} className="mr-2" />
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleSaleConfirmation}
+                  disabled={confirming}
+                  size="lg"
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                >
+                  {confirming ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <Check size={20} className="mr-2" />
+                      Confirmar Venda da {selectedProduct.storeName}
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Single Product Found */}
+      {((isAdmin && foundProducts.length === 1 && selectedProduct) || (!isAdmin && foundProduct)) && (
         <Card className="premium-shadow border-2 border-green-200">
           <CardHeader className="bg-green-50">
             <CardTitle className="text-green-800 flex items-center">
@@ -207,9 +285,9 @@ export function SalesTab() {
               {/* Imagem do produto */}
               <div className="flex-shrink-0">
                 <ProductImage 
-                  sku={foundProduct.sku}
-                  categoria={foundProduct.categoria}
-                  imagePath={foundProduct.imagem}
+                  sku={(isAdmin && selectedProduct) ? selectedProduct.sku : foundProduct!.sku}
+                  categoria={(isAdmin && selectedProduct) ? selectedProduct.categoria : foundProduct!.categoria}
+                  imagePath={(isAdmin && selectedProduct) ? selectedProduct.imagem : foundProduct!.imagem}
                   className="w-24 h-24 rounded-lg object-cover border-2 border-gray-200"
                 />
               </div>
@@ -217,17 +295,27 @@ export function SalesTab() {
               {/* Informações do produto */}
               <div className="flex-1">
                 <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                  {foundProduct.sku}
+                  {(isAdmin && selectedProduct) ? selectedProduct.sku : foundProduct!.sku}
                 </h3>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-gray-600">Categoria:</span>
-                    <span className="ml-2 font-medium capitalize">{foundProduct.categoria}</span>
+                    <span className="ml-2 font-medium capitalize">
+                      {(isAdmin && selectedProduct) ? selectedProduct.categoria : foundProduct!.categoria}
+                    </span>
                   </div>
                   <div>
                     <span className="text-gray-600">Localização:</span>
-                    <span className="ml-2 font-medium">Caixa {foundProduct.caixa}</span>
+                    <span className="ml-2 font-medium">
+                      Caixa {(isAdmin && selectedProduct) ? selectedProduct.caixa : foundProduct!.caixa}
+                    </span>
                   </div>
+                  {isAdmin && selectedProduct && (
+                    <div className="col-span-2">
+                      <span className="text-gray-600">Loja:</span>
+                      <span className="ml-2 font-medium text-blue-600">{selectedProduct.storeName}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

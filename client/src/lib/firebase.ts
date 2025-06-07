@@ -668,5 +668,26 @@ export const firebase = {
       console.error('Error updating product image:', error);
       throw new Error('Failed to update product image');
     }
+  },
+
+  // Remove product from specific store (for admin multi-store sales)
+  async removeProductFromSpecificStore(sku: string, storeId: string, category: 'oculos' | 'cintos'): Promise<void> {
+    try {
+      // Find product in specific store
+      const storeCollection = collection(db, storeId, category, 'products');
+      const q = query(storeCollection, where("sku", "==", sku));
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty) {
+        const productDoc = querySnapshot.docs[0];
+        await deleteDoc(productDoc.ref);
+        console.log(`Product ${sku} removed from ${storeId}/${category}`);
+      } else {
+        throw new Error(`Product ${sku} not found in ${storeId}/${category}`);
+      }
+    } catch (error) {
+      console.error('Error removing product from specific store:', error);
+      throw new Error('Failed to remove product from store');
+    }
   }
 };
