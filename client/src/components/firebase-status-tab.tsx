@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Database, Wifi, WifiOff, RefreshCw, Eye, Upload, Store, Plus } from "lucide-react";
+import { Database, Wifi, WifiOff, RefreshCw, Eye, Upload, Store } from "lucide-react";
 import { firebase } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 
@@ -139,39 +139,7 @@ export function FirebaseStatusTab() {
     }
   };
 
-  const createStoreCollection = async (storeId: string, storeName: string) => {
-    setLoading(true);
-    try {
-      const currentStoreId = localStorage.getItem('luxury_store_id');
-      const currentStoreName = localStorage.getItem('luxury_store_name');
-      
-      localStorage.setItem('luxury_store_id', storeId);
-      localStorage.setItem('luxury_store_name', storeName);
-      
-      // Apenas inicializa o localStorage vazio para a loja
-      const localStorageKey = `luxury_products_${storeId}`;
-      localStorage.setItem(localStorageKey, JSON.stringify([]));
 
-      if (currentStoreId) localStorage.setItem('luxury_store_id', currentStoreId);
-      if (currentStoreName) localStorage.setItem('luxury_store_name', currentStoreName);
-
-      toast({
-        title: "Coleção Criada",
-        description: `Coleção '${storeId}' inicializada vazia no sistema`,
-      });
-
-      loadStoreProductCounts();
-    } catch (error) {
-      console.error('Error creating collection:', error);
-      toast({
-        title: "Erro ao Criar Coleção",
-        description: "Verifique sua conexão com o Firebase",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const clearLocalData = () => {
     const storeId = localStorage.getItem('luxury_store_id') || 'default';
@@ -297,15 +265,7 @@ export function FirebaseStatusTab() {
                           <RefreshCw className="mr-1" size={14} />
                           Sync
                         </Button>
-                        <Button 
-                          onClick={() => createStoreCollection('patiobatel', 'Patio Batel')}
-                          disabled={loading}
-                          size="sm"
-                          className="bg-blue-600 hover:bg-blue-700 text-white"
-                        >
-                          <Plus className="mr-1" size={14} />
-                          Criar
-                        </Button>
+
                       </div>
                     </div>
                   </div>
@@ -337,15 +297,7 @@ export function FirebaseStatusTab() {
                           <RefreshCw className="mr-1" size={14} />
                           Sync
                         </Button>
-                        <Button 
-                          onClick={() => createStoreCollection('village', 'Village')}
-                          disabled={loading}
-                          size="sm"
-                          className="bg-green-600 hover:bg-green-700 text-white"
-                        >
-                          <Plus className="mr-1" size={14} />
-                          Criar
-                        </Button>
+
                       </div>
                     </div>
                   </div>
