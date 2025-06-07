@@ -107,9 +107,9 @@ export function PhotoUploadTab({}: PhotoUploadTabProps) {
 
     setUploading(true);
     try {
-      // Check if product exists
-      const allProducts = await firebase.getProducts();
-      const existingProduct = allProducts.find(p => p.sku === sku && p.categoria === category);
+      // Check if product exists in all stores (admin can access all stores)
+      const searchResults = await firebase.searchProductInAllStores(sku);
+      const existingProduct = searchResults.find(p => p.categoria === category);
       
       const correctExtension = getCorrectExtension(category);
       const fileName = `${category}/${sku}${correctExtension}`;
@@ -118,13 +118,12 @@ export function PhotoUploadTab({}: PhotoUploadTabProps) {
       // This will save the image path to the Firebase document
       
       if (existingProduct) {
-        // Update existing product with image path
-        const storeId = localStorage.getItem('luxury_store_id') || 'admin';
-        await firebase.updateProductImagePath(existingProduct.id!, fileName, category, storeId);
+        // Update existing product with image path in the correct store
+        await firebase.updateProductImagePath(existingProduct.id!, fileName, category, existingProduct.storeId);
         
         toast({
           title: "Foto adicionada",
-          description: `Foto do produto SKU ${sku} foi atualizada com sucesso.`,
+          description: `Foto do produto SKU ${sku} foi atualizada com sucesso na loja ${existingProduct.storeName}.`,
         });
       } else {
         toast({
