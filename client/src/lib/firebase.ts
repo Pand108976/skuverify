@@ -26,10 +26,13 @@ const getLocalStorageKey = () => {
 
 // Função para obter caminho da imagem baseado no SKU e categoria
 function getImagePath(sku: string, categoria: 'oculos' | 'cintos'): string | undefined {
-  // Define as extensões possíveis em ordem de prioridade
-  const extensions = ['.webp', '.jpg'];
+  // Para óculos, usar sempre .jpg primeiro (baseado na estrutura da pasta)
+  if (categoria === 'oculos') {
+    return `/images/oculos/${sku}.jpg`;
+  }
   
-  // Retorna o primeiro caminho encontrado
+  // Para cintos, priorizar .webp depois .jpg
+  const extensions = ['.webp', '.jpg'];
   for (const ext of extensions) {
     const imagePath = `/images/${categoria}/${sku}${ext}`;
     return imagePath;
