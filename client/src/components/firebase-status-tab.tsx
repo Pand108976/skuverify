@@ -46,7 +46,8 @@ export function FirebaseStatusTab() {
     const products = stored ? JSON.parse(stored) : [];
     setLocalProducts(products);
     
-    const lastSyncTime = localStorage.getItem(`luxury_last_sync_${storeId}`);
+    // Check for auto sync timestamp
+    const lastSyncTime = localStorage.getItem(`${localStorageKey}_last_sync`);
     if (lastSyncTime) {
       setLastSync(new Date(lastSyncTime).toLocaleString('pt-BR'));
     }
@@ -66,22 +67,19 @@ export function FirebaseStatusTab() {
   const syncWithFirebase = async () => {
     setLoading(true);
     try {
-      const storeId = localStorage.getItem('luxury_store_id') || 'default';
+      // Use the new auto sync function for manual sync
+      await firebase.autoSyncFromFirebase();
       
-      const products = await firebase.getProductsFromFirebase();
-      setLocalProducts(products);
-      
-      const now = new Date().toISOString();
-      localStorage.setItem(`luxury_last_sync_${storeId}`, now);
-      setLastSync(new Date(now).toLocaleString('pt-BR'));
+      // Reload local data to update UI
+      loadLocalData();
+      loadStoreProductCounts();
       
       toast({
-        title: "Sincronização Concluída",
-        description: `${products.length} produtos sincronizados com Firebase`,
+        title: "Sincronização Manual Concluída",
+        description: "Dados atualizados do Firebase",
       });
       
       setFirebaseStatus('connected');
-      loadStoreProductCounts();
     } catch (error) {
       console.error('Sync error:', error);
       setFirebaseStatus('error');
@@ -228,9 +226,13 @@ export function FirebaseStatusTab() {
                   <div className="flex items-center justify-center mb-2">
                     <RefreshCw className="text-purple-600" size={24} />
                   </div>
-                  <h3 className="font-semibold mb-1">Última Sincronização</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {lastSync || 'Nunca sincronizado'}
+                  <h3 className="font-semibold mb-1">Sincronização Automática</h3>
+                  <p className="text-xs text-green-600 font-medium mb-1">ATIVA</p>
+                  <p className="text-xs text-muted-foreground">
+                    Última: {lastSync || 'Nunca'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Próxima: 10 min
                   </p>
                 </CardContent>
               </Card>
@@ -408,6 +410,29 @@ export function FirebaseStatusTab() {
               </div>
               </div>
             )}
+
+            {/* Informações sobre Sincronização Automática */}
+            <Card className="border-l-4 border-l-green-500">
+              <CardContent className="p-6">
+                <div className="flex items-start space-x-3">
+                  <RefreshCw className="text-green-600 mt-1" size={20} />
+                  <div>
+                    <h3 className="font-semibold text-green-800 mb-2">Sistema de Sincronização Automática</h3>
+                    <div className="text-sm text-muted-foreground space-y-2">
+                      <p>✓ <strong>Sincronização inicial:</strong> Executada automaticamente ao carregar a página</p>
+                      <p>✓ <strong>Sincronização periódica:</strong> A cada 10 minutos em segundo plano</p>
+                      <p>✓ <strong>Sincronização inteligente:</strong> Apenas quando necessário (mais de 5 minutos desde a última)</p>
+                      <p>✓ <strong>Sincronização manual:</strong> Disponível nos botões acima quando precisar</p>
+                      <p className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                        <strong>Resultado:</strong> Você não precisa mais sincronizar constantemente. 
+                        O sistema mantém os dados atualizados automaticamente, mas os botões manuais 
+                        continuam disponíveis para quando você quiser forçar uma atualização.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </CardContent>
       </Card>

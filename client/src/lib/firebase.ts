@@ -717,5 +717,115 @@ export const firebase = {
       console.error('Error removing product from specific store:', error);
       throw new Error('Failed to remove product from store');
     }
+  },
+
+  // Automatic synchronization functions
+  async autoSyncFromFirebase(): Promise<void> {
+    const storeId = getStoreCollection();
+    const localStorageKey = getLocalStorageKey();
+    
+    try {
+      console.log(`Sincronização automática iniciada para ${storeId}...`);
+      
+      // Get current localStorage timestamp
+      const lastSyncKey = `${localStorageKey}_last_sync`;
+      const lastSync = localStorage.getItem(lastSyncKey);
+      const lastSyncTime = lastSync ? new Date(lastSync) : new Date(0);
+      
+      // Fetch from Firebase
+      const ocolosRef = collection(db, storeId, 'oculos', 'products');
+      const cintosRef = collection(db, storeId, 'cintos', 'products');
+      
+      const [ocolosSnapshot, cintosSnapshot] = await Promise.all([
+        getDocs(ocolosRef),
+        getDocs(cintosRef)
+      ]);
+      
+      const firebaseProducts: Product[] = [];
+      
+      // Process glasses
+      ocolosSnapshot.docs.forEach(doc => {
+        const data = doc.data();
+        const product: Product = {
+          id: doc.id,
+          sku: data.sku,
+          categoria: 'oculos' as const,
+          caixa: data.caixa,
+          imagem: data.imagem,
+          link: data.link,
+          onSale: data.onSale || false,
+          saleUpdatedAt: data.saleUpdatedAt?.toDate?.(),
+          brand: data.brand,
+          model: data.model,
+          createdAt: data.createdAt?.toDate?.() || new Date()
+        };
+        firebaseProducts.push(product);
+      });
+      
+      // Process belts
+      cintosSnapshot.docs.forEach(doc => {
+        const data = doc.data();
+        const product: Product = {
+          id: doc.id,
+          sku: data.sku,
+          categoria: 'cintos' as const,
+          caixa: data.caixa,
+          imagem: data.imagem,
+          link: data.link,
+          onSale: data.onSale || false,
+          saleUpdatedAt: data.saleUpdatedAt?.toDate?.(),
+          brand: data.brand,
+          model: data.model,
+          createdAt: data.createdAt?.toDate?.() || new Date()
+        };
+        firebaseProducts.push(product);
+      });
+      
+      // Update localStorage with Firebase data
+      localStorage.setItem(localStorageKey, JSON.stringify(firebaseProducts));
+      localStorage.setItem(lastSyncKey, new Date().toISOString());
+      
+      console.log(`${firebaseProducts.length} produtos sincronizados automaticamente do Firebase para "${storeId}"`);
+      
+    } catch (error) {
+      console.error('Erro na sincronização automática:', error);
+    }
+  },
+
+  async shouldAutoSync(): Promise<boolean> {
+    const localStorageKey = getLocalStorageKey();
+    const lastSyncKey = `${localStorageKey}_last_sync`;
+    const lastSync = localStorage.getItem(lastSyncKey);
+    
+    if (!lastSync) return true; // Never synced
+    
+    const lastSyncTime = new Date(lastSync);
+    const now = new Date();
+    const timeDiff = now.getTime() - lastSyncTime.getTime();
+    const minutesSinceSync = timeDiff / (1000 * 60);
+    
+    // Auto sync if more than 5 minutes since last sync
+    return minutesSinceSync > 5;
+  },
+
+  async startPeriodicSync(): Promise<void> {
+    // Auto sync every 10 minutes
+    setInterval(async () => {
+      if (await this.shouldAutoSync()) {
+        await this.autoSyncFromFirebase();
+      }
+    }, 10 * 60 * 1000);
+  },
+
+  async initializeAutoSync(): Promise<void> {
+    // Initial sync when page loads
+    if (await this.shouldAutoSync()) {
+      await this.autoSyncFromFirebase();
+    }
+    
+    // Start periodic background sync
+    await this.startPeriodicSync();
+    
+    console.log('Sistema de sincronização automática inicializado');
   }
 };

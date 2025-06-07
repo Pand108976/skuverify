@@ -32,8 +32,16 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
     setStoreName(currentStoreName);
     setIsAdmin(currentStoreId === 'admin');
     
-    // Atualizar Firebase: óculos para .jpg e cintos para .webp
-    firebase.updateAllProductsToCorrectExtensions();
+    // Initialize automatic synchronization system
+    const initializeApp = async () => {
+      // Update Firebase extensions first
+      await firebase.updateAllProductsToCorrectExtensions();
+      
+      // Initialize automatic sync (checks if sync needed and starts periodic sync)
+      await firebase.initializeAutoSync();
+    };
+    
+    initializeApp();
   }, []);
 
   const handleProductClick = (product: Product) => {
