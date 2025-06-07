@@ -31,8 +31,8 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
     setStoreName(currentStoreName);
     setIsAdmin(currentStoreId === 'admin');
     
-    // Iniciar sincronização automática
-    firebase.startAutoSync();
+    // Atualizar Firebase para usar apenas .jpg e iniciar sincronização
+    firebase.updateAllProductsToJpg();
   }, []);
 
   const handleProductClick = (product: Product) => {

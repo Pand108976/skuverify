@@ -24,38 +24,24 @@ const getLocalStorageKey = () => {
   return `luxury_products_${storeId}`;
 };
 
-// Função para obter caminho da imagem baseado no SKU e categoria
+// Função para obter caminho da imagem baseado no SKU e categoria (apenas .jpg)
 function getImagePath(sku: string, categoria: 'oculos' | 'cintos'): string | undefined {
-  // Define as extensões possíveis em ordem de prioridade
-  const extensions = ['.jpg', '.webp'];
-  
-  // Retorna o primeiro caminho encontrado
-  for (const ext of extensions) {
-    const imagePath = `/images/${categoria}/${sku}${ext}`;
-    return imagePath;
-  }
-  
-  return undefined;
+  return `/images/${categoria}/${sku}.jpg`;
 }
 
-// Função para verificar dinamicamente qual extensão de imagem existe
+// Função para verificar se a imagem .jpg existe
 async function getValidImagePath(sku: string, categoria: 'oculos' | 'cintos'): Promise<string | undefined> {
-  const extensions = ['.jpg', '.webp'];
+  const imagePath = `/images/${categoria}/${sku}.jpg`;
   
-  for (const ext of extensions) {
-    const imagePath = `/images/${categoria}/${sku}${ext}`;
-    try {
-      const response = await fetch(imagePath, { method: 'HEAD' });
-      if (response.ok) {
-        console.log(`Imagem encontrada para ${sku}: ${imagePath}`);
-        return imagePath;
-      }
-    } catch (error) {
-      // Continue para próxima extensão
+  try {
+    const response = await fetch(imagePath, { method: 'HEAD' });
+    if (response.ok) {
+      return imagePath;
     }
+  } catch (error) {
+    // Imagem não encontrada
   }
   
-  console.log(`Nenhuma imagem encontrada para ${sku} em ${categoria}`);
   return undefined;
 }
 
@@ -585,6 +571,51 @@ export const firebase = {
     console.log("Cache limpo, aplicando detecção dinâmica de imagens...");
     console.log("Verificando todas as imagens disponíveis...");
     await this.getProductsFromFirebase();
+  },
+
+  // Update all Firebase products to use .jpg paths only
+  async updateAllProductsToJpg(): Promise<void> {
+    console.log("Atualizando todos os produtos para usar apenas caminhos .jpg...");
+    
+    try {
+      const storeId = getStoreCollection();
+      
+      // Update glasses products
+      const oculosRef = collection(db, storeId, 'oculos', 'products');
+      const oculosSnapshot = await getDocs(oculosRef);
+      
+      for (const doc of oculosSnapshot.docs) {
+        const data = doc.data();
+        const jpgPath = `/images/oculos/${data.sku}.jpg`;
+        
+        await setDoc(doc.ref, {
+          ...data,
+          imagem: jpgPath
+        });
+      }
+      
+      // Update belt products
+      const cintosRef = collection(db, storeId, 'cintos', 'products');
+      const cintosSnapshot = await getDocs(cintosRef);
+      
+      for (const doc of cintosSnapshot.docs) {
+        const data = doc.data();
+        const jpgPath = `/images/cintos/${data.sku}.jpg`;
+        
+        await setDoc(doc.ref, {
+          ...data,
+          imagem: jpgPath
+        });
+      }
+      
+      console.log(`Firebase atualizado: ${oculosSnapshot.size} óculos e ${cintosSnapshot.size} cintos agora usam .jpg`);
+      
+      // Force refresh to apply changes
+      await this.forceRefreshImages();
+      
+    } catch (error) {
+      console.error("Erro ao atualizar produtos para .jpg:", error);
+    }
   },
 
   // Initialize and apply dynamic image detection to all products
