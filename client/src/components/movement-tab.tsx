@@ -24,7 +24,9 @@ export function MovementTab() {
 
   const availableStores = [
     { id: 'patiobatel', name: 'Patio Batel' },
-    { id: 'village', name: 'Village' }
+    { id: 'village', name: 'Village' },
+    { id: 'jk', name: 'JK' },
+    { id: 'iguatemi', name: 'Iguatemi' }
   ];
 
   useEffect(() => {

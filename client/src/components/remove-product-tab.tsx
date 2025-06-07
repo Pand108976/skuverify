@@ -26,7 +26,9 @@ export function RemoveProductTab() {
   
   const availableStores = [
     { id: 'patiobatel', name: 'Patio Batel' },
-    { id: 'village', name: 'Village' }
+    { id: 'village', name: 'Village' },
+    { id: 'jk', name: 'JK' },
+    { id: 'iguatemi', name: 'Iguatemi' }
   ];
 
   // Função para obter usuários baseado na loja atual ou selecionada
