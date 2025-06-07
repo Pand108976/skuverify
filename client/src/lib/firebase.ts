@@ -26,16 +26,32 @@ const getLocalStorageKey = () => {
 
 // Função para obter caminho da imagem baseado no SKU e categoria
 function getImagePath(sku: string, categoria: 'oculos' | 'cintos'): string | undefined {
-  // Para óculos, usar sempre .jpg primeiro (baseado na estrutura da pasta)
-  if (categoria === 'oculos') {
-    return `/images/oculos/${sku}.jpg`;
-  }
+  // Define as extensões possíveis em ordem de prioridade
+  const extensions = ['.jpg', '.webp'];
   
-  // Para cintos, priorizar .webp depois .jpg
-  const extensions = ['.webp', '.jpg'];
+  // Retorna o primeiro caminho encontrado
   for (const ext of extensions) {
     const imagePath = `/images/${categoria}/${sku}${ext}`;
     return imagePath;
+  }
+  
+  return undefined;
+}
+
+// Função para verificar dinamicamente qual extensão de imagem existe
+async function getValidImagePath(sku: string, categoria: 'oculos' | 'cintos'): Promise<string | undefined> {
+  const extensions = ['.jpg', '.webp'];
+  
+  for (const ext of extensions) {
+    const imagePath = `/images/${categoria}/${sku}${ext}`;
+    try {
+      const response = await fetch(imagePath, { method: 'HEAD' });
+      if (response.ok) {
+        return imagePath;
+      }
+    } catch (error) {
+      // Continue para próxima extensão
+    }
   }
   
   return undefined;
@@ -100,34 +116,34 @@ export const firebase = {
       // Buscar produtos de óculos
       const oculosRef = collection(db, storeId, 'oculos', 'products');
       const oculosSnapshot = await getDocs(oculosRef);
-      oculosSnapshot.forEach((doc) => {
+      for (const doc of oculosSnapshot.docs) {
         const data = doc.data();
-        const imagePath = data.imagem || getImagePath(data.sku, 'oculos');
+        const validImagePath = await getValidImagePath(data.sku, 'oculos');
         const productLink = data.link || getProductLink(data.sku);
         firebaseProducts.push({ 
           id: doc.id, 
           categoria: 'oculos',
           ...data,
-          imagem: imagePath,
+          imagem: validImagePath,
           link: productLink
         } as Product);
-      });
+      }
       
       // Buscar produtos de cintos
       const cintosRef = collection(db, storeId, 'cintos', 'products');
       const cintosSnapshot = await getDocs(cintosRef);
-      cintosSnapshot.forEach((doc) => {
+      for (const doc of cintosSnapshot.docs) {
         const data = doc.data();
-        const imagePath = data.imagem || getImagePath(data.sku, 'cintos');
+        const validImagePath = await getValidImagePath(data.sku, 'cintos');
         const productLink = data.link || getProductLink(data.sku);
         firebaseProducts.push({ 
           id: doc.id, 
           categoria: 'cintos',
           ...data,
-          imagem: imagePath,
+          imagem: validImagePath,
           link: productLink
         } as Product);
-      });
+      }
       
       // Atualiza localStorage com dados do Firebase
       localStorage.setItem(localStorageKey, JSON.stringify(firebaseProducts));
@@ -211,8 +227,8 @@ export const firebase = {
     const storeId = getStoreCollection();
     const localStorageKey = getLocalStorageKey();
     
-    // Adiciona automaticamente o caminho da imagem se não fornecido
-    const imagePath = product.imagem || getImagePath(product.sku, product.categoria);
+    // Detecta automaticamente o caminho válido da imagem
+    const validImagePath = product.imagem || await getValidImagePath(product.sku, product.categoria);
     
     // Atualiza localStorage primeiro para velocidade
     const stored = localStorage.getItem(localStorageKey);
@@ -220,7 +236,7 @@ export const firebase = {
     const newProduct = { 
       ...product, 
       id: product.sku, 
-      imagem: imagePath || undefined, 
+      imagem: validImagePath || undefined, 
       createdAt: new Date() 
     };
     
