@@ -703,7 +703,7 @@ export const firebase = {
   // Remove product from specific store (for admin multi-store sales)
   async removeProductFromSpecificStore(sku: string, storeId: string, category: 'oculos' | 'cintos'): Promise<void> {
     try {
-      // Find product in specific store
+      // Remove from Firebase
       const storeCollection = collection(db, storeId, category, 'products');
       const q = query(storeCollection, where("sku", "==", sku));
       const querySnapshot = await getDocs(q);
@@ -711,10 +711,21 @@ export const firebase = {
       if (!querySnapshot.empty) {
         const productDoc = querySnapshot.docs[0];
         await deleteDoc(productDoc.ref);
-        console.log(`Product ${sku} removed from ${storeId}/${category}`);
+        console.log(`Product ${sku} removed from Firebase ${storeId}/${category}`);
       } else {
         throw new Error(`Product ${sku} not found in ${storeId}/${category}`);
       }
+      
+      // Remove from localStorage of the specific store
+      const localStorageKey = `luxury_products_${storeId}`;
+      const stored = localStorage.getItem(localStorageKey);
+      if (stored) {
+        const products = JSON.parse(stored);
+        const updatedProducts = products.filter((p: any) => p.sku !== sku);
+        localStorage.setItem(localStorageKey, JSON.stringify(updatedProducts));
+        console.log(`Product ${sku} removed from localStorage for store ${storeId}`);
+      }
+      
     } catch (error) {
       console.error('Error removing product from specific store:', error);
       throw new Error('Failed to remove product from store');
