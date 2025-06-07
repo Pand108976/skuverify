@@ -299,6 +299,7 @@ export function PromotionsTab({ localProducts, setLocalProducts }: PromotionsTab
                   value={skuInput}
                   onChange={(e) => setSkuInput(e.target.value)}
                   className="min-h-[120px] text-sm"
+                  inputMode="numeric"
                 />
                 <div className="flex gap-3 mt-4">
                   <Button 

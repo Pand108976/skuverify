@@ -127,6 +127,7 @@ export function SearchTab({ isAdmin = false }: SearchTabProps) {
               onKeyPress={handleKeyPress}
               className="luxury-input text-lg py-4"
               placeholder=" "
+              inputMode="numeric"
             />
             <Label htmlFor="skuSearch" className="text-lg font-medium">Digite o SKU</Label>
           </div>
