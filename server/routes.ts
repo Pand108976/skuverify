@@ -38,7 +38,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Create directory if it doesn't exist
-      const imageDir = path.join(process.cwd(), 'public', 'images', category);
+      const imageDir = path.join(process.cwd(), 'images', category);
       if (!fs.existsSync(imageDir)) {
         fs.mkdirSync(imageDir, { recursive: true });
       }
