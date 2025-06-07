@@ -34,7 +34,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
       localStorage.setItem('luxury_store_name', getStoreName(storeId));
       onLogin();
     } else {
-      setError("Credenciais inválidas. Use: patiobatel/patiobatel, village/village ou admin/1234");
+      setError("Credenciais inválidas. Tente novamente.");
       setTimeout(() => setError(""), 3000);
     }
   };
