@@ -392,7 +392,7 @@ export function FirebaseStatusTab() {
                               </>
                             ) : (
                               <>
-                                <Plus className="mr-1" size={14} />
+                                <RefreshCw className="mr-1" size={14} />
                                 Criar Coleção
                               </>
                             )}
@@ -420,15 +420,37 @@ export function FirebaseStatusTab() {
                         {storeCounts.iguatemi || 0} produtos
                       </Badge>
                       <div className="flex space-x-2">
-                        <Button 
-                          onClick={() => syncStoreData('iguatemi', 'Iguatemi')}
-                          disabled={loading}
-                          size="sm"
-                          variant="outline"
-                        >
-                          <RefreshCw className="mr-1" size={14} />
-                          Sync
-                        </Button>
+                        {storeCollectionStatus.iguatemi && (storeCollectionStatus.iguatemi.oculos || storeCollectionStatus.iguatemi.cintos) ? (
+                          <Button 
+                            onClick={() => syncStoreData('iguatemi', 'Iguatemi')}
+                            disabled={loading}
+                            size="sm"
+                            variant="outline"
+                          >
+                            <RefreshCw className="mr-1" size={14} />
+                            Sync
+                          </Button>
+                        ) : (
+                          <Button 
+                            onClick={() => createStoreCollection('iguatemi', 'Iguatemi')}
+                            disabled={creatingCollections.iguatemi}
+                            size="sm"
+                            variant="default"
+                            className="bg-teal-600 hover:bg-teal-700 text-white"
+                          >
+                            {creatingCollections.iguatemi ? (
+                              <>
+                                <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin mr-1" />
+                                Criando...
+                              </>
+                            ) : (
+                              <>
+                                <RefreshCw className="mr-1" size={14} />
+                                Criar Coleção
+                              </>
+                            )}
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </div>
