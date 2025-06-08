@@ -274,10 +274,10 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
           {products.map((product, index) => (
             <Card 
               key={`${product.sku}-${index}`}
-              className="product-card overflow-hidden cursor-pointer premium-shadow hover:shadow-xl transition-all duration-300"
+              className="product-card overflow-hidden cursor-pointer premium-shadow hover:shadow-xl transition-all duration-300 relative"
               onClick={() => onProductClick(product)}
             >
-              <div className="aspect-[4/3] overflow-hidden bg-gradient-to-br from-muted/20 to-muted/40">
+              <div className="aspect-[4/3] overflow-hidden bg-gradient-to-br from-muted/20 to-muted/40 relative">
                 <ProductImage 
                   sku={product.sku}
                   categoria={product.categoria}
@@ -285,15 +285,17 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
                   className="w-full h-full"
                   alt={`Produto ${product.sku}`}
                 />
+                {product.onSale && (
+                  <div className="absolute top-2 right-2 z-10">
+                    <span className="text-[11px] sm:text-xs bg-gradient-to-r from-red-500 to-orange-500 text-white px-2.5 py-1.5 rounded-lg font-bold shadow-lg whitespace-nowrap border border-white/70 backdrop-blur-sm">
+                      PROMOÇÃO
+                    </span>
+                  </div>
+                )}
               </div>
               <div className="p-4 bg-gradient-to-r from-background to-muted/10">
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="font-bold text-luxury-dark text-lg">{product.sku}</h3>
-                  {product.onSale && (
-                    <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-semibold">
-                      PROMOÇÃO
-                    </span>
-                  )}
                 </div>
                 <p className="text-sm text-muted-foreground font-medium">Caixa: {product.caixa}</p>
                 
