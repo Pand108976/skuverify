@@ -156,13 +156,23 @@ export function PromotionsTab({ localProducts, setLocalProducts }: PromotionsTab
           for (const sku of skusToPromote) {
             const productIndex = storeProducts.findIndex((p: any) => p.sku === sku);
             if (productIndex !== -1) {
-              storeProducts[productIndex] = {
+              const updatedProduct = {
                 ...storeProducts[productIndex],
                 onSale: true,
                 saleUpdatedAt: new Date().toISOString()
               };
+              
+              storeProducts[productIndex] = updatedProduct;
               updatedCount++;
               console.log(`Marked SKU ${sku} as promotion in ${store.name}`);
+              
+              // Save to Firebase to persist the promotion
+              try {
+                await firebase.saveProductToSpecificStore(updatedProduct, store.id);
+                console.log(`SKU ${sku} promotion saved to Firebase for ${store.name}`);
+              } catch (firebaseError) {
+                console.error(`Failed to save promotion to Firebase for SKU ${sku}:`, firebaseError);
+              }
             }
           }
           
@@ -230,12 +240,22 @@ export function PromotionsTab({ localProducts, setLocalProducts }: PromotionsTab
           for (const sku of skusToPromote) {
             const productIndex = storeProducts.findIndex((p: any) => p.sku === sku);
             if (productIndex !== -1) {
-              storeProducts[productIndex] = {
+              const updatedProduct = {
                 ...storeProducts[productIndex],
                 onSale: false,
                 saleUpdatedAt: new Date().toISOString()
               };
+              
+              storeProducts[productIndex] = updatedProduct;
               console.log(`Removed SKU ${sku} from promotion in ${store.name}`);
+              
+              // Save to Firebase to persist the promotion removal
+              try {
+                await firebase.saveProductToSpecificStore(updatedProduct, store.id);
+                console.log(`SKU ${sku} promotion removal saved to Firebase for ${store.name}`);
+              } catch (firebaseError) {
+                console.error(`Failed to save promotion removal to Firebase for SKU ${sku}:`, firebaseError);
+              }
             }
           }
           
