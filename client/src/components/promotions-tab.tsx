@@ -47,59 +47,24 @@ export function PromotionsTab({ localProducts, setLocalProducts }: PromotionsTab
     const skus = skuInput.split(/[\n,;]/).map(s => s.trim()).filter(Boolean);
 
     try {
-      const stores = [
-        { id: 'patiobatel', name: 'Patio Batel' },
-        { id: 'village', name: 'Village' },
-        { id: 'jk', name: 'JK' },
-        { id: 'iguatemi', name: 'Iguatemi' }
-      ];
-      
-      for (const store of stores) {
+      // Buscar cada SKU diretamente no Firebase em todas as lojas
+      for (const sku of skus) {
         try {
-          // Get stored products for this store from localStorage
-          let storeProducts = [];
-          const localStorageKey = `luxury_products_${store.id}`;
-          const stored = localStorage.getItem(localStorageKey);
+          const searchResults = await firebase.searchProductInAllStores(sku);
           
-          if (stored) {
-            storeProducts = JSON.parse(stored);
-          } else {
-            // Se não tiver no localStorage, tentar buscar do Firebase
-            try {
-              const originalStoreId = localStorage.getItem('luxury_store_id');
-              localStorage.setItem('luxury_store_id', store.id);
-              
-              const oculosProducts = await firebase.getProductsFromFirebase('oculos');
-              const cintosProducts = await firebase.getProductsFromFirebase('cintos');
-              storeProducts = [...oculosProducts, ...cintosProducts];
-              
-              // Restaurar o store original
-              if (originalStoreId) {
-                localStorage.setItem('luxury_store_id', originalStoreId);
-              }
-            } catch (firebaseError) {
-              console.error(`Error fetching from Firebase for ${store.id}:`, firebaseError);
-            }
-          }
-          
-          console.log(`Searching in store ${store.id}: found ${storeProducts.length} products`);
-          
-          for (const sku of skus) {
-            const foundProduct = storeProducts.find((p: any) => p.sku === sku);
-            if (foundProduct) {
-              console.log(`SKU ${sku} found in ${store.name}`);
-              results.push({
-                sku: foundProduct.sku,
-                categoria: foundProduct.categoria,
-                store: store.name,
-                brand: foundProduct.brand,
-                model: foundProduct.model,
-                isOnSale: foundProduct.onSale || false
-              });
-            }
+          for (const product of searchResults) {
+            console.log(`SKU ${sku} found in ${product.storeName}`);
+            results.push({
+              sku: product.sku,
+              categoria: product.categoria,
+              store: product.storeName,
+              brand: product.brand,
+              model: product.model,
+              isOnSale: product.onSale || false
+            });
           }
         } catch (error) {
-          console.error(`Error searching in store ${store.id}:`, error);
+          console.error(`Error searching SKU ${sku} in Firebase:`, error);
         }
       }
 
