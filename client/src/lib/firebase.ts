@@ -693,6 +693,7 @@ export const firebase = {
       if (product.saleUpdatedAt) firebaseData.saleUpdatedAt = product.saleUpdatedAt;
       if (product.brand) firebaseData.brand = product.brand;
       if (product.model) firebaseData.model = product.model;
+      if (product.gender) firebaseData.gender = product.gender;
       
       await setDoc(productRef, firebaseData);
       
@@ -732,6 +733,7 @@ export const firebase = {
       if (product.saleUpdatedAt) firebaseData.saleUpdatedAt = product.saleUpdatedAt;
       if (product.brand) firebaseData.brand = product.brand;
       if (product.model) firebaseData.model = product.model;
+      if (product.gender) firebaseData.gender = product.gender;
       
       await setDoc(productRef, firebaseData);
       console.log(`Product ${product.sku} saved to Firebase for store ${storeId}`);

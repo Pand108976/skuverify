@@ -57,11 +57,32 @@ export function PromotionsTab({ localProducts, setLocalProducts }: PromotionsTab
       for (const store of stores) {
         try {
           // Get stored products for this store from localStorage
+          let storeProducts = [];
           const localStorageKey = `luxury_products_${store.id}`;
           const stored = localStorage.getItem(localStorageKey);
-          const storeProducts = stored ? JSON.parse(stored) : [];
           
-          console.log(`Searching in store ${store.id}: found ${storeProducts.length} products in localStorage`);
+          if (stored) {
+            storeProducts = JSON.parse(stored);
+          } else {
+            // Se não tiver no localStorage, tentar buscar do Firebase
+            try {
+              const originalStoreId = localStorage.getItem('luxury_store_id');
+              localStorage.setItem('luxury_store_id', store.id);
+              
+              const oculosProducts = await firebase.getProductsFromFirebase('oculos');
+              const cintosProducts = await firebase.getProductsFromFirebase('cintos');
+              storeProducts = [...oculosProducts, ...cintosProducts];
+              
+              // Restaurar o store original
+              if (originalStoreId) {
+                localStorage.setItem('luxury_store_id', originalStoreId);
+              }
+            } catch (firebaseError) {
+              console.error(`Error fetching from Firebase for ${store.id}:`, firebaseError);
+            }
+          }
+          
+          console.log(`Searching in store ${store.id}: found ${storeProducts.length} products`);
           
           for (const sku of skus) {
             const foundProduct = storeProducts.find((p: any) => p.sku === sku);
