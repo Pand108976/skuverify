@@ -58,12 +58,13 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
       const masculineBelts = products.filter(p => 
         p.gender === 'masculino' || (!p.gender && !feminineBoxes.includes(p.caixa))
       );
-      return { feminine: feminineBelts, masculine: masculineBelts };
+      return { feminine: feminineBelts, masculine: masculineBelts, unclassified: [] };
     } else {
-      // Para óculos, mostrar produtos sem gênero definido em ambas as seções
-      const feminineProducts = products.filter(p => p.gender === 'feminino' || !p.gender);
-      const masculineProducts = products.filter(p => p.gender === 'masculino' || !p.gender);
-      return { feminine: feminineProducts, masculine: masculineProducts };
+      // Para óculos, separar por gênero definido vs não definido
+      const feminineProducts = products.filter(p => p.gender === 'feminino');
+      const masculineProducts = products.filter(p => p.gender === 'masculino');
+      const unclassifiedProducts = products.filter(p => !p.gender);
+      return { feminine: feminineProducts, masculine: masculineProducts, unclassified: unclassifiedProducts };
     }
   };
 
@@ -111,9 +112,73 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
         // Layout com divisão por gênero para todas as categorias
         <div>
           {(() => {
-            const { feminine, masculine } = getCategorizedProducts();
+            const { feminine, masculine, unclassified } = getCategorizedProducts();
             return (
               <>
+                {/* Seção Sem Classificação (para óculos existentes) */}
+                {unclassified.length > 0 && (
+                  <div className="mb-12">
+                    <div className="flex items-center mb-6">
+                      <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mr-4">
+                        <span className="text-gray-600 font-bold">?</span>
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-ferragamo-dark">{category === 'oculos' ? 'Óculos (Sem Classificação)' : 'Produtos (Sem Classificação)'}</h3>
+                        <p className="text-muted-foreground">{unclassified.length} produtos</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-6">
+                      {unclassified.map((product: Product, index: number) => (
+                        <Card 
+                          key={`unclassified-${product.sku}-${index}`}
+                          className="product-card overflow-hidden cursor-pointer premium-shadow hover:shadow-xl transition-all duration-300 border-gray-200"
+                          onClick={() => onProductClick(product)}
+                        >
+                          <div className="aspect-[4/3] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 relative">
+                            <ProductImage 
+                              sku={product.sku}
+                              categoria={product.categoria}
+                              imagePath={product.imagem}
+                              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                            />
+                            {product.onSale && (
+                              <div className="absolute top-2 right-2 z-10">
+                                <span className="text-[11px] sm:text-xs bg-orange-500/90 text-white px-2.5 py-1.5 rounded-lg font-bold shadow-lg whitespace-nowrap border border-white/70 backdrop-blur-sm">
+                                  PROMOÇÃO
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="p-4 space-y-3">
+                            <div className="flex justify-between items-start">
+                              <h3 className="font-bold text-ferragamo-dark">SKU {product.sku}</h3>
+                              <div className="flex flex-col gap-1">
+                                <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">
+                                  Caixa {product.caixa}
+                                </span>
+                              </div>
+                            </div>
+                            {product.link && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="w-full"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  window.open(product.link, '_blank');
+                                }}
+                              >
+                                <ExternalLink size={14} className="mr-2" />
+                                Ver Produto
+                              </Button>
+                            )}
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Seção Feminina */}
                 {feminine.length > 0 && (
                   <div className="mb-12">
