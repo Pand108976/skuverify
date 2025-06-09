@@ -142,7 +142,7 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
                             />
                             {product.onSale && (
                               <div className="absolute top-2 right-2 z-10">
-                                <span className="text-[11px] sm:text-xs bg-gradient-to-r from-red-500 to-orange-500 text-white px-2.5 py-1.5 rounded-lg font-bold shadow-lg whitespace-nowrap border border-white/70">
+                                <span className="text-[11px] sm:text-xs bg-orange-500/90 text-white px-2.5 py-1.5 rounded-lg font-bold shadow-lg whitespace-nowrap border border-white/70 backdrop-blur-sm">
                                   PROMOÇÃO
                                 </span>
                               </div>
@@ -206,7 +206,7 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
                             />
                             {product.onSale && (
                               <div className="absolute top-2 right-2 z-10">
-                                <span className="text-[11px] sm:text-xs bg-gradient-to-r from-red-500 to-orange-500 text-white px-2.5 py-1.5 rounded-lg font-bold shadow-lg whitespace-nowrap border border-white/70">
+                                <span className="text-[11px] sm:text-xs bg-orange-500/90 text-white px-2.5 py-1.5 rounded-lg font-bold shadow-lg whitespace-nowrap border border-white/70 backdrop-blur-sm">
                                   PROMOÇÃO
                                 </span>
                               </div>
