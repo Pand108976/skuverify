@@ -60,9 +60,9 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
       );
       return { feminine: feminineBelts, masculine: masculineBelts };
     } else {
-      // Para óculos, usar apenas o campo gender
-      const feminineProducts = products.filter(p => p.gender === 'feminino');
-      const masculineProducts = products.filter(p => p.gender === 'masculino');
+      // Para óculos, mostrar produtos sem gênero definido em ambas as seções
+      const feminineProducts = products.filter(p => p.gender === 'feminino' || !p.gender);
+      const masculineProducts = products.filter(p => p.gender === 'masculino' || !p.gender);
       return { feminine: feminineProducts, masculine: masculineProducts };
     }
   };

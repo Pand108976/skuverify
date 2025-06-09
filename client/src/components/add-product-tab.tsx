@@ -48,7 +48,7 @@ export function AddProductTab() {
 
   const handleGenderSelect = (gender: 'masculino' | 'feminino') => {
     setSelectedGender(gender);
-    setStep(isAdmin ? 3 : 2);
+    // Não muda o step - mantém as opções visíveis
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -293,12 +293,23 @@ export function AddProductTab() {
                     </div>
                   </Button>
                 </div>
+                
+                {/* Botão Continuar */}
+                {selectedGender && (
+                  <div className="mt-6 text-center">
+                    <Button
+                      onClick={() => setStep(isAdmin ? 3 : 2)}
+                      className="gold-gradient text-white font-semibold px-8 py-3"
+                    >
+                      Continuar
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
             
             {/* Step 3: Product Details */}
-            {((!isAdmin && step >= 2) || (isAdmin && step >= 3)) && selectedCategory && 
-             (selectedCategory === 'oculos' || (selectedCategory === 'cintos' && selectedGender)) && (
+            {((!isAdmin && step >= 2) || (isAdmin && step >= 3)) && selectedCategory && selectedGender && (
               <div>
                 <h3 className="text-lg font-semibold mb-4">{isAdmin ? '3' : '2'}. Dados do Produto:</h3>
                 <form onSubmit={handleSubmit} className="space-y-6">
