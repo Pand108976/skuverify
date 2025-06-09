@@ -48,7 +48,6 @@ export function AddProductTab() {
 
   const handleGenderSelect = (gender: 'masculino' | 'feminino') => {
     setSelectedGender(gender);
-    // Não muda o step - mantém as opções visíveis
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -249,21 +248,7 @@ export function AddProductTab() {
             {/* Step 2.5: Select Gender for Products */}
             {((!isAdmin && step >= 2.5) || (isAdmin && step >= 2.5)) && selectedCategory && (
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">{isAdmin ? '2.5' : '1.5'}. Selecione o Gênero:</h3>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setSelectedCategory('');
-                      setSelectedGender('');
-                      setStep(2);
-                    }}
-                    className="text-xs"
-                  >
-                    ← Voltar
-                  </Button>
-                </div>
+                <h3 className="text-lg font-semibold mb-4">{isAdmin ? '2.5' : '1.5'}. Selecione o Gênero:</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <Button
                     variant={selectedGender === 'masculino' ? 'default' : 'outline'}
@@ -293,23 +278,11 @@ export function AddProductTab() {
                     </div>
                   </Button>
                 </div>
-                
-                {/* Botão Continuar */}
-                {selectedGender && (
-                  <div className="mt-6 text-center">
-                    <Button
-                      onClick={() => setStep(isAdmin ? 3 : 2)}
-                      className="gold-gradient text-white font-semibold px-8 py-3"
-                    >
-                      Continuar
-                    </Button>
-                  </div>
-                )}
               </div>
             )}
             
             {/* Step 3: Product Details */}
-            {((!isAdmin && step >= 2) || (isAdmin && step >= 3)) && selectedCategory && selectedGender && (
+            {selectedCategory && selectedGender && (
               <div>
                 <h3 className="text-lg font-semibold mb-4">{isAdmin ? '3' : '2'}. Dados do Produto:</h3>
                 <form onSubmit={handleSubmit} className="space-y-6">
