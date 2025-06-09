@@ -96,6 +96,22 @@ export function ProductModal({ product, open, onClose }: ProductModalProps) {
               </div>
             </div>
 
+            {/* Status de Promoção */}
+            {product.onSale && (
+              <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 bg-gradient-to-r from-red-500 to-orange-500 rounded-full"></div>
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-orange-600 uppercase">Status</p>
+                    <p className="font-bold text-orange-800">Em Promoção</p>
+                  </div>
+                  <Badge className="text-xs px-2 py-1 bg-gradient-to-r from-red-500 to-orange-500 text-white">
+                    PROMOÇÃO
+                  </Badge>
+                </div>
+              </div>
+            )}
+
             {/* Botão Visitar Site */}
             {product.link && (
               <div className="mt-4">

@@ -160,13 +160,20 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
                           className="product-card overflow-hidden cursor-pointer premium-shadow hover:shadow-xl transition-all duration-300 border-pink-200"
                           onClick={() => onProductClick(product)}
                         >
-                          <div className="aspect-[4/3] overflow-hidden bg-gradient-to-br from-pink-50 to-pink-100">
+                          <div className="aspect-[4/3] overflow-hidden bg-gradient-to-br from-pink-50 to-pink-100 relative">
                             <ProductImage 
                               sku={product.sku}
                               categoria={product.categoria}
                               imagePath={product.imagem}
                               className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                             />
+                            {product.onSale && (
+                              <div className="absolute inset-0 bg-orange-500/30 backdrop-blur-[1px] flex items-start justify-end p-2">
+                                <span className="text-[11px] sm:text-xs bg-gradient-to-r from-red-500 to-orange-500 text-white px-2.5 py-1.5 rounded-lg font-bold shadow-lg whitespace-nowrap border border-white/70">
+                                  PROMOÇÃO
+                                </span>
+                              </div>
+                            )}
                           </div>
                           <div className="p-4 space-y-3">
                             <div className="flex justify-between items-start">
@@ -222,13 +229,20 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
                           className="product-card overflow-hidden cursor-pointer premium-shadow hover:shadow-xl transition-all duration-300 border-blue-200"
                           onClick={() => onProductClick(product)}
                         >
-                          <div className="aspect-[4/3] overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100">
+                          <div className="aspect-[4/3] overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100 relative">
                             <ProductImage 
                               sku={product.sku}
                               categoria={product.categoria}
                               imagePath={product.imagem}
                               className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                             />
+                            {product.onSale && (
+                              <div className="absolute inset-0 bg-orange-500/30 backdrop-blur-[1px] flex items-start justify-end p-2">
+                                <span className="text-[11px] sm:text-xs bg-gradient-to-r from-red-500 to-orange-500 text-white px-2.5 py-1.5 rounded-lg font-bold shadow-lg whitespace-nowrap border border-white/70">
+                                  PROMOÇÃO
+                                </span>
+                              </div>
+                            )}
                           </div>
                           <div className="p-4 space-y-3">
                             <div className="flex justify-between items-start">
