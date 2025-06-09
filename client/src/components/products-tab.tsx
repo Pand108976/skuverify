@@ -286,8 +286,8 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
                   alt={`Produto ${product.sku}`}
                 />
                 {product.onSale && (
-                  <div className="absolute top-2 right-2 z-10">
-                    <span className="text-[11px] sm:text-xs bg-gradient-to-r from-red-500 to-orange-500 text-white px-2.5 py-1.5 rounded-lg font-bold shadow-lg whitespace-nowrap border border-white/70 backdrop-blur-sm">
+                  <div className="absolute inset-0 bg-orange-500/30 backdrop-blur-[1px] flex items-start justify-end p-2">
+                    <span className="text-[11px] sm:text-xs bg-gradient-to-r from-red-500 to-orange-500 text-white px-2.5 py-1.5 rounded-lg font-bold shadow-lg whitespace-nowrap border border-white/70">
                       PROMOÇÃO
                     </span>
                   </div>

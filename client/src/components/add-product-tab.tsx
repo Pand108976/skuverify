@@ -11,6 +11,7 @@ export function AddProductTab() {
   const [step, setStep] = useState(1);
   const [selectedStore, setSelectedStore] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'oculos' | 'cintos' | ''>('');
+  const [selectedGender, setSelectedGender] = useState<'masculino' | 'feminino' | ''>('');
   const [sku, setSku] = useState("");
   const [caixa, setCaixa] = useState("");
   const [loading, setLoading] = useState(false);
@@ -31,6 +32,7 @@ export function AddProductTab() {
   const handleStoreSelect = (storeId: string) => {
     setSelectedStore(storeId);
     setSelectedCategory('');
+    setSelectedGender('');
     setSku('');
     setCaixa('');
     setStep(2);
@@ -38,6 +40,17 @@ export function AddProductTab() {
 
   const handleCategorySelect = (category: 'oculos' | 'cintos') => {
     setSelectedCategory(category);
+    setSelectedGender('');
+    
+    if (category === 'cintos') {
+      setStep(isAdmin ? 3 : 2.5); // Passo intermediário para gênero
+    } else {
+      setStep(isAdmin ? 3 : 2);
+    }
+  };
+
+  const handleGenderSelect = (gender: 'masculino' | 'feminino') => {
+    setSelectedGender(gender);
     setStep(isAdmin ? 3 : 2);
   };
 
@@ -74,7 +87,8 @@ export function AddProductTab() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!sku.trim() || !selectedCategory || !caixa.trim() || (isAdmin && !selectedStore)) {
+    if (!sku.trim() || !selectedCategory || !caixa.trim() || (isAdmin && !selectedStore) || 
+        (selectedCategory === 'cintos' && !selectedGender)) {
       toast({
         title: "Erro",
         description: "Preencha todos os campos obrigatórios",
@@ -122,6 +136,7 @@ export function AddProductTab() {
         sku: sku.trim().toUpperCase(),
         categoria: selectedCategory as 'oculos' | 'cintos',
         caixa: caixa.trim(),
+        ...(selectedCategory === 'cintos' && selectedGender && { gender: selectedGender })
       };
       
       await firebase.addProduct(productData);
@@ -234,9 +249,46 @@ export function AddProductTab() {
                 </div>
               </div>
             )}
+
+            {/* Step 2.5: Select Gender for Belts */}
+            {((!isAdmin && step >= 2.5) || (isAdmin && step >= 2.5)) && selectedCategory === 'cintos' && (
+              <div>
+                <h3 className="text-lg font-semibold mb-4">{isAdmin ? '2.5' : '1.5'}. Selecione o Gênero:</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <Button
+                    variant={selectedGender === 'masculino' ? 'default' : 'outline'}
+                    className={`p-6 h-auto ${selectedGender === 'masculino' ? 'gold-gradient text-white' : 'border-2 hover:border-primary'}`}
+                    onClick={() => handleGenderSelect('masculino')}
+                  >
+                    <div className="text-center">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-3">
+                        <circle cx="12" cy="8" r="3"/>
+                        <path d="M16 20v-2a4 4 0 0 0-8 0v2"/>
+                      </svg>
+                      <p className="font-semibold">Masculino</p>
+                    </div>
+                  </Button>
+                  <Button
+                    variant={selectedGender === 'feminino' ? 'default' : 'outline'}
+                    className={`p-6 h-auto ${selectedGender === 'feminino' ? 'gold-gradient text-white' : 'border-2 hover:border-primary'}`}
+                    onClick={() => handleGenderSelect('feminino')}
+                  >
+                    <div className="text-center">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-3">
+                        <circle cx="12" cy="8" r="3"/>
+                        <path d="M16 18v2a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-2"/>
+                        <path d="M8 14h8l-2-6H10z"/>
+                      </svg>
+                      <p className="font-semibold">Feminino</p>
+                    </div>
+                  </Button>
+                </div>
+              </div>
+            )}
             
             {/* Step 3: Product Details */}
-            {((!isAdmin && step >= 2) || (isAdmin && step >= 3)) && selectedCategory && (
+            {((!isAdmin && step >= 2) || (isAdmin && step >= 3)) && selectedCategory && 
+             (selectedCategory === 'oculos' || (selectedCategory === 'cintos' && selectedGender)) && (
               <div>
                 <h3 className="text-lg font-semibold mb-4">{isAdmin ? '3' : '2'}. Dados do Produto:</h3>
                 <form onSubmit={handleSubmit} className="space-y-6">
