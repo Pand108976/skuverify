@@ -108,8 +108,12 @@ export function PhotoUploadTab({}: PhotoUploadTabProps) {
     setUploading(true);
     try {
       // Check if product exists in all stores (admin can access all stores)
+      console.log(`Searching for SKU ${sku} in category ${category} across all stores...`);
       const searchResults = await firebase.searchProductInAllStores(sku);
+      console.log(`Search results:`, searchResults);
+      
       const existingProduct = searchResults.find(p => p.categoria === category);
+      console.log(`Found matching product:`, existingProduct);
       
       const correctExtension = getCorrectExtension(category);
       const fileName = `${category}/${sku}${correctExtension}`;
