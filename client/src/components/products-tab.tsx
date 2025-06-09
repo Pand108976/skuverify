@@ -83,13 +83,24 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
     }
   };
 
-  // Separar cintos femininos e masculinos
-  const getCategorizedBelts = () => {
-    const feminineBoxes = ['44', '48', '49', '50', '51'];
-    const feminineBelts = products.filter(p => feminineBoxes.includes(p.caixa));
-    const masculineBelts = products.filter(p => !feminineBoxes.includes(p.caixa));
-    
-    return { feminineBelts, masculineBelts };
+  // Separar produtos por gênero
+  const getCategorizedProducts = () => {
+    if (category === 'cintos') {
+      // Para cintos, usar caixas específicas como fallback se não tiver gender
+      const feminineBoxes = ['44', '48', '49', '50', '51'];
+      const feminineBelts = products.filter(p => 
+        p.gender === 'feminino' || (!p.gender && feminineBoxes.includes(p.caixa))
+      );
+      const masculineBelts = products.filter(p => 
+        p.gender === 'masculino' || (!p.gender && !feminineBoxes.includes(p.caixa))
+      );
+      return { feminine: feminineBelts, masculine: masculineBelts };
+    } else {
+      // Para óculos, usar apenas o campo gender
+      const feminineProducts = products.filter(p => p.gender === 'feminino');
+      const masculineProducts = products.filter(p => p.gender === 'masculino');
+      return { feminine: feminineProducts, masculine: masculineProducts };
+    }
   };
 
   const scrollToTop = () => {

@@ -3,6 +3,7 @@ export interface Product {
   sku: string;
   categoria: 'oculos' | 'cintos';
   caixa: string;
+  gender?: 'masculino' | 'feminino';
   imagem?: string;
   link?: string;
   createdAt?: Date;

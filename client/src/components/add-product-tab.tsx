@@ -42,11 +42,8 @@ export function AddProductTab() {
     setSelectedCategory(category);
     setSelectedGender('');
     
-    if (category === 'cintos') {
-      setStep(isAdmin ? 3 : 2.5); // Passo intermediário para gênero
-    } else {
-      setStep(isAdmin ? 3 : 2);
-    }
+    // Sempre vai para seleção de gênero para ambas as categorias
+    setStep(isAdmin ? 3 : 2.5);
   };
 
   const handleGenderSelect = (gender: 'masculino' | 'feminino') => {
@@ -87,8 +84,7 @@ export function AddProductTab() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!sku.trim() || !selectedCategory || !caixa.trim() || (isAdmin && !selectedStore) || 
-        (selectedCategory === 'cintos' && !selectedGender)) {
+    if (!sku.trim() || !selectedCategory || !caixa.trim() || (isAdmin && !selectedStore) || !selectedGender) {
       toast({
         title: "Erro",
         description: "Preencha todos os campos obrigatórios",
@@ -132,11 +128,11 @@ export function AddProductTab() {
         localStorage.setItem('luxury_store_id', selectedStore);
       }
       
-      const productData = {
+      const productData: any = {
         sku: sku.trim().toUpperCase(),
         categoria: selectedCategory as 'oculos' | 'cintos',
         caixa: caixa.trim(),
-        ...(selectedCategory === 'cintos' && selectedGender && { gender: selectedGender })
+        gender: selectedGender as 'masculino' | 'feminino'
       };
       
       await firebase.addProduct(productData);
@@ -250,10 +246,24 @@ export function AddProductTab() {
               </div>
             )}
 
-            {/* Step 2.5: Select Gender for Belts */}
-            {((!isAdmin && step >= 2.5) || (isAdmin && step >= 2.5)) && selectedCategory === 'cintos' && (
+            {/* Step 2.5: Select Gender for Products */}
+            {((!isAdmin && step >= 2.5) || (isAdmin && step >= 2.5)) && selectedCategory && (
               <div>
-                <h3 className="text-lg font-semibold mb-4">{isAdmin ? '2.5' : '1.5'}. Selecione o Gênero:</h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">{isAdmin ? '2.5' : '1.5'}. Selecione o Gênero:</h3>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedCategory('');
+                      setSelectedGender('');
+                      setStep(2);
+                    }}
+                    className="text-xs"
+                  >
+                    ← Voltar
+                  </Button>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <Button
                     variant={selectedGender === 'masculino' ? 'default' : 'outline'}
