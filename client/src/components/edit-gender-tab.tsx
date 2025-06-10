@@ -25,7 +25,7 @@ export function EditGenderTab() {
   ];
 
   const genderOptions = [
-    { value: "", label: "Sem Gênero" },
+    { value: "sem_genero", label: "Sem Gênero" },
     { value: "masculino", label: "Masculino" },
     { value: "feminino", label: "Feminino" }
   ];
@@ -93,7 +93,7 @@ export function EditGenderTab() {
 
   const handleEditGender = (product: Product) => {
     setEditingProduct(product);
-    setNewGender(product.gender || "");
+    setNewGender(product.gender || "sem_genero");
   };
 
   const handleSaveGender = async () => {
@@ -102,7 +102,7 @@ export function EditGenderTab() {
     try {
       setLoading(true);
       
-      const updatedGender = newGender === "" ? undefined : (newGender as "masculino" | "feminino");
+      const updatedGender = newGender === "sem_genero" ? undefined : (newGender as "masculino" | "feminino");
       const allStores = ["patiobatel", "village", "jk", "iguatemi"];
       
       // Atualizar em todas as lojas onde o produto existe
@@ -139,7 +139,7 @@ export function EditGenderTab() {
       
       // Salvar preferência global no localStorage
       const globalKey = `product_gender_${editingProduct.sku}`;
-      if (newGender) {
+      if (newGender && newGender !== "sem_genero") {
         localStorage.setItem(globalKey, newGender);
       } else {
         localStorage.removeItem(globalKey);
