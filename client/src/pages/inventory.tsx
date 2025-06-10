@@ -12,7 +12,8 @@ import { PhotoUploadTab } from "@/components/photo-upload-tab";
 import { MovementTab } from "@/components/movement-tab";
 import { SalesTab } from "@/components/sales-tab";
 import { PromotionsTab } from "@/components/promotions-tab";
-import { SyncImagesTab } from "@/components/sync-images-tab";
+import { EditProductTab } from "@/components/edit-product-tab";
+
 
 import { firebase } from "@/lib/firebase";
 import type { Product } from "@/lib/types";
@@ -113,7 +114,7 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto p-6">
         <Tabs defaultValue="search" className="w-full">
-          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-9' : 'grid-cols-5'} bg-background border premium-shadow`}>
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-8' : 'grid-cols-5'} bg-background border premium-shadow`}>
             <TabsTrigger value="search" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
               <Search size={16} />
               <span className="hidden sm:inline">Pesquisar</span>
@@ -163,9 +164,9 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
                   <Upload size={16} />
                   <span className="hidden sm:inline">Fotos</span>
                 </TabsTrigger>
-                <TabsTrigger value="sync-images" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
+                <TabsTrigger value="edit" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
                   <Square size={16} />
-                  <span className="hidden sm:inline">Sync Fotos</span>
+                  <span className="hidden sm:inline">Editar</span>
                 </TabsTrigger>
                 <TabsTrigger value="firebase" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
                   <Database size={16} />
@@ -217,8 +218,8 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
                 <TabsContent value="photos" className="fade-in">
                   <PhotoUploadTab />
                 </TabsContent>
-                <TabsContent value="sync-images" className="fade-in">
-                  <SyncImagesTab />
+                <TabsContent value="edit" className="fade-in">
+                  <EditProductTab />
                 </TabsContent>
                 <TabsContent value="firebase" className="fade-in">
                   <FirebaseStatusTab />
