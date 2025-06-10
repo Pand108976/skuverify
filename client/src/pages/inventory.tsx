@@ -164,7 +164,6 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
                   <Upload size={16} />
                   <span className="hidden sm:inline">Fotos</span>
                 </TabsTrigger>
-
                 <TabsTrigger value="firebase" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
                   <Database size={16} />
                   <span className="hidden sm:inline">Firebase</span>

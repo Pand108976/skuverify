@@ -152,8 +152,8 @@ export function PhotoUploadTab({}: PhotoUploadTabProps) {
             console.log(`Photo uploaded successfully for SKU ${pair.sku}`);
             
             // Update product with photo link in Firebase
-            await firebase.updateProduct(existingProduct.storeName, existingProduct.id, {
-              foto: `/images/${fileName}`
+            await firebase.updateProduct(existingProduct.id, {
+              imagem: `/images/${fileName}`
             });
             
             successCount++;
