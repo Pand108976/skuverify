@@ -59,11 +59,20 @@ export function EditGenderTab() {
         }
       }
       
-      // Remover duplicatas baseado no SKU
+      // Remover duplicatas baseado no SKU e aplicar gênero salvo
       const uniqueProducts = allProducts.reduce((acc: Product[], current) => {
         const exists = acc.find(p => p.sku === current.sku);
         if (!exists) {
-          acc.push(current);
+          // Verificar se existe um gênero salvo globalmente
+          const globalKey = `product_gender_${current.sku}`;
+          const savedGender = localStorage.getItem(globalKey);
+          
+          const productWithGender = {
+            ...current,
+            gender: savedGender ? (savedGender as "masculino" | "feminino") : current.gender
+          };
+          
+          acc.push(productWithGender);
         }
         return acc;
       }, []);

@@ -85,11 +85,17 @@ export const firebase = {
     const stored = localStorage.getItem(localStorageKey);
     let localProducts: Product[] = stored ? JSON.parse(stored) : [];
     
-    // Aplica links automaticamente aos produtos que não têm link
-    localProducts = localProducts.map(product => ({
-      ...product,
-      link: product.link || getProductLink(product.sku)
-    }));
+    // Aplica links e gênero salvo globalmente aos produtos
+    localProducts = localProducts.map(product => {
+      const globalKey = `product_gender_${product.sku}`;
+      const savedGender = localStorage.getItem(globalKey);
+      
+      return {
+        ...product,
+        link: product.link || getProductLink(product.sku),
+        gender: savedGender ? (savedGender as "masculino" | "feminino") : product.gender
+      };
+    });
     
     return localProducts;
   },

@@ -16,21 +16,21 @@ export function ProductModal({ product, open, onClose }: ProductModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl mx-auto p-0 overflow-hidden">
+      <DialogContent className="max-w-4xl mx-auto p-0 overflow-hidden max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
         <DialogTitle className="sr-only">Detalhes do Produto {product.sku}</DialogTitle>
         <DialogDescription className="sr-only">
           Informações detalhadas sobre o produto: SKU {product.sku}, categoria {product.categoria}, caixa {product.caixa}
         </DialogDescription>
         
         {/* Header compacto */}
-        <div className="relative bg-gray-800 text-white p-4">
+        <div className="relative bg-gray-800 text-white p-4 sticky top-0 z-10">
           <Button
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="absolute top-2 right-2 text-white hover:bg-white/20 rounded-full w-8 h-8 p-0"
+            className="absolute top-2 right-2 text-white hover:bg-white/20 rounded-full w-10 h-10 p-0 flex items-center justify-center"
           >
-            <X size={16} />
+            <X size={18} />
           </Button>
           
           <div className="flex items-center space-x-3">
@@ -44,15 +44,15 @@ export function ProductModal({ product, open, onClose }: ProductModalProps) {
           </div>
         </div>
 
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="p-4 sm:p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
             {/* Lado Esquerdo - Imagem Grande */}
             <div className="flex items-center justify-center">
               <ProductImage 
                 sku={product.sku}
                 categoria={product.categoria}
                 imagePath={product.imagem}
-                className="w-full h-80 rounded-lg border-2 border-gray-200 shadow-lg"
+                className="w-full h-60 sm:h-80 rounded-lg border-2 border-gray-200 shadow-lg"
                 alt={`Produto ${product.sku}`}
               />
             </div>
