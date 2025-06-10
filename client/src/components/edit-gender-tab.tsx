@@ -13,17 +13,15 @@ export function EditGenderTab() {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedStore, setSelectedStore] = useState<string>("patiobatel");
+  const [selectedCategory, setSelectedCategory] = useState<string>("oculos");
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [newGender, setNewGender] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const stores = [
-    { value: "patiobatel", label: "Patio Batel" },
-    { value: "village", label: "Village" },
-    { value: "jk", label: "JK Shopping" },
-    { value: "iguatemi", label: "Iguatemi" }
+  const categories = [
+    { value: "oculos", label: "Óculos" },
+    { value: "cintos", label: "Cintos" }
   ];
 
   const genderOptions = [
@@ -34,7 +32,7 @@ export function EditGenderTab() {
 
   useEffect(() => {
     loadProducts();
-  }, [selectedStore]);
+  }, [selectedCategory]);
 
   useEffect(() => {
     filterProducts();
@@ -43,8 +41,9 @@ export function EditGenderTab() {
   const loadProducts = async () => {
     try {
       setLoading(true);
-      const allProducts = await firebase.getProductsByStore(selectedStore);
-      setProducts(allProducts);
+      const allProducts = await firebase.getProducts();
+      const categoryProducts = allProducts.filter(p => p.categoria === selectedCategory);
+      setProducts(categoryProducts);
     } catch (error) {
       console.error("Erro ao carregar produtos:", error);
       toast({
@@ -60,15 +59,15 @@ export function EditGenderTab() {
   const filterProducts = () => {
     const filtered = products.filter(product =>
       product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.marca?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.modelo?.toLowerCase().includes(searchTerm.toLowerCase())
+      product.brand?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.model?.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredProducts(filtered);
   };
 
   const handleEditGender = (product: Product) => {
     setEditingProduct(product);
-    setNewGender(product.genero || "");
+    setNewGender(product.gender || "");
   };
 
   const handleSaveGender = async () => {
@@ -77,12 +76,20 @@ export function EditGenderTab() {
     try {
       setLoading(true);
       
-      const updatedProduct = {
+      const updatedProduct: Product = {
         ...editingProduct,
-        genero: newGender || null
+        gender: newGender === "" ? undefined : (newGender as "masculino" | "feminino")
       };
 
-      await firebase.updateProduct(selectedStore, updatedProduct);
+      await firebase.updateProduct(updatedProduct.sku, updatedProduct);
+      
+      // Salvar no localStorage para persistência
+      const localKey = `product_gender_${editingProduct.sku}`;
+      if (newGender) {
+        localStorage.setItem(localKey, newGender);
+      } else {
+        localStorage.removeItem(localKey);
+      }
       
       // Atualizar a lista local
       setProducts(products.map(p => 
@@ -153,17 +160,17 @@ export function EditGenderTab() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Seletor de Loja */}
+          {/* Seletor de Categoria */}
           <div>
-            <label className="text-sm font-medium mb-2 block">Loja</label>
-            <Select value={selectedStore} onValueChange={setSelectedStore}>
+            <label className="text-sm font-medium mb-2 block">Categoria</label>
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
               <SelectTrigger>
-                <SelectValue placeholder="Selecione a loja" />
+                <SelectValue placeholder="Selecione a categoria" />
               </SelectTrigger>
               <SelectContent>
-                {stores.map((store) => (
-                  <SelectItem key={store.value} value={store.value}>
-                    {store.label}
+                {categories.map((category) => (
+                  <SelectItem key={category.value} value={category.value}>
+                    {category.label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -208,13 +215,13 @@ export function EditGenderTab() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <span className="font-semibold">{product.sku}</span>
-                      <Badge className={getGenderBadgeColor(product.genero)}>
-                        {getGenderLabel(product.genero)}
+                      <Badge className={getGenderBadgeColor(product.gender)}>
+                        {getGenderLabel(product.gender)}
                       </Badge>
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      {product.marca && <span className="mr-3">Marca: {product.marca}</span>}
-                      {product.modelo && <span className="mr-3">Modelo: {product.modelo}</span>}
+                      {product.brand && <span className="mr-3">Marca: {product.brand}</span>}
+                      {product.model && <span className="mr-3">Modelo: {product.model}</span>}
                       {product.categoria && <span>Categoria: {product.categoria}</span>}
                     </div>
                   </div>
