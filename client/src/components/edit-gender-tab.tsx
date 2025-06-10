@@ -41,9 +41,35 @@ export function EditGenderTab() {
   const loadProducts = async () => {
     try {
       setLoading(true);
-      const allProducts = await firebase.getProducts();
-      const categoryProducts = allProducts.filter(p => p.categoria === selectedCategory);
-      setProducts(categoryProducts);
+      const allStores = ["patiobatel", "village", "jk", "iguatemi"];
+      let allProducts: Product[] = [];
+      
+      for (const store of allStores) {
+        try {
+          // Buscar produtos do localStorage de cada loja
+          const storeKey = `luxury_products_${store}`;
+          const storeData = localStorage.getItem(storeKey);
+          if (storeData) {
+            const storeProducts: Product[] = JSON.parse(storeData);
+            const categoryProducts = storeProducts.filter(p => p.categoria === selectedCategory);
+            allProducts = [...allProducts, ...categoryProducts];
+          }
+        } catch (error) {
+          console.log(`Erro ao carregar produtos da loja ${store}:`, error);
+        }
+      }
+      
+      // Remover duplicatas baseado no SKU
+      const uniqueProducts = allProducts.reduce((acc: Product[], current) => {
+        const exists = acc.find(p => p.sku === current.sku);
+        if (!exists) {
+          acc.push(current);
+        }
+        return acc;
+      }, []);
+      
+      console.log(`Produtos carregados da categoria ${selectedCategory}:`, uniqueProducts.length);
+      setProducts(uniqueProducts);
     } catch (error) {
       console.error("Erro ao carregar produtos:", error);
       toast({
@@ -76,23 +102,55 @@ export function EditGenderTab() {
     try {
       setLoading(true);
       
-      const updatedProduct: Product = {
-        ...editingProduct,
-        gender: newGender === "" ? undefined : (newGender as "masculino" | "feminino")
-      };
-
-      // Atualizar no Firebase e localStorage
-      await firebase.updateProduct(updatedProduct.sku, { gender: updatedProduct.gender });
+      const updatedGender = newGender === "" ? undefined : (newGender as "masculino" | "feminino");
+      const allStores = ["patiobatel", "village", "jk", "iguatemi"];
       
-      // Salvar no localStorage para persistência
-      const localKey = `product_gender_${editingProduct.sku}`;
+      // Atualizar em todas as lojas onde o produto existe
+      for (const store of allStores) {
+        try {
+          const storeKey = `luxury_products_${store}`;
+          const storeData = localStorage.getItem(storeKey);
+          if (storeData) {
+            const storeProducts: Product[] = JSON.parse(storeData);
+            const productIndex = storeProducts.findIndex(p => p.sku === editingProduct.sku);
+            
+            if (productIndex >= 0) {
+              storeProducts[productIndex] = {
+                ...storeProducts[productIndex],
+                gender: updatedGender
+              };
+              localStorage.setItem(storeKey, JSON.stringify(storeProducts));
+            }
+          }
+        } catch (error) {
+          console.log(`Erro ao atualizar produto na loja ${store}:`, error);
+        }
+      }
+
+      // Tentar atualizar no Firebase
+      try {
+        await firebase.updateProduct(editingProduct.sku, { 
+          gender: updatedGender,
+          categoria: editingProduct.categoria 
+        });
+      } catch (error) {
+        console.log("Erro ao atualizar no Firebase, mas localStorage foi atualizado:", error);
+      }
+      
+      // Salvar preferência global no localStorage
+      const globalKey = `product_gender_${editingProduct.sku}`;
       if (newGender) {
-        localStorage.setItem(localKey, newGender);
+        localStorage.setItem(globalKey, newGender);
       } else {
-        localStorage.removeItem(localKey);
+        localStorage.removeItem(globalKey);
       }
       
       // Atualizar a lista local
+      const updatedProduct: Product = {
+        ...editingProduct,
+        gender: updatedGender
+      };
+      
       setProducts(products.map(p => 
         p.sku === editingProduct.sku ? updatedProduct : p
       ));
@@ -102,7 +160,7 @@ export function EditGenderTab() {
 
       toast({
         title: "Sucesso",
-        description: `Gênero do produto ${editingProduct.sku} atualizado!`,
+        description: `Gênero do produto ${editingProduct.sku} atualizado em todas as lojas!`,
       });
     } catch (error) {
       console.error("Erro ao atualizar gênero:", error);
