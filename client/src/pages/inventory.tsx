@@ -12,6 +12,7 @@ import { PhotoUploadTab } from "@/components/photo-upload-tab";
 import { MovementTab } from "@/components/movement-tab";
 import { SalesTab } from "@/components/sales-tab";
 import { PromotionsTab } from "@/components/promotions-tab";
+import { EditGenderTab } from "@/components/edit-gender-tab";
 
 
 
@@ -114,10 +115,10 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto p-6">
         <Tabs defaultValue="search" className="w-full">
-          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-7' : 'grid-cols-5'} bg-background border premium-shadow`}>
-            <TabsTrigger value="search" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
-              <Search size={16} />
-              <span className="hidden sm:inline">Pesquisar</span>
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-8' : 'grid-cols-5'} bg-background border premium-shadow`}>
+            <TabsTrigger value="search" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs">
+              <Search size={14} />
+              <span className="hidden lg:inline">Pesquisar</span>
             </TabsTrigger>
             {!isAdmin && (
               <>
@@ -136,37 +137,46 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
               </>
             )}
 
-            <TabsTrigger value="sales" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
-              <ShoppingCart size={16} />
-              <span className="hidden sm:inline">Vendas</span>
+            <TabsTrigger value="sales" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs">
+              <ShoppingCart size={14} />
+              <span className="hidden lg:inline">Vendas</span>
             </TabsTrigger>
-            <TabsTrigger value="add" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
-              <Plus size={16} />
-              <span className="hidden sm:inline">Adicionar</span>
+            <TabsTrigger value="add" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs">
+              <Plus size={14} />
+              <span className="hidden lg:inline">Adicionar</span>
             </TabsTrigger>
             {isAdmin && (
-              <TabsTrigger value="remove" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
-                <Trash2 size={16} />
-                <span className="hidden sm:inline">Remover</span>
+              <TabsTrigger value="remove" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs">
+                <Trash2 size={14} />
+                <span className="hidden lg:inline">Remover</span>
               </TabsTrigger>
             )}
             {isAdmin && (
               <>
-                <TabsTrigger value="promotions" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
-                  <Percent size={16} />
-                  <span className="hidden sm:inline">Promoções</span>
+                <TabsTrigger value="promotions" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs">
+                  <Percent size={14} />
+                  <span className="hidden lg:inline">Promoções</span>
                 </TabsTrigger>
-                <TabsTrigger value="movement" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
-                  <ArrowRightLeft size={16} />
-                  <span className="hidden sm:inline">Movimentar</span>
+                <TabsTrigger value="movement" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs">
+                  <ArrowRightLeft size={14} />
+                  <span className="hidden lg:inline">Movimentar</span>
                 </TabsTrigger>
-                <TabsTrigger value="photos" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
-                  <Upload size={16} />
-                  <span className="hidden sm:inline">Fotos</span>
+                <TabsTrigger value="photos" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs">
+                  <Upload size={14} />
+                  <span className="hidden lg:inline">Fotos</span>
                 </TabsTrigger>
-                <TabsTrigger value="firebase" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
-                  <Database size={16} />
-                  <span className="hidden sm:inline">Firebase</span>
+                <TabsTrigger value="firebase" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs">
+                  <Database size={14} />
+                  <span className="hidden lg:inline">Firebase</span>
+                </TabsTrigger>
+                <TabsTrigger value="edit-gender" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="4" r="2"/>
+                    <path d="M10.5 6.5L8 9h8l-2.5-2.5"/>
+                    <path d="M12 10v10"/>
+                    <path d="M8 16h8"/>
+                  </svg>
+                  <span className="hidden lg:inline">Gênero</span>
                 </TabsTrigger>
               </>
             )}
@@ -217,6 +227,9 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
 
                 <TabsContent value="firebase" className="fade-in">
                   <FirebaseStatusTab />
+                </TabsContent>
+                <TabsContent value="edit-gender" className="fade-in">
+                  <EditGenderTab />
                 </TabsContent>
               </>
             )}
