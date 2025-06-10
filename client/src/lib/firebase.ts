@@ -165,9 +165,16 @@ export const firebase = {
     const stored = localStorage.getItem(localStorageKey);
     if (stored) {
       const products: Product[] = JSON.parse(stored);
-      const localProduct = products.find(p => p.sku.toLowerCase() === sku.toLowerCase());
+      let localProduct = products.find(p => p.sku.toLowerCase() === sku.toLowerCase());
       if (localProduct) {
-        return localProduct;
+        // Aplicar gênero salvo globalmente
+        const globalKey = `product_gender_${localProduct.sku}`;
+        const savedGender = localStorage.getItem(globalKey);
+        
+        return {
+          ...localProduct,
+          gender: savedGender ? (savedGender as "masculino" | "feminino") : localProduct.gender
+        };
       }
     }
     
@@ -432,8 +439,13 @@ export const firebase = {
           
           oculosSnapshot.forEach((doc) => {
             const product = { id: doc.id, categoria: 'oculos', ...doc.data() } as Product;
+            // Aplicar gênero salvo globalmente
+            const globalKey = `product_gender_${product.sku}`;
+            const savedGender = localStorage.getItem(globalKey);
+            
             results.push({
               ...product,
+              gender: savedGender ? (savedGender as "masculino" | "feminino") : product.gender,
               storeName: store.name,
               storeId: store.id
             });
@@ -448,8 +460,13 @@ export const firebase = {
           
           cintosSnapshot.forEach((doc) => {
             const product = { id: doc.id, categoria: 'cintos', ...doc.data() } as Product;
+            // Aplicar gênero salvo globalmente
+            const globalKey = `product_gender_${product.sku}`;
+            const savedGender = localStorage.getItem(globalKey);
+            
             results.push({
               ...product,
+              gender: savedGender ? (savedGender as "masculino" | "feminino") : product.gender,
               storeName: store.name,
               storeId: store.id
             });

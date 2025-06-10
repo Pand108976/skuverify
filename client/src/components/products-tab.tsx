@@ -37,7 +37,19 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
       
       if (stored) {
         const allProducts = JSON.parse(stored);
-        const categoryProducts = allProducts.filter((p: Product) => p.categoria === category);
+        let categoryProducts = allProducts.filter((p: Product) => p.categoria === category);
+        
+        // Aplicar gênero salvo globalmente
+        categoryProducts = categoryProducts.map((product: Product) => {
+          const globalKey = `product_gender_${product.sku}`;
+          const savedGender = localStorage.getItem(globalKey);
+          
+          return {
+            ...product,
+            gender: savedGender ? (savedGender as "masculino" | "feminino") : product.gender
+          };
+        });
+        
         setProducts(categoryProducts);
       }
     } catch (error) {
