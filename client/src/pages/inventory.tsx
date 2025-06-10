@@ -116,9 +116,9 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
       <main className="max-w-7xl mx-auto p-6">
         <Tabs defaultValue="search" className="w-full">
           <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-8' : 'grid-cols-5'} bg-background border premium-shadow`}>
-            <TabsTrigger value="search" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs">
-              <Search size={14} />
-              <span className="hidden lg:inline">Pesquisar</span>
+            <TabsTrigger value="search" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-2">
+              <Search size={12} />
+              <span className="hidden xl:inline text-xs">Pesquisar</span>
             </TabsTrigger>
             {!isAdmin && (
               <>
@@ -137,46 +137,46 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
               </>
             )}
 
-            <TabsTrigger value="sales" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs">
-              <ShoppingCart size={14} />
-              <span className="hidden lg:inline">Vendas</span>
+            <TabsTrigger value="sales" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-2">
+              <ShoppingCart size={12} />
+              <span className="hidden xl:inline text-xs">Vendas</span>
             </TabsTrigger>
-            <TabsTrigger value="add" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs">
-              <Plus size={14} />
-              <span className="hidden lg:inline">Adicionar</span>
+            <TabsTrigger value="add" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-2">
+              <Plus size={12} />
+              <span className="hidden xl:inline text-xs">Adicionar</span>
             </TabsTrigger>
             {isAdmin && (
-              <TabsTrigger value="remove" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs">
-                <Trash2 size={14} />
-                <span className="hidden lg:inline">Remover</span>
+              <TabsTrigger value="remove" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-2">
+                <Trash2 size={12} />
+                <span className="hidden xl:inline text-xs">Remover</span>
               </TabsTrigger>
             )}
             {isAdmin && (
               <>
-                <TabsTrigger value="promotions" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs">
-                  <Percent size={14} />
-                  <span className="hidden lg:inline">Promoções</span>
+                <TabsTrigger value="promotions" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-2">
+                  <Percent size={12} />
+                  <span className="hidden xl:inline text-xs">Promoções</span>
                 </TabsTrigger>
-                <TabsTrigger value="movement" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs">
-                  <ArrowRightLeft size={14} />
-                  <span className="hidden lg:inline">Movimentar</span>
+                <TabsTrigger value="movement" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-2">
+                  <ArrowRightLeft size={12} />
+                  <span className="hidden xl:inline text-xs">Movimentar</span>
                 </TabsTrigger>
-                <TabsTrigger value="photos" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs">
-                  <Upload size={14} />
-                  <span className="hidden lg:inline">Fotos</span>
+                <TabsTrigger value="photos" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-2">
+                  <Upload size={12} />
+                  <span className="hidden xl:inline text-xs">Fotos</span>
                 </TabsTrigger>
-                <TabsTrigger value="firebase" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs">
-                  <Database size={14} />
-                  <span className="hidden lg:inline">Firebase</span>
+                <TabsTrigger value="firebase" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-2">
+                  <Database size={12} />
+                  <span className="hidden xl:inline text-xs">Firebase</span>
                 </TabsTrigger>
-                <TabsTrigger value="edit-gender" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <TabsTrigger value="edit-gender" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-2">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <circle cx="12" cy="4" r="2"/>
                     <path d="M10.5 6.5L8 9h8l-2.5-2.5"/>
                     <path d="M12 10v10"/>
                     <path d="M8 16h8"/>
                   </svg>
-                  <span className="hidden lg:inline">Gênero</span>
+                  <span className="hidden xl:inline text-xs">Gênero</span>
                 </TabsTrigger>
               </>
             )}

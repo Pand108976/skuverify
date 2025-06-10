@@ -81,7 +81,8 @@ export function EditGenderTab() {
         gender: newGender === "" ? undefined : (newGender as "masculino" | "feminino")
       };
 
-      await firebase.updateProduct(updatedProduct.sku, updatedProduct);
+      // Atualizar no Firebase e localStorage
+      await firebase.updateProduct(updatedProduct.sku, { gender: updatedProduct.gender });
       
       // Salvar no localStorage para persistência
       const localKey = `product_gender_${editingProduct.sku}`;
