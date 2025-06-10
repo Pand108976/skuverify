@@ -246,6 +246,11 @@ export const firebase = {
         createdAt: new Date()
       };
       
+      // Adiciona gender se disponível (para óculos)
+      if (product.gender) {
+        firebaseData.gender = product.gender;
+      }
+      
       // Adiciona imagem se disponível
       if (validImagePath) {
         firebaseData.imagem = validImagePath;
@@ -894,6 +899,7 @@ export const firebase = {
             caixa: data.caixa,
             imagem: data.imagem,
             link: data.link,
+            gender: data.gender, // Preservar campo gender
             onSale: data.onSale || false,
             saleUpdatedAt: data.saleUpdatedAt?.toDate?.(),
             brand: data.brand,
