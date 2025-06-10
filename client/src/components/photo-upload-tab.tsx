@@ -46,28 +46,45 @@ export function PhotoUploadTab({}: PhotoUploadTabProps) {
     return true;
   };
 
-  const addPhotoSkuPair = (files: FileList) => {
+  const addFiles = useCallback((files: FileList) => {
     const newPairs: PhotoSku[] = [];
     
-    Array.from(files).forEach(file => {
+    Array.from(files).forEach((file) => {
       if (validateFile(file)) {
         const reader = new FileReader();
-        const id = Math.random().toString(36).substr(2, 9);
-        
         reader.onload = (e) => {
-          const newPair: PhotoSku = {
+          const id = Math.random().toString(36).substr(2, 9);
+          newPairs.push({
             file,
             sku: '',
             preview: e.target?.result as string,
             id
-          };
+          });
           
-          setPhotoSkuPairs(prev => [...prev, newPair]);
+          if (newPairs.length === files.length) {
+            setPhotoSkuPairs(prev => [...prev, ...newPairs]);
+          }
         };
         reader.readAsDataURL(file);
       }
     });
+  }, []);
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      addFiles(e.target.files);
+    }
   };
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      addFiles(e.dataTransfer.files);
+    }
+  }, [addFiles]);
 
   const updateSku = (id: string, sku: string) => {
     setPhotoSkuPairs(prev => 
@@ -77,31 +94,8 @@ export function PhotoUploadTab({}: PhotoUploadTabProps) {
     );
   };
 
-  const removePair = (id: string) => {
+  const removePhoto = (id: string) => {
     setPhotoSkuPairs(prev => prev.filter(pair => pair.id !== id));
-  };
-
-  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    
-    const files = e.dataTransfer.files;
-    if (files && files.length > 0) {
-      addPhotoSkuPair(files);
-    }
-  }, []);
-
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      addPhotoSkuPair(files);
-    }
-  };
-
-  const getCorrectExtension = (sku: string): { extension: string; category: 'oculos' | 'cintos' } => {
-    // Determinar categoria baseada no produto encontrado
-    return { extension: '.jpg', category: 'oculos' }; // Default, será determinado na busca
   };
 
   const uploadAllPhotos = async () => {
@@ -148,51 +142,62 @@ export function PhotoUploadTab({}: PhotoUploadTabProps) {
           formData.append('fileName', fileName);
           formData.append('category', existingProduct.categoria);
           formData.append('sku', pair.sku);
-          formData.append('storeId', existingProduct.storeId);
-          formData.append('productId', existingProduct.id!);
-          
-          const response = await fetch('/api/upload-photo', {
+
+          const response = await fetch('/api/upload-image', {
             method: 'POST',
             body: formData,
           });
-          
-          if (!response.ok) {
-            throw new Error('Failed to upload photo');
+
+          if (response.ok) {
+            console.log(`Photo uploaded successfully for SKU ${pair.sku}`);
+            
+            // Update product with photo link in Firebase
+            await firebase.updateProduct(existingProduct.storeName, existingProduct.id, {
+              foto: `/images/${fileName}`
+            });
+            
+            successCount++;
+          } else {
+            console.error(`Failed to upload photo for SKU ${pair.sku}`);
+            errorCount++;
           }
-          
-          successCount++;
-          
         } catch (error) {
-          console.error(`Error uploading photo for SKU ${pair.sku}:`, error);
+          console.error(`Error processing SKU ${pair.sku}:`, error);
           errorCount++;
         }
       }
 
+      // Show results
       if (successCount > 0) {
         toast({
-          title: "Upload Concluído",
-          description: `${successCount} foto(s) foram adicionadas com sucesso. ${errorCount > 0 ? `${errorCount} erro(s).` : ''}`,
+          title: "Upload concluído",
+          description: `${successCount} foto(s) enviada(s) com sucesso${errorCount > 0 ? `, ${errorCount} erro(s)` : ''}.`,
         });
       }
 
-      if (errorCount === validPairs.length) {
+      if (errorCount > 0 && successCount === 0) {
         toast({
-          title: "Erro no Upload",
-          description: "Não foi possível fazer o upload de nenhuma foto.",
+          title: "Erro no upload",
+          description: `${errorCount} erro(s) durante o upload.`,
           variant: "destructive",
         });
       }
 
       // Clear successful uploads
       if (successCount > 0) {
-        setPhotoSkuPairs([]);
+        setPhotoSkuPairs(prev => 
+          prev.filter(pair => {
+            const wasProcessed = validPairs.some(validPair => validPair.id === pair.id);
+            return !wasProcessed || pair.sku.trim() === '';
+          })
+        );
       }
-      
+
     } catch (error) {
-      console.error('Error in batch upload:', error);
+      console.error('Error during bulk upload:', error);
       toast({
-        title: "Erro no Upload",
-        description: "Não foi possível fazer o upload das fotos. Tente novamente.",
+        title: "Erro no upload",
+        description: "Erro durante o upload das fotos.",
         variant: "destructive",
       });
     } finally {
@@ -297,12 +302,15 @@ export function PhotoUploadTab({}: PhotoUploadTabProps) {
               <div className="grid gap-4">
                 {photoSkuPairs.map((pair) => (
                   <div key={pair.id} className="flex items-center space-x-4 p-4 border rounded-lg">
-                    <div className="flex-shrink-0">
+                    <div className="flex-shrink-0 text-center">
                       <img
                         src={pair.preview}
                         alt="Preview"
                         className="w-20 h-20 object-cover rounded-lg"
                       />
+                      <div className="text-xs text-muted-foreground mt-1 max-w-20 truncate" title={pair.file.name}>
+                        {pair.file.name}
+                      </div>
                     </div>
                     
                     <div className="flex-1">
@@ -321,8 +329,7 @@ export function PhotoUploadTab({}: PhotoUploadTabProps) {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => removePair(pair.id)}
-                      className="flex-shrink-0"
+                      onClick={() => removePhoto(pair.id)}
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -334,9 +341,9 @@ export function PhotoUploadTab({}: PhotoUploadTabProps) {
         )}
 
         {/* Instructions */}
-        <div className="bg-blue-50 p-4 rounded-lg">
-          <h4 className="font-semibold text-blue-800 mb-2">Como usar:</h4>
-          <ul className="text-sm text-blue-700 space-y-1">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h3 className="font-semibold text-blue-900 mb-2">Como usar:</h3>
+          <ul className="text-sm text-blue-800 space-y-1">
             <li>• Selecione ou arraste múltiplas fotos para a área de upload</li>
             <li>• Digite o SKU correspondente para cada foto</li>
             <li>• O sistema detectará automaticamente se é óculos (.jpg) ou cinto (.webp)</li>
