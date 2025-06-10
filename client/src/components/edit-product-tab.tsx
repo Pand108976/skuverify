@@ -126,7 +126,7 @@ export function EditProductTab({}: EditProductTabProps) {
           ...selectedProduct,
           sku: editForm.sku,
           caixa: editForm.caixa,
-          gender: editForm.gender || undefined,
+          gender: (editForm.gender || undefined) as 'masculino' | 'feminino' | undefined,
           lastModified: new Date()
         };
         
@@ -299,7 +299,7 @@ export function EditProductTab({}: EditProductTabProps) {
                     <Label htmlFor="edit-gender">Gênero</Label>
                     <Select 
                       value={editForm.gender} 
-                      onValueChange={(value) => setEditForm(prev => ({ ...prev, gender: value }))}
+                      onValueChange={(value: 'masculino' | 'feminino' | '') => setEditForm(prev => ({ ...prev, gender: value }))}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione o gênero" />
