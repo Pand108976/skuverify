@@ -46,26 +46,54 @@ export function PhotoUploadTab({}: PhotoUploadTabProps) {
     return true;
   };
 
+  const extractSkuFromFilename = (filename: string): string => {
+    // Remove extension and extract SKU
+    const nameWithoutExt = filename.replace(/\.(jpg|jpeg|png|webp)$/i, '');
+    
+    // Try different patterns for SKU extraction
+    // Pattern 1: Just the filename without extension
+    if (/^[A-Za-z0-9-_]+$/.test(nameWithoutExt)) {
+      return nameWithoutExt;
+    }
+    
+    // Pattern 2: Look for patterns like "SKU_something" or "something_SKU"
+    const parts = nameWithoutExt.split(/[-_\s]/);
+    if (parts.length > 0) {
+      return parts[0]; // Use first part as SKU
+    }
+    
+    return nameWithoutExt;
+  };
+
   const addFiles = useCallback((files: FileList) => {
     const newPairs: PhotoSku[] = [];
+    let processedCount = 0;
     
     Array.from(files).forEach((file) => {
       if (validateFile(file)) {
         const reader = new FileReader();
         reader.onload = (e) => {
           const id = Math.random().toString(36).substr(2, 9);
+          const extractedSku = extractSkuFromFilename(file.name);
+          
           newPairs.push({
             file,
-            sku: '',
+            sku: extractedSku,
             preview: e.target?.result as string,
             id
           });
           
-          if (newPairs.length === files.length) {
+          processedCount++;
+          if (processedCount === Array.from(files).filter(f => validateFile(f)).length) {
             setPhotoSkuPairs(prev => [...prev, ...newPairs]);
           }
         };
         reader.readAsDataURL(file);
+      } else {
+        processedCount++;
+        if (processedCount === Array.from(files).filter(f => validateFile(f)).length) {
+          setPhotoSkuPairs(prev => [...prev, ...newPairs]);
+        }
       }
     });
   }, []);
@@ -345,7 +373,8 @@ export function PhotoUploadTab({}: PhotoUploadTabProps) {
           <h3 className="font-semibold text-blue-900 mb-2">Como usar:</h3>
           <ul className="text-sm text-blue-800 space-y-1">
             <li>• Selecione ou arraste múltiplas fotos para a área de upload</li>
-            <li>• Digite o SKU correspondente para cada foto</li>
+            <li>• O SKU será preenchido automaticamente baseado no nome da foto</li>
+            <li>• Você pode editar o SKU se necessário</li>
             <li>• O sistema detectará automaticamente se é óculos (.jpg) ou cinto (.webp)</li>
             <li>• Clique em "Enviar Todas" para fazer upload de todas as fotos de uma vez</li>
             <li>• As fotos serão salvas na pasta local e vinculadas aos produtos no Firebase</li>

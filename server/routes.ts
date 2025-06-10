@@ -68,11 +68,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // put application routes here
-  // prefix all routes with /api
+  // Bulk photo upload endpoint for admin
+  app.post('/api/upload-image', upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No file provided' });
+      }
 
-  // use storage to perform CRUD operations on the storage interface
-  // e.g. storage.insertUser(user) or storage.getUserByUsername(username)
+      const { fileName, category, sku } = req.body;
+      
+      if (!fileName || !category || !sku) {
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      // Create directory if it doesn't exist
+      const imageDir = path.join(process.cwd(), 'images', category);
+      if (!fs.existsSync(imageDir)) {
+        fs.mkdirSync(imageDir, { recursive: true });
+      }
+
+      // Save file to local images folder
+      const filePath = path.join(imageDir, path.basename(fileName));
+      fs.writeFileSync(filePath, req.file.buffer);
+
+      console.log(`Image saved successfully: ${filePath}`);
+      res.json({ success: true, path: filePath });
+
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      res.status(500).json({ error: 'Failed to upload image' });
+    }
+  });
 
   const httpServer = createServer(app);
 
