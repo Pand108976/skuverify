@@ -16,7 +16,7 @@ export function ProductModal({ product, open, onClose }: ProductModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md mx-auto p-0 overflow-hidden">
+      <DialogContent className="max-w-lg mx-auto p-0 overflow-hidden">
         <DialogTitle className="sr-only">Detalhes do Produto {product.sku}</DialogTitle>
         <DialogDescription className="sr-only">
           Informações detalhadas sobre o produto: SKU {product.sku}, categoria {product.categoria}, caixa {product.caixa}
@@ -50,7 +50,7 @@ export function ProductModal({ product, open, onClose }: ProductModalProps) {
             sku={product.sku}
             categoria={product.categoria}
             imagePath={product.imagem}
-            className="w-full h-32"
+            className="w-full h-48 rounded-lg border-2 border-gray-200"
             alt={`Produto ${product.sku}`}
           />
           
