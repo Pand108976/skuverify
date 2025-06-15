@@ -241,7 +241,7 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
                   <EditGenderTab />
                 </TabsContent>
                 <TabsContent value="cinteiro" className="fade-in">
-                  <CinteiroTab selectedStore={localStorage.getItem('luxury_store_id') || 'admin'} />
+                  <CinteiroTab />
                 </TabsContent>
               </>
             )}

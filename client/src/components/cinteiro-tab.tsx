@@ -9,10 +9,11 @@ import { firebase } from "@/lib/firebase";
 import type { Product } from "@/lib/types";
 
 interface CinteiroTabProps {
-  selectedStore: string;
+  selectedStore?: string;
 }
 
 export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
+  const currentStore = selectedStore || localStorage.getItem('luxury_store_id') || 'patiobatel';
   const [products, setProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [rotation, setRotation] = useState(0);
@@ -26,7 +27,7 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
     const loadBelts = async () => {
       setIsLoading(true);
       try {
-        const allProducts = await firebase.getProducts();
+        const allProducts = await firebase.getProductsFromStore(currentStore);
         const belts = allProducts.filter(product => 
           product.categoria === "cintos" && 
           product.imagem &&
@@ -41,7 +42,7 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
     };
     
     loadBelts();
-  }, [selectedStore]);
+  }, [currentStore]);
 
   // Filtrar cintos baseado na busca e gênero
   const filteredBelts = useMemo(() => {

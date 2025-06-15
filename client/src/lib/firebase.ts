@@ -100,6 +100,31 @@ export const firebase = {
     return localProducts;
   },
 
+  // Get products from specific store
+  async getProductsFromStore(storeId: string): Promise<Product[]> {
+    const localStorageKey = `luxury_products_${storeId}`;
+    
+    // Carrega links automaticamente se ainda não foram carregados
+    await loadProductLinks();
+    
+    const stored = localStorage.getItem(localStorageKey);
+    let localProducts: Product[] = stored ? JSON.parse(stored) : [];
+    
+    // Aplica links e gênero salvo globalmente aos produtos
+    localProducts = localProducts.map(product => {
+      const globalKey = `product_gender_${product.sku}`;
+      const savedGender = localStorage.getItem(globalKey);
+      
+      return {
+        ...product,
+        link: product.link || getProductLink(product.sku),
+        gender: savedGender ? (savedGender as "masculino" | "feminino") : product.gender
+      };
+    });
+    
+    return localProducts;
+  },
+
   // Get all products from Firebase (for sync operations)
   async getProductsFromFirebase(): Promise<Product[]> {
     const storeId = getStoreCollection();
