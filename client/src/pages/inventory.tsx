@@ -13,7 +13,7 @@ import { MovementTab } from "@/components/movement-tab";
 import { SalesTab } from "@/components/sales-tab";
 import { PromotionsTab } from "@/components/promotions-tab";
 import { EditGenderTab } from "@/components/edit-gender-tab";
-import { CinteiroTab } from "@/components/cinteiro-tab";
+
 
 
 
@@ -179,14 +179,7 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
                   </svg>
                   <span className="hidden xl:inline text-xs">Gênero</span>
                 </TabsTrigger>
-                <TabsTrigger value="cinteiro" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-2">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="8"/>
-                    <path d="M8 12h8"/>
-                    <circle cx="12" cy="12" r="3"/>
-                  </svg>
-                  <span className="hidden xl:inline text-xs">Cinteiro</span>
-                </TabsTrigger>
+
               </>
             )}
           </TabsList>
@@ -240,9 +233,7 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
                 <TabsContent value="edit-gender" className="fade-in">
                   <EditGenderTab />
                 </TabsContent>
-                <TabsContent value="cinteiro" className="fade-in">
-                  <CinteiroTab />
-                </TabsContent>
+
               </>
             )}
           </div>
