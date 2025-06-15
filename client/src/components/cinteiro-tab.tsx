@@ -47,7 +47,7 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
   const filteredBelts = useMemo(() => {
     return products.filter(product => {
       const matchesSearch = product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           product.marca?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           product.brand?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            product.caixa?.toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesGender = genderFilter === "todos" || 
@@ -305,10 +305,10 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
               {selectedBelt ? (
                 <div className="space-y-4">
                   {/* Imagem grande */}
-                  {selectedBelt.imageUrl && (
+                  {selectedBelt.imagem && (
                     <div className="w-full h-48 bg-gray-100 rounded-lg overflow-hidden">
                       <img 
-                        src={selectedBelt.imageUrl} 
+                        src={selectedBelt.imagem} 
                         alt={selectedBelt.sku}
                         className="w-full h-full object-cover"
                       />
@@ -322,10 +322,10 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
                       <p className="font-semibold">{selectedBelt.sku}</p>
                     </div>
                     
-                    {selectedBelt.descricao && (
+                    {selectedBelt.brand && (
                       <div>
-                        <p className="text-sm text-gray-500">Descrição</p>
-                        <p className="font-medium">{selectedBelt.descricao}</p>
+                        <p className="text-sm text-gray-500">Marca</p>
+                        <p className="font-medium">{selectedBelt.brand}</p>
                       </div>
                     )}
                     
@@ -336,21 +336,21 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
                       </Badge>
                     </div>
                     
-                    {selectedBelt.genero && (
+                    {selectedBelt.gender && (
                       <div>
                         <p className="text-sm text-gray-500">Gênero</p>
                         <Badge 
-                          variant={selectedBelt.genero === 'masculino' ? 'default' : 'secondary'}
+                          variant={selectedBelt.gender === 'masculino' ? 'default' : 'secondary'}
                           className="capitalize"
                         >
-                          {selectedBelt.genero}
+                          {selectedBelt.gender}
                         </Badge>
                       </div>
                     )}
                     
                     <div>
-                      <p className="text-sm text-gray-500">Quantidade</p>
-                      <p className="font-semibold text-lg">{selectedBelt.quantidade || 0} unidades</p>
+                      <p className="text-sm text-gray-500">Categoria</p>
+                      <p className="font-semibold text-lg capitalize">{selectedBelt.categoria}</p>
                     </div>
                   </div>
                 </div>
