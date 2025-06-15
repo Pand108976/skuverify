@@ -388,16 +388,6 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
                           fill={belt.gender === 'masculino' ? '#3B82F6' : '#EC4899'}
                         />
                       )}
-                      
-                      {/* SKU */}
-                      <text 
-                        x="0" 
-                        y="45" 
-                        textAnchor="middle" 
-                        className="fill-gray-600 text-xs font-semibold"
-                      >
-                        {belt.sku.length > 8 ? belt.sku.substring(0, 8) + '...' : belt.sku}
-                      </text>
                     </g>
                   ))}
                 </svg>
