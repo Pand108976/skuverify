@@ -14,7 +14,6 @@ interface CinteiroTabProps {
 
 export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
   const currentStore = 'patiobatel'; // Forçar Patio Batel para o cinteiro
-  console.log("Cinteiro - Store forçada:", currentStore);
   const [products, setProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [rotation, setRotation] = useState(0);
@@ -28,21 +27,16 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
     const loadBelts = async () => {
       setIsLoading(true);
       try {
-        console.log("Carregando cintos da loja:", currentStore);
         const allProducts = await firebase.getProductsFromStore(currentStore);
-        console.log("Total produtos carregados:", allProducts.length);
         
         const belts = allProducts.filter(product => 
           product.categoria === "cintos"
         );
-        console.log("Cintos encontrados:", belts.length);
         
-        const beltsWithImages = belts.filter(product => 
-          product.imagem && product.imagem !== ""
-        );
-        console.log("Cintos com imagem:", beltsWithImages.length);
+        // Limitar a 20 cintos para teste
+        const limitedBelts = belts.slice(0, 20);
         
-        setProducts(belts); // Mostrar todos os cintos, mesmo sem imagem
+        setProducts(limitedBelts);
       } catch (error) {
         console.error("Erro ao carregar cintos:", error);
       } finally {
@@ -56,13 +50,15 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
   // Filtrar cintos baseado na busca e gênero
   const filteredBelts = useMemo(() => {
     return products.filter(product => {
-      const matchesSearch = product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      const matchesSearch = searchTerm === "" || 
+                           product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            product.brand?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            product.caixa?.toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesGender = genderFilter === "todos" || 
                            product.gender === genderFilter ||
-                           (!product.gender && genderFilter === "sem_genero");
+                           (!product.gender && genderFilter === "sem_genero") ||
+                           (!product.gender && genderFilter === "todos");
       
       return matchesSearch && matchesGender;
     });
