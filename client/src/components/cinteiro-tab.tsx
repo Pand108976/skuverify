@@ -311,13 +311,33 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
               {selectedBelt ? (
                 <div className="space-y-4">
                   {/* Imagem grande */}
-                  {selectedBelt.imagem && (
-                    <div className="w-full h-48 bg-gray-100 rounded-lg overflow-hidden">
+                  {selectedBelt.imagem ? (
+                    <div className="w-full h-48 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
                       <img 
                         src={selectedBelt.imagem} 
                         alt={selectedBelt.sku}
-                        className="w-full h-full object-cover"
+                        className="max-w-full max-h-full object-contain"
+                        onError={(e) => {
+                          console.log("Erro ao carregar imagem:", selectedBelt.imagem);
+                          e.currentTarget.style.display = 'none';
+                        }}
+                        onLoad={() => {
+                          console.log("Imagem carregada com sucesso:", selectedBelt.imagem);
+                        }}
                       />
+                    </div>
+                  ) : (
+                    <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center">
+                      <div className="text-center text-gray-500">
+                        <div className="w-16 h-16 bg-gray-300 rounded-full mx-auto mb-2 flex items-center justify-center">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <rect x="2" y="10" width="20" height="4" rx="2"/>
+                            <rect x="15" y="8" width="4" height="8" rx="1"/>
+                            <circle cx="17" cy="12" r="1"/>
+                          </svg>
+                        </div>
+                        <p>Sem imagem</p>
+                      </div>
                     </div>
                   )}
                   
