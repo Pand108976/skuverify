@@ -27,6 +27,7 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [lastX, setLastX] = useState(0);
   const [lastY, setLastY] = useState(0);
+  const [isMouseOverCinteiro, setIsMouseOverCinteiro] = useState(false);
 
   // Listeners globais para navegação tipo mapa
   useEffect(() => {
@@ -80,6 +81,24 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
       document.removeEventListener('touchend', handleGlobalTouchEnd);
     };
   }, [isDragging, lastX, lastY]);
+
+  // Interceptar scroll global quando mouse estiver sobre cinteiro
+  useEffect(() => {
+    const handleGlobalWheel = (e: WheelEvent) => {
+      if (isMouseOverCinteiro) {
+        e.preventDefault();
+        e.stopPropagation();
+        const delta = e.deltaY > 0 ? -0.1 : 0.1;
+        setZoom(prev => Math.max(0.5, Math.min(3, prev + delta)));
+      }
+    };
+
+    document.addEventListener('wheel', handleGlobalWheel, { passive: false });
+
+    return () => {
+      document.removeEventListener('wheel', handleGlobalWheel);
+    };
+  }, [isMouseOverCinteiro]);
 
   // Carregar apenas cintos
   useEffect(() => {
@@ -162,6 +181,7 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
 
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     const delta = e.deltaY > 0 ? -0.1 : 0.1;
     setZoom(prev => Math.max(0.5, Math.min(3, prev + delta)));
   };
@@ -262,14 +282,17 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
         <div className="lg:col-span-2">
           <Card>
             <CardContent className="p-6">
-              <div className="relative bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 rounded-lg overflow-hidden">
+              <div 
+                className="relative bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 rounded-lg overflow-hidden"
+                onMouseEnter={() => setIsMouseOverCinteiro(true)}
+                onMouseLeave={() => setIsMouseOverCinteiro(false)}
+              >
                 <svg 
                   width="500" 
                   height="500" 
                   className="w-full h-auto cursor-grab active:cursor-grabbing select-none"
                   onMouseDown={handleMouseDown}
                   onTouchStart={handleTouchStart}
-                  onWheel={handleWheel}
                   viewBox="0 0 500 500"
                   style={{ 
                     transform: `scale(${zoom}) translate(${panX / zoom}px, ${panY / zoom}px)`,
