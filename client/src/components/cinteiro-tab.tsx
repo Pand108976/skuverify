@@ -16,25 +16,31 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
   const currentStore = 'patiobatel'; // Forçar Patio Batel para o cinteiro
   const [products, setProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [rotation, setRotation] = useState(0);
-  const [zoom, setZoom] = useState(1);
   const [selectedBelt, setSelectedBelt] = useState<Product | null>(null);
   const [genderFilter, setGenderFilter] = useState<string>("todos");
   const [isLoading, setIsLoading] = useState(true);
   
-  // Estados para controle de arrastar
+  // Estados para navegação tipo mapa
+  const [zoom, setZoom] = useState(1);
+  const [panX, setPanX] = useState(0);
+  const [panY, setPanY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [lastX, setLastX] = useState(0);
   const [lastY, setLastY] = useState(0);
 
-  // Adicionar listeners globais para mouse e touch
+  // Listeners globais para navegação tipo mapa
   useEffect(() => {
     const handleGlobalMouseMove = (e: MouseEvent) => {
       if (!isDragging) return;
       
       const deltaX = e.clientX - lastX;
-      setRotation(prev => (prev + deltaX * 0.5) % 360);
+      const deltaY = e.clientY - lastY;
+      
+      setPanX(prev => prev + deltaX);
+      setPanY(prev => prev + deltaY);
+      
       setLastX(e.clientX);
+      setLastY(e.clientY);
     };
 
     const handleGlobalMouseUp = () => {
@@ -46,8 +52,13 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
       
       const touch = e.touches[0];
       const deltaX = touch.clientX - lastX;
-      setRotation(prev => (prev + deltaX * 0.5) % 360);
+      const deltaY = touch.clientY - lastY;
+      
+      setPanX(prev => prev + deltaX);
+      setPanY(prev => prev + deltaY);
+      
       setLastX(touch.clientX);
+      setLastY(touch.clientY);
       e.preventDefault();
     };
 
@@ -68,7 +79,7 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
       document.removeEventListener('touchmove', handleGlobalTouchMove);
       document.removeEventListener('touchend', handleGlobalTouchEnd);
     };
-  }, [isDragging, lastX]);
+  }, [isDragging, lastX, lastY]);
 
   // Carregar apenas cintos
   useEffect(() => {
@@ -112,14 +123,14 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
     });
   }, [products, searchTerm, genderFilter]);
 
-  // Calcular posições dos cintos no círculo
+  // Calcular posições dos cintos no círculo (fixo)
   const beltPositions = useMemo(() => {
     const radius = 200;
     const centerX = 250;
     const centerY = 250;
     
     return filteredBelts.map((belt, index) => {
-      const angle = (index / filteredBelts.length) * 2 * Math.PI + (rotation * Math.PI / 180);
+      const angle = (index / filteredBelts.length) * 2 * Math.PI;
       const x = centerX + radius * Math.cos(angle);
       const y = centerY + radius * Math.sin(angle);
       
@@ -131,12 +142,13 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
         index
       };
     });
-  }, [filteredBelts, rotation]);
+  }, [filteredBelts]);
 
   // Funções de controle por mouse e toque simplificadas
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
     setLastX(e.clientX);
+    setLastY(e.clientY);
     e.preventDefault();
   };
 
@@ -144,21 +156,24 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
     const touch = e.touches[0];
     setIsDragging(true);
     setLastX(touch.clientX);
+    setLastY(touch.clientY);
     e.preventDefault();
   };
 
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     const delta = e.deltaY > 0 ? -0.1 : 0.1;
-    setZoom(prev => Math.max(0.5, Math.min(2, prev + delta)));
+    setZoom(prev => Math.max(0.5, Math.min(3, prev + delta)));
   };
 
-  const rotateCinteiro = () => {
-    setRotation(prev => (prev + 30) % 360);
+  const resetView = () => {
+    setZoom(1);
+    setPanX(0);
+    setPanY(0);
   };
 
   const zoomIn = () => {
-    setZoom(prev => Math.min(prev + 0.2, 2));
+    setZoom(prev => Math.min(prev + 0.2, 3));
   };
 
   const zoomOut = () => {
@@ -227,9 +242,9 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
 
             {/* Controles do Cinteiro */}
             <div className="flex gap-2">
-              <Button onClick={rotateCinteiro} variant="outline" size="sm">
+              <Button onClick={resetView} variant="outline" size="sm">
                 <RotateCw className="h-4 w-4 mr-2" />
-                Girar
+                Reset
               </Button>
               <Button onClick={zoomIn} variant="outline" size="sm">
                 <ZoomIn className="h-4 w-4" />
@@ -252,10 +267,14 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
                   width="500" 
                   height="500" 
                   className="w-full h-auto cursor-grab active:cursor-grabbing select-none"
-                  style={{ transform: `scale(${zoom})` }}
                   onMouseDown={handleMouseDown}
                   onTouchStart={handleTouchStart}
                   onWheel={handleWheel}
+                  viewBox="0 0 500 500"
+                  style={{ 
+                    transform: `scale(${zoom}) translate(${panX / zoom}px, ${panY / zoom}px)`,
+                    transformOrigin: 'center center'
+                  }}
                 >
                   {/* Base do cinteiro */}
                   <defs>
