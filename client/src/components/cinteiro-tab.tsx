@@ -349,7 +349,7 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
                       <circle 
                         cx="2" 
                         cy="2" 
-                        r="22" 
+                        r="32" 
                         fill="rgba(0,0,0,0.1)" 
                       />
                       
@@ -357,7 +357,7 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
                       <circle 
                         cx="0" 
                         cy="0" 
-                        r="20" 
+                        r="30" 
                         fill="white" 
                         stroke={selectedBelt?.sku === belt.sku ? "#F59E0B" : "#E5E7EB"}
                         strokeWidth={selectedBelt?.sku === belt.sku ? "3" : "2"}
@@ -369,11 +369,11 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
                       {belt.imagem && (
                         <image
                           href={belt.imagem}
-                          x="-15"
-                          y="-15"
-                          width="30"
-                          height="30"
-                          clipPath="circle(15px at 15px 15px)"
+                          x="-25"
+                          y="-25"
+                          width="50"
+                          height="50"
+                          clipPath="circle(25px at 25px 25px)"
                           className="cursor-pointer"
                           onClick={() => handleBeltClick(belt)}
                         />
@@ -382,9 +382,9 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
                       {/* Indicador de gênero */}
                       {belt.gender && (
                         <circle 
-                          cx="12" 
-                          cy="-12" 
-                          r="6" 
+                          cx="18" 
+                          cy="-18" 
+                          r="8" 
                           fill={belt.gender === 'masculino' ? '#3B82F6' : '#EC4899'}
                         />
                       )}
@@ -392,7 +392,7 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
                       {/* SKU */}
                       <text 
                         x="0" 
-                        y="35" 
+                        y="45" 
                         textAnchor="middle" 
                         className="fill-gray-600 text-xs font-semibold"
                       >
