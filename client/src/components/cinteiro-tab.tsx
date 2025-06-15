@@ -13,7 +13,8 @@ interface CinteiroTabProps {
 }
 
 export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
-  const currentStore = selectedStore || localStorage.getItem('luxury_store_id') || 'patiobatel';
+  const currentStore = 'patiobatel'; // Forçar Patio Batel para o cinteiro
+  console.log("Cinteiro - Store forçada:", currentStore);
   const [products, setProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [rotation, setRotation] = useState(0);
@@ -27,13 +28,21 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
     const loadBelts = async () => {
       setIsLoading(true);
       try {
+        console.log("Carregando cintos da loja:", currentStore);
         const allProducts = await firebase.getProductsFromStore(currentStore);
+        console.log("Total produtos carregados:", allProducts.length);
+        
         const belts = allProducts.filter(product => 
-          product.categoria === "cintos" && 
-          product.imagem &&
-          product.imagem !== ""
+          product.categoria === "cintos"
         );
-        setProducts(belts);
+        console.log("Cintos encontrados:", belts.length);
+        
+        const beltsWithImages = belts.filter(product => 
+          product.imagem && product.imagem !== ""
+        );
+        console.log("Cintos com imagem:", beltsWithImages.length);
+        
+        setProducts(belts); // Mostrar todos os cintos, mesmo sem imagem
       } catch (error) {
         console.error("Erro ao carregar cintos:", error);
       } finally {
