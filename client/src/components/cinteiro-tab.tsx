@@ -27,6 +27,8 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
       try {
         const beltProducts = await firebase.getProductsByTypeAndStore('cintos', currentStore);
         console.log(`Carregando ${beltProducts.length} cintos do ${currentStore}`);
+        console.log('Estrutura dos primeiros cintos:', beltProducts.slice(0, 3));
+        console.log('Total produtos filtrados para cintos:', beltProducts.filter(p => p.categoria === 'cintos' || p.tipo === 'cintos').length);
         setProducts(beltProducts);
       } catch (error) {
         console.error('Erro ao carregar cintos:', error);
@@ -42,7 +44,7 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
   // Filtrar cintos por busca e gênero
   const filteredBelts = useMemo(() => {
     let filtered = products.filter(product => 
-      product.tipo === 'cintos' &&
+      (product.tipo === 'cintos' || product.categoria === 'cintos') &&
       (searchTerm === "" || 
        product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
        (product.descricao && product.descricao.toLowerCase().includes(searchTerm.toLowerCase())))
@@ -52,10 +54,12 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
       filtered = filtered.filter(product => product.gender === genderFilter);
     }
 
+    console.log('Produtos filtrados:', filtered.length, 'de', products.length);
     return filtered;
   }, [products, searchTerm, genderFilter]);
 
   const handleBeltClick = (belt: Product) => {
+    console.log('Cinto clicado:', belt);
     setSelectedBelt(belt);
   };
 
@@ -219,13 +223,18 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
                         <span className="text-gray-500">Tipo:</span>
-                        <p className="font-medium capitalize">{selectedBelt.tipo}</p>
+                        <p className="font-medium capitalize">{selectedBelt.categoria || selectedBelt.tipo || 'cintos'}</p>
+                      </div>
+                      
+                      <div>
+                        <span className="text-gray-500">Caixa:</span>
+                        <p className="font-medium">{selectedBelt.caixa || "Não informado"}</p>
                       </div>
                       
                       <div>
                         <span className="text-gray-500">Gênero:</span>
                         <div className="flex items-center gap-2 mt-1">
-                          {selectedBelt.gender && (
+                          {selectedBelt.gender ? (
                             <>
                               <div 
                                 className={`w-3 h-3 rounded-full ${
@@ -234,20 +243,31 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
                               />
                               <span className="font-medium capitalize">{selectedBelt.gender}</span>
                             </>
+                          ) : (
+                            <span className="text-gray-400">Não definido</span>
                           )}
                         </div>
                       </div>
                       
                       <div>
                         <span className="text-gray-500">Loja:</span>
-                        <p className="font-medium capitalize">{selectedBelt.loja}</p>
-                      </div>
-                      
-                      <div>
-                        <span className="text-gray-500">Local:</span>
-                        <p className="font-medium">{selectedBelt.local || "Não informado"}</p>
+                        <p className="font-medium capitalize">{selectedBelt.loja || currentStore}</p>
                       </div>
                     </div>
+
+                    {selectedBelt.link && (
+                      <div>
+                        <span className="text-gray-500 text-sm">Link do produto:</span>
+                        <a 
+                          href={selectedBelt.link} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-500 hover:text-blue-700 text-sm mt-1 block truncate"
+                        >
+                          Ver no site da Ferragamo
+                        </a>
+                      </div>
+                    )}
 
                     {selectedBelt.observacoes && (
                       <div>
