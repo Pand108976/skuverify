@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,54 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
   const [selectedBelt, setSelectedBelt] = useState<Product | null>(null);
   const [genderFilter, setGenderFilter] = useState<string>("todos");
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Estados para controle de arrastar
+  const [isDragging, setIsDragging] = useState(false);
+  const [lastX, setLastX] = useState(0);
+  const [lastY, setLastY] = useState(0);
+
+  // Adicionar listeners globais para mouse e touch
+  useEffect(() => {
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (!isDragging) return;
+      
+      const deltaX = e.clientX - lastX;
+      setRotation(prev => (prev + deltaX * 0.5) % 360);
+      setLastX(e.clientX);
+    };
+
+    const handleGlobalMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    const handleGlobalTouchMove = (e: TouchEvent) => {
+      if (!isDragging) return;
+      
+      const touch = e.touches[0];
+      const deltaX = touch.clientX - lastX;
+      setRotation(prev => (prev + deltaX * 0.5) % 360);
+      setLastX(touch.clientX);
+      e.preventDefault();
+    };
+
+    const handleGlobalTouchEnd = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleGlobalMouseMove);
+      document.addEventListener('mouseup', handleGlobalMouseUp);
+      document.addEventListener('touchmove', handleGlobalTouchMove, { passive: false });
+      document.addEventListener('touchend', handleGlobalTouchEnd);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+      document.removeEventListener('touchmove', handleGlobalTouchMove);
+      document.removeEventListener('touchend', handleGlobalTouchEnd);
+    };
+  }, [isDragging, lastX]);
 
   // Carregar apenas cintos
   useEffect(() => {
@@ -85,6 +133,26 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
     });
   }, [filteredBelts, rotation]);
 
+  // Funções de controle por mouse e toque simplificadas
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setLastX(e.clientX);
+    e.preventDefault();
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    setIsDragging(true);
+    setLastX(touch.clientX);
+    e.preventDefault();
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+    setZoom(prev => Math.max(0.5, Math.min(2, prev + delta)));
+  };
+
   const rotateCinteiro = () => {
     setRotation(prev => (prev + 30) % 360);
   };
@@ -98,7 +166,9 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
   };
 
   const handleBeltClick = (belt: Product) => {
-    setSelectedBelt(belt);
+    if (!isDragging) {
+      setSelectedBelt(belt);
+    }
   };
 
   if (isLoading) {
@@ -181,8 +251,11 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
                 <svg 
                   width="500" 
                   height="500" 
-                  className="w-full h-auto"
+                  className="w-full h-auto cursor-grab active:cursor-grabbing select-none"
                   style={{ transform: `scale(${zoom})` }}
+                  onMouseDown={handleMouseDown}
+                  onTouchStart={handleTouchStart}
+                  onWheel={handleWheel}
                 >
                   {/* Base do cinteiro */}
                   <defs>
