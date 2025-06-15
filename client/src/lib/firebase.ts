@@ -125,6 +125,39 @@ export const firebase = {
     return localProducts;
   },
 
+  // Get products by type and store - for cinteiro functionality
+  async getProductsByTypeAndStore(tipo: 'oculos' | 'cintos', storeId: string): Promise<Product[]> {
+    const localStorageKey = `luxury_products_${storeId}`;
+    
+    // Carrega links automaticamente se ainda não foram carregados
+    await loadProductLinks();
+    
+    const stored = localStorage.getItem(localStorageKey);
+    let localProducts: Product[] = stored ? JSON.parse(stored) : [];
+    
+    // Filtra por tipo de produto
+    localProducts = localProducts.filter(product => {
+      // Compatibilidade com diferentes formatos de dados
+      return product.tipo === tipo || product.categoria === tipo;
+    });
+    
+    // Aplica links e gênero salvo globalmente aos produtos
+    localProducts = localProducts.map(product => {
+      const globalKey = `product_gender_${product.sku}`;
+      const savedGender = localStorage.getItem(globalKey);
+      
+      return {
+        ...product,
+        link: product.link || getProductLink(product.sku),
+        gender: savedGender ? (savedGender as "masculino" | "feminino") : product.gender,
+        imagem: product.imagem || getImagePath(product.sku, tipo)
+      };
+    });
+    
+    console.log(`Encontrados ${localProducts.length} produtos do tipo "${tipo}" na loja "${storeId}"`);
+    return localProducts;
+  },
+
   // Get all products from Firebase (for sync operations)
   async getProductsFromFirebase(): Promise<Product[]> {
     const storeId = getStoreCollection();
