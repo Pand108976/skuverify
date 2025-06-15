@@ -13,6 +13,7 @@ import { MovementTab } from "@/components/movement-tab";
 import { SalesTab } from "@/components/sales-tab";
 import { PromotionsTab } from "@/components/promotions-tab";
 import { EditGenderTab } from "@/components/edit-gender-tab";
+import { CinteiroTab } from "@/components/cinteiro-tab";
 
 
 
