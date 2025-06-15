@@ -1,9 +1,9 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect, useMemo } from "react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, RotateCw, ZoomIn, ZoomOut, Filter } from "lucide-react";
+import { Search, Filter, Grid, Package } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { firebase } from "@/lib/firebase";
 import type { Product } from "@/lib/types";
@@ -19,228 +19,62 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
   const [selectedBelt, setSelectedBelt] = useState<Product | null>(null);
   const [genderFilter, setGenderFilter] = useState<string>("todos");
   const [isLoading, setIsLoading] = useState(true);
-  
-  // Estados para navegação tipo mapa
-  const [zoom, setZoom] = useState(1);
-  const [panX, setPanX] = useState(0);
-  const [panY, setPanY] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [lastX, setLastX] = useState(0);
-  const [lastY, setLastY] = useState(0);
-  const [isMouseOverCinteiro, setIsMouseOverCinteiro] = useState(false);
-
-  // Listeners globais para navegação tipo mapa
-  useEffect(() => {
-    const handleGlobalMouseMove = (e: MouseEvent) => {
-      if (!isDragging) return;
-      
-      const deltaX = e.clientX - lastX;
-      const deltaY = e.clientY - lastY;
-      
-      setPanX(prev => prev + deltaX);
-      setPanY(prev => prev + deltaY);
-      
-      setLastX(e.clientX);
-      setLastY(e.clientY);
-    };
-
-    const handleGlobalMouseUp = () => {
-      setIsDragging(false);
-    };
-
-    const handleGlobalTouchMove = (e: TouchEvent) => {
-      if (!isDragging) return;
-      
-      const touch = e.touches[0];
-      const deltaX = touch.clientX - lastX;
-      const deltaY = touch.clientY - lastY;
-      
-      setPanX(prev => prev + deltaX);
-      setPanY(prev => prev + deltaY);
-      
-      setLastX(touch.clientX);
-      setLastY(touch.clientY);
-      e.preventDefault();
-    };
-
-    const handleGlobalTouchEnd = () => {
-      setIsDragging(false);
-    };
-
-    if (isDragging) {
-      document.addEventListener('mousemove', handleGlobalMouseMove);
-      document.addEventListener('mouseup', handleGlobalMouseUp);
-      document.addEventListener('touchmove', handleGlobalTouchMove, { passive: false });
-      document.addEventListener('touchend', handleGlobalTouchEnd);
-    }
-
-    return () => {
-      document.removeEventListener('mousemove', handleGlobalMouseMove);
-      document.removeEventListener('mouseup', handleGlobalMouseUp);
-      document.removeEventListener('touchmove', handleGlobalTouchMove);
-      document.removeEventListener('touchend', handleGlobalTouchEnd);
-    };
-  }, [isDragging, lastX, lastY]);
-
-  // Interceptar scroll global quando mouse estiver sobre cinteiro
-  useEffect(() => {
-    const handleGlobalWheel = (e: WheelEvent) => {
-      if (isMouseOverCinteiro) {
-        e.preventDefault();
-        e.stopPropagation();
-        const delta = e.deltaY > 0 ? -0.1 : 0.1;
-        setZoom(prev => Math.max(0.5, Math.min(3, prev + delta)));
-      }
-    };
-
-    document.addEventListener('wheel', handleGlobalWheel, { passive: false });
-
-    return () => {
-      document.removeEventListener('wheel', handleGlobalWheel);
-    };
-  }, [isMouseOverCinteiro]);
 
   // Carregar apenas cintos
   useEffect(() => {
     const loadBelts = async () => {
       setIsLoading(true);
       try {
-        const allProducts = await firebase.getProductsFromStore(currentStore);
-        
-        const belts = allProducts.filter(product => 
-          product.categoria === "cintos"
-        );
-        
-        // Limitar a 20 cintos para teste
-        const limitedBelts = belts.slice(0, 20);
-        
-        setProducts(limitedBelts);
+        const beltProducts = await firebase.getProductsByTypeAndStore('cintos', currentStore);
+        console.log(`Carregando ${beltProducts.length} cintos do ${currentStore}`);
+        setProducts(beltProducts);
       } catch (error) {
-        console.error("Erro ao carregar cintos:", error);
+        console.error('Erro ao carregar cintos:', error);
+        setProducts([]);
       } finally {
         setIsLoading(false);
       }
     };
-    
+
     loadBelts();
   }, [currentStore]);
 
-  // Filtrar cintos baseado na busca e gênero
+  // Filtrar cintos por busca e gênero
   const filteredBelts = useMemo(() => {
-    return products.filter(product => {
-      const matchesSearch = searchTerm === "" || 
-                           product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           product.brand?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           product.caixa?.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesGender = genderFilter === "todos" || 
-                           product.gender === genderFilter ||
-                           (!product.gender && genderFilter === "sem_genero") ||
-                           (!product.gender && genderFilter === "todos");
-      
-      return matchesSearch && matchesGender;
-    });
+    let filtered = products.filter(product => 
+      product.tipo === 'cintos' &&
+      (searchTerm === "" || 
+       product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
+       (product.descricao && product.descricao.toLowerCase().includes(searchTerm.toLowerCase())))
+    );
+
+    if (genderFilter !== "todos") {
+      filtered = filtered.filter(product => product.gender === genderFilter);
+    }
+
+    return filtered;
   }, [products, searchTerm, genderFilter]);
 
-  // Calcular posições dos cintos no círculo (fixo)
-  const beltPositions = useMemo(() => {
-    const radius = 200;
-    const centerX = 250;
-    const centerY = 250;
-    
-    return filteredBelts.map((belt, index) => {
-      const angle = (index / filteredBelts.length) * 2 * Math.PI;
-      const x = centerX + radius * Math.cos(angle);
-      const y = centerY + radius * Math.sin(angle);
-      
-      return {
-        ...belt,
-        x,
-        y,
-        angle: angle * 180 / Math.PI,
-        index
-      };
-    });
-  }, [filteredBelts]);
-
-  // Funções de controle por mouse e toque simplificadas
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    setLastX(e.clientX);
-    setLastY(e.clientY);
-    e.preventDefault();
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    setIsDragging(true);
-    setLastX(touch.clientX);
-    setLastY(touch.clientY);
-    e.preventDefault();
-  };
-
-  const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const delta = e.deltaY > 0 ? -0.1 : 0.1;
-    setZoom(prev => Math.max(0.5, Math.min(3, prev + delta)));
-  };
-
-  const resetView = () => {
-    setZoom(1);
-    setPanX(0);
-    setPanY(0);
-  };
-
-  const zoomIn = () => {
-    setZoom(prev => Math.min(prev + 0.2, 3));
-  };
-
-  const zoomOut = () => {
-    setZoom(prev => Math.max(prev - 0.2, 0.5));
-  };
-
   const handleBeltClick = (belt: Product) => {
-    if (!isDragging) {
-      setSelectedBelt(belt);
-    }
+    setSelectedBelt(belt);
   };
-
-  if (isLoading) {
-    return (
-      <div className="p-6">
-        <Card>
-          <CardContent className="flex items-center justify-center h-96">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Carregando cinteiro virtual...</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Controles */}
+    <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-amber-500 to-orange-600 rounded-full flex items-center justify-center">
-              <div className="w-4 h-4 bg-white rounded-full"></div>
-            </div>
-            Cinteiro Virtual 3D
-            <Badge variant="secondary">{filteredBelts.length} cintos</Badge>
-          </CardTitle>
+          <CardTitle>Cinteiro Virtual - Patio Batel</CardTitle>
+          <CardDescription>
+            Visualização ágil para seleção rápida de cintos na loja
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-4 items-center">
+        <CardContent className="space-y-4">
+          <div className="flex flex-col sm:flex-row gap-4">
             {/* Busca */}
-            <div className="relative flex-1 min-w-[200px]">
+            <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
-                placeholder="Buscar por SKU, descrição ou caixa..."
+                placeholder="Buscar por SKU ou descrição..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -249,159 +83,102 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
 
             {/* Filtro de Gênero */}
             <Select value={genderFilter} onValueChange={setGenderFilter}>
-              <SelectTrigger className="w-40">
-                <SelectValue />
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue placeholder="Filtrar por gênero" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="todos">Todos</SelectItem>
+                <SelectItem value="todos">Todos os Gêneros</SelectItem>
                 <SelectItem value="masculino">Masculino</SelectItem>
                 <SelectItem value="feminino">Feminino</SelectItem>
                 <SelectItem value="sem_genero">Sem Gênero</SelectItem>
               </SelectContent>
             </Select>
-
-            {/* Controles do Cinteiro */}
-            <div className="flex gap-2">
-              <Button onClick={resetView} variant="outline" size="sm">
-                <RotateCw className="h-4 w-4 mr-2" />
-                Reset
-              </Button>
-              <Button onClick={zoomIn} variant="outline" size="sm">
-                <ZoomIn className="h-4 w-4" />
-              </Button>
-              <Button onClick={zoomOut} variant="outline" size="sm">
-                <ZoomOut className="h-4 w-4" />
-              </Button>
-            </div>
           </div>
         </CardContent>
       </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Cinteiro 3D */}
+        {/* Cinteiro em Grade - Visualização Ágil */}
         <div className="lg:col-span-2">
           <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Grid className="h-5 w-5" />
+                Cinteiro Virtual - Visualização Rápida
+              </CardTitle>
+              <CardDescription>
+                {filteredBelts.length} cintos disponíveis - Clique para ver detalhes
+              </CardDescription>
+            </CardHeader>
             <CardContent className="p-6">
-              <div 
-                className="relative bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 rounded-lg overflow-hidden"
-                onMouseEnter={() => setIsMouseOverCinteiro(true)}
-                onMouseLeave={() => setIsMouseOverCinteiro(false)}
-              >
-                <svg 
-                  width="500" 
-                  height="500" 
-                  className="w-full h-auto cursor-grab active:cursor-grabbing select-none"
-                  onMouseDown={handleMouseDown}
-                  onTouchStart={handleTouchStart}
-                  viewBox="0 0 500 500"
-                  style={{ 
-                    transform: `scale(${zoom}) translate(${panX / zoom}px, ${panY / zoom}px)`,
-                    transformOrigin: 'center center'
-                  }}
-                >
-                  {/* Base do cinteiro */}
-                  <defs>
-                    <radialGradient id="baseGradient" cx="50%" cy="50%" r="50%">
-                      <stop offset="0%" stopColor="#8B5CF6" stopOpacity="0.2" />
-                      <stop offset="70%" stopColor="#3B82F6" stopOpacity="0.1" />
-                      <stop offset="100%" stopColor="#1E40AF" stopOpacity="0.05" />
-                    </radialGradient>
-                  </defs>
-                  
-                  {/* Círculo base */}
-                  <circle 
-                    cx="250" 
-                    cy="250" 
-                    r="220" 
-                    fill="url(#baseGradient)" 
-                    stroke="#E5E7EB" 
-                    strokeWidth="2"
-                    strokeDasharray="5,5"
-                  />
-                  
-                  {/* Centro do cinteiro */}
-                  <circle 
-                    cx="250" 
-                    cy="250" 
-                    r="40" 
-                    fill="#4F46E5" 
-                    opacity="0.8"
-                  />
-                  <circle 
-                    cx="250" 
-                    cy="250" 
-                    r="25" 
-                    fill="#6366F1" 
-                  />
-                  <text 
-                    x="250" 
-                    y="255" 
-                    textAnchor="middle" 
-                    className="fill-white text-xs font-bold"
-                  >
-                    VITRÉO
-                  </text>
-
-                  {/* Cintos */}
-                  {beltPositions.map((belt) => (
-                    <g key={belt.sku} transform={`translate(${belt.x}, ${belt.y})`}>
-                      {/* Sombra */}
-                      <circle 
-                        cx="2" 
-                        cy="2" 
-                        r="32" 
-                        fill="rgba(0,0,0,0.1)" 
-                      />
-                      
-                      {/* Fundo do produto */}
-                      <circle 
-                        cx="0" 
-                        cy="0" 
-                        r="30" 
-                        fill="white" 
-                        stroke={selectedBelt?.sku === belt.sku ? "#F59E0B" : "#E5E7EB"}
-                        strokeWidth={selectedBelt?.sku === belt.sku ? "3" : "2"}
-                        className="cursor-pointer hover:stroke-blue-500 transition-colors"
-                        onClick={() => handleBeltClick(belt)}
-                      />
-                      
-                      {/* Imagem do cinto */}
-                      {belt.imagem && (
-                        <image
-                          href={belt.imagem}
-                          x="-25"
-                          y="-25"
-                          width="50"
-                          height="50"
-                          clipPath="circle(25px at 25px 25px)"
-                          className="cursor-pointer"
-                          onClick={() => handleBeltClick(belt)}
-                        />
-                      )}
-                      
-                      {/* Indicador de gênero */}
-                      {belt.gender && (
-                        <circle 
-                          cx="18" 
-                          cy="-18" 
-                          r="8" 
-                          fill={belt.gender === 'masculino' ? '#3B82F6' : '#EC4899'}
-                        />
-                      )}
-                    </g>
-                  ))}
-                </svg>
-
-                {filteredBelts.length === 0 && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center">
-                      <Filter className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                      <p className="text-gray-500">Nenhum cinto encontrado</p>
-                      <p className="text-sm text-gray-400">Ajuste os filtros de busca</p>
-                    </div>
+              {isLoading ? (
+                <div className="flex items-center justify-center h-64">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-2"></div>
+                    <p className="text-gray-500">Carregando cintos...</p>
                   </div>
-                )}
-              </div>
+                </div>
+              ) : filteredBelts.length === 0 ? (
+                <div className="flex items-center justify-center h-64">
+                  <div className="text-center">
+                    <Filter className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-500">Nenhum cinto encontrado</p>
+                    <p className="text-sm text-gray-400">Ajuste os filtros de busca</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-3 max-h-96 overflow-y-auto">
+                  {filteredBelts.map((belt, index) => (
+                    <div
+                      key={belt.sku}
+                      className={`relative group cursor-pointer transition-all duration-200 ${
+                        selectedBelt?.sku === belt.sku 
+                          ? 'ring-2 ring-amber-500 ring-offset-2' 
+                          : 'hover:scale-105 hover:shadow-lg'
+                      }`}
+                      onClick={() => handleBeltClick(belt)}
+                    >
+                      {/* Container da imagem */}
+                      <div className="aspect-square bg-white rounded-lg border-2 border-gray-200 overflow-hidden relative">
+                        {belt.imagem ? (
+                          <img
+                            src={belt.imagem}
+                            alt={`Cinto ${belt.sku}`}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                            <Package className="h-6 w-6 text-gray-400" />
+                          </div>
+                        )}
+                        
+                        {/* Número da posição */}
+                        <div className="absolute top-1 left-1 bg-black bg-opacity-70 text-white text-xs px-1.5 py-0.5 rounded">
+                          {index + 1}
+                        </div>
+                        
+                        {/* Indicador de gênero */}
+                        {belt.gender && (
+                          <div 
+                            className={`absolute top-1 right-1 w-3 h-3 rounded-full ${
+                              belt.gender === 'masculino' ? 'bg-blue-500' : 'bg-pink-500'
+                            }`}
+                            title={belt.gender === 'masculino' ? 'Masculino' : 'Feminino'}
+                          />
+                        )}
+                        
+                        {/* Overlay com SKU no hover */}
+                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 flex items-end">
+                          <div className="w-full p-1 text-white text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-center truncate">
+                            {belt.sku}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -410,79 +187,74 @@ export function CinteiroTab({ selectedStore }: CinteiroTabProps) {
         <div>
           <Card className="h-fit">
             <CardHeader>
-              <CardTitle>Detalhes do Cinto</CardTitle>
+              <CardTitle>Detalhes do Produto</CardTitle>
             </CardHeader>
             <CardContent>
               {selectedBelt ? (
                 <div className="space-y-4">
-                  {/* Imagem grande */}
-                  {selectedBelt.imagem ? (
-                    <div className="w-full h-48 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
-                      <img 
-                        src={selectedBelt.imagem} 
+                  {/* Imagem maior */}
+                  <div className="aspect-square bg-gray-50 rounded-lg overflow-hidden">
+                    {selectedBelt.imagem ? (
+                      <img
+                        src={selectedBelt.imagem}
                         alt={selectedBelt.sku}
-                        className="max-w-full max-h-full object-contain"
-                        onError={(e) => {
-                          console.log("Erro ao carregar imagem:", selectedBelt.imagem);
-                          e.currentTarget.style.display = 'none';
-                        }}
-                        onLoad={() => {
-                          console.log("Imagem carregada com sucesso:", selectedBelt.imagem);
-                        }}
+                        className="w-full h-full object-cover"
                       />
-                    </div>
-                  ) : (
-                    <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center">
-                      <div className="text-center text-gray-500">
-                        <div className="w-16 h-16 bg-gray-300 rounded-full mx-auto mb-2 flex items-center justify-center">
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <rect x="2" y="10" width="20" height="4" rx="2"/>
-                            <rect x="15" y="8" width="4" height="8" rx="1"/>
-                            <circle cx="17" cy="12" r="1"/>
-                          </svg>
-                        </div>
-                        <p>Sem imagem</p>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Package className="h-16 w-16 text-gray-400" />
                       </div>
-                    </div>
-                  )}
-                  
+                    )}
+                  </div>
+
                   {/* Informações */}
                   <div className="space-y-3">
                     <div>
-                      <p className="text-sm text-gray-500">SKU</p>
-                      <p className="font-semibold">{selectedBelt.sku}</p>
+                      <h3 className="font-semibold text-lg">{selectedBelt.sku}</h3>
+                      {selectedBelt.descricao && (
+                        <p className="text-sm text-gray-600 mt-1">{selectedBelt.descricao}</p>
+                      )}
                     </div>
-                    
-                    {selectedBelt.brand && (
+
+                    <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
-                        <p className="text-sm text-gray-500">Marca</p>
-                        <p className="font-medium">{selectedBelt.brand}</p>
+                        <span className="text-gray-500">Tipo:</span>
+                        <p className="font-medium capitalize">{selectedBelt.tipo}</p>
+                      </div>
+                      
+                      <div>
+                        <span className="text-gray-500">Gênero:</span>
+                        <div className="flex items-center gap-2 mt-1">
+                          {selectedBelt.gender && (
+                            <>
+                              <div 
+                                className={`w-3 h-3 rounded-full ${
+                                  selectedBelt.gender === 'masculino' ? 'bg-blue-500' : 'bg-pink-500'
+                                }`}
+                              />
+                              <span className="font-medium capitalize">{selectedBelt.gender}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <span className="text-gray-500">Loja:</span>
+                        <p className="font-medium capitalize">{selectedBelt.loja}</p>
+                      </div>
+                      
+                      <div>
+                        <span className="text-gray-500">Local:</span>
+                        <p className="font-medium">{selectedBelt.local || "Não informado"}</p>
+                      </div>
+                    </div>
+
+                    {selectedBelt.observacoes && (
+                      <div>
+                        <span className="text-gray-500 text-sm">Observações:</span>
+                        <p className="text-sm mt-1 p-2 bg-gray-50 rounded">{selectedBelt.observacoes}</p>
                       </div>
                     )}
-                    
-                    <div>
-                      <p className="text-sm text-gray-500">Localização</p>
-                      <Badge variant="outline" className="font-semibold">
-                        Caixa: {selectedBelt.caixa || "Não definida"}
-                      </Badge>
-                    </div>
-                    
-                    {selectedBelt.gender && (
-                      <div>
-                        <p className="text-sm text-gray-500">Gênero</p>
-                        <Badge 
-                          variant={selectedBelt.gender === 'masculino' ? 'default' : 'secondary'}
-                          className="capitalize"
-                        >
-                          {selectedBelt.gender}
-                        </Badge>
-                      </div>
-                    )}
-                    
-                    <div>
-                      <p className="text-sm text-gray-500">Categoria</p>
-                      <p className="font-semibold text-lg capitalize">{selectedBelt.categoria}</p>
-                    </div>
                   </div>
                 </div>
               ) : (
