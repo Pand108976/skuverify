@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { LoginForm } from "@/components/login-form";
 import { InventoryPage } from "@/pages/inventory";
+import { Admin2FASetup } from "@/components/admin-2fa-setup";
+import { Admin2FALogin } from "@/components/admin-2fa-login";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
