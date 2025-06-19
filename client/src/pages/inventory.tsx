@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Crown, Search, Glasses, Plus, Trash2, LogOut, Database, Upload, ArrowRightLeft, Percent, MoreHorizontal, Square, Shield } from "lucide-react";
+import { Crown, Search, Glasses, Plus, Trash2, LogOut, Database, Upload, ArrowRightLeft, ShoppingCart, Percent, MoreHorizontal, Square, Shield } from "lucide-react";
 import { SearchTab } from "@/components/search-tab";
 import { ProductsTab } from "@/components/products-tab";
 import { AddProductTab } from "@/components/add-product-tab";
@@ -10,6 +10,7 @@ import { ProductModal } from "@/components/product-modal";
 import { FirebaseStatusTab } from "@/components/firebase-status-tab";
 import { PhotoUploadTab } from "@/components/photo-upload-tab";
 import { MovementTab } from "@/components/movement-tab";
+import { SalesTab } from "@/components/sales-tab";
 import { PromotionsTab } from "@/components/promotions-tab";
 import { EditGenderTab } from "@/components/edit-gender-tab";
 import { SecurityTab } from "@/components/security-tab";
@@ -116,7 +117,7 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto p-6">
         <Tabs defaultValue="search" className="w-full">
-          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-9' : 'grid-cols-3'} bg-background border premium-shadow`}>
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-9' : 'grid-cols-4'} bg-background border premium-shadow`}>
             <TabsTrigger value="search" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-2">
               <Search size={12} />
               <span className="hidden xl:inline text-xs">Pesquisar</span>
@@ -138,6 +139,12 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
               </>
             )}
 
+            {!isAdmin && (
+              <TabsTrigger value="sales" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-2">
+                <ShoppingCart size={12} />
+                <span className="hidden xl:inline text-xs">Vendas</span>
+              </TabsTrigger>
+            )}
 
             <TabsTrigger value="add" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-2">
               <Plus size={12} />
@@ -202,7 +209,11 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
               </>
             )}
 
-
+            {!isAdmin && (
+              <TabsContent value="sales" className="fade-in">
+                <SalesTab />
+              </TabsContent>
+            )}
 
             <TabsContent value="add" className="fade-in">
               <AddProductTab />
