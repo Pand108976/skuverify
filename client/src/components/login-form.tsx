@@ -17,19 +17,35 @@ export function LoginForm({ onLogin }: LoginFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Sistema multi-loja
-    const validLogins: Record<string, string> = {
-      'patiobatel': 'patiobatel',
+    // Obtém senhas salvas do localStorage ou usa padrões iniciais
+    const getSavedPasswords = () => {
+      const saved = localStorage.getItem('luxury_store_passwords');
+      return saved ? JSON.parse(saved) : {
+        'patio-batel': 'patio123',
+        'village': 'village123',
+        'jk': 'jk123',
+        'iguatemi': 'iguatemi123',
+        'admin': 'admin123'
+      };
+    };
+
+    // Mapeia nomes de usuário para IDs de loja
+    const usernameToStoreId: Record<string, string> = {
+      'patiobatel': 'patio-batel',
+      'patio-batel': 'patio-batel',
+      'patio': 'patio-batel',
       'village': 'village',
-      'admin': '1234'
+      'jk': 'jk',
+      'iguatemi': 'iguatemi',
+      'admin': 'admin'
     };
     
     const normalizedUsername = username.toLowerCase().trim();
-    const normalizedPassword = password.toLowerCase().trim();
+    const storeId = usernameToStoreId[normalizedUsername];
+    const savedPasswords = getSavedPasswords();
     
-    if (validLogins[normalizedUsername] === normalizedPassword) {
+    if (storeId && savedPasswords[storeId] === password.trim()) {
       // Salva informação da loja no localStorage
-      const storeId = normalizedUsername === 'admin' ? 'admin' : normalizedUsername;
       localStorage.setItem('luxury_store_id', storeId);
       localStorage.setItem('luxury_store_name', getStoreName(storeId));
       onLogin();
@@ -41,8 +57,10 @@ export function LoginForm({ onLogin }: LoginFormProps) {
 
   const getStoreName = (storeId: string) => {
     const storeNames: Record<string, string> = {
-      'patiobatel': 'Patio Batel',
+      'patio-batel': 'Patio Batel',
       'village': 'Village',
+      'jk': 'JK',
+      'iguatemi': 'Iguatemi',
       'admin': 'Administrador'
     };
     return storeNames[storeId] || storeId;

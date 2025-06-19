@@ -116,7 +116,7 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto p-6">
         <Tabs defaultValue="search" className="w-full">
-          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-8' : 'grid-cols-4'} bg-background border premium-shadow`}>
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-9' : 'grid-cols-3'} bg-background border premium-shadow`}>
             <TabsTrigger value="search" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-2">
               <Search size={12} />
               <span className="hidden xl:inline text-xs">Pesquisar</span>
@@ -228,6 +228,9 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
 
                 <TabsContent value="firebase" className="fade-in">
                   <FirebaseStatusTab />
+                </TabsContent>
+                <TabsContent value="security" className="fade-in">
+                  <SecurityTab />
                 </TabsContent>
                 <TabsContent value="edit-gender" className="fade-in">
                   <EditGenderTab />
