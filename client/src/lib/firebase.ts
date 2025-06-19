@@ -853,13 +853,14 @@ export const firebase = {
   },
 
   // Update product image path specifically
-  async updateProductImagePath(productId: string, imagePath: string, category: 'oculos' | 'cintos', storeId: string): Promise<void> {
+  async updateProductImagePath(sku: string, imagePath: string, category: 'oculos' | 'cintos', storeId: string): Promise<void> {
     try {
-      const productRef = firestoreDoc(db, storeId, category, 'products', productId);
+      const productRef = firestoreDoc(db, storeId, category, 'products', sku);
       await updateDoc(productRef, { imagem: imagePath });
+      console.log(`Updated image path for SKU ${sku} in ${storeId}/${category}: ${imagePath}`);
     } catch (error) {
-      console.error('Error updating product image:', error);
-      throw new Error('Failed to update product image');
+      console.error(`Error updating product image for SKU ${sku}:`, error);
+      throw new Error(`Failed to update product image for SKU ${sku}`);
     }
   },
 

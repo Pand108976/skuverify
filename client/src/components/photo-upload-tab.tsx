@@ -164,7 +164,7 @@ export function PhotoUploadTab({}: PhotoUploadTabProps) {
           const correctExtension = existingProduct.categoria === 'oculos' ? '.jpg' : '.webp';
           const fileName = `${existingProduct.categoria}/${pair.sku}${correctExtension}`;
           
-          // Save image to local project folder and update Firebase
+          // Save image to local project folder
           const formData = new FormData();
           formData.append('file', pair.file);
           formData.append('fileName', fileName);
@@ -177,16 +177,41 @@ export function PhotoUploadTab({}: PhotoUploadTabProps) {
           });
 
           if (response.ok) {
-            console.log(`Photo uploaded successfully for SKU ${pair.sku}`);
+            const responseData = await response.json();
+            console.log(`Photo uploaded successfully for SKU ${pair.sku}:`, responseData);
             
-            // Update product with photo link in Firebase
-            await firebase.updateProduct(existingProduct.id, {
-              imagem: `/images/${fileName}`
-            });
+            // Update product with photo link in all stores where it exists
+            const imagePath = `/images/${fileName}`;
+            console.log(`Updating image path to: ${imagePath}`);
+            
+            for (const product of searchResults) {
+              try {
+                await firebase.updateProductImagePath(
+                  product.sku, // Use SKU instead of ID for consistent updates
+                  imagePath, 
+                  existingProduct.categoria, 
+                  product.storeId
+                );
+                console.log(`Updated image path for SKU ${pair.sku} in store ${product.storeId}`);
+              } catch (updateError) {
+                console.error(`Failed to update image for SKU ${pair.sku} in store ${product.storeId}:`, updateError);
+              }
+            }
+            
+            // Force synchronization after image upload
+            setTimeout(async () => {
+              try {
+                await firebase.autoSyncFromFirebase();
+                console.log('Forced sync after image upload completed');
+              } catch (syncError) {
+                console.error('Sync error after image upload:', syncError);
+              }
+            }, 1000);
             
             successCount++;
           } else {
-            console.error(`Failed to upload photo for SKU ${pair.sku}`);
+            const errorText = await response.text();
+            console.error(`Failed to upload photo for SKU ${pair.sku}:`, errorText);
             errorCount++;
           }
         } catch (error) {
