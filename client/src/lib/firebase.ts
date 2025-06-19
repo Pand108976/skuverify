@@ -294,12 +294,16 @@ export const firebase = {
     const storeId = getStoreCollection();
     const localStorageKey = getLocalStorageKey();
     
-    // Detecta automaticamente o caminho válido da imagem
-    const validImagePath = product.imagem || await getValidImagePath(product.sku, product.categoria);
+    // Preserva imagem já existente ou detecta automaticamente
+    const storedData = localStorage.getItem(localStorageKey);
+    const existingProducts: Product[] = storedData ? JSON.parse(storedData) : [];
+    const existingProduct = existingProducts.find(p => p.sku === product.sku);
+    
+    // Prioriza: 1) imagem fornecida 2) imagem já salva 3) detecção automática
+    const validImagePath = product.imagem || existingProduct?.imagem || await getValidImagePath(product.sku, product.categoria);
     
     // Atualiza localStorage primeiro para velocidade
-    const stored = localStorage.getItem(localStorageKey);
-    const products: Product[] = stored ? JSON.parse(stored) : [];
+    const products: Product[] = existingProducts;
     const newProduct = { 
       ...product, 
       id: product.sku, 
@@ -314,11 +318,18 @@ export const firebase = {
     
     // Tenta salvar no Firebase na subcoleção da categoria
     try {
+      // Verifica se produto já existe no Firebase para preservar dados existentes
+      const categoryPath = product.categoria || 'oculos';
+      const existingDocRef = doc(db, storeId, categoryPath, 'products', product.sku);
+      const existingDoc = await getDoc(existingDocRef);
+      const existingData = existingDoc.exists() ? existingDoc.data() : {};
+      
       const firebaseData: any = {
         sku: product.sku,
         categoria: product.categoria,
         caixa: product.caixa,
-        createdAt: new Date()
+        createdAt: existingData.createdAt || new Date(),
+        lastModified: new Date()
       };
       
       // Adiciona gender se disponível (para óculos)
@@ -326,15 +337,16 @@ export const firebase = {
         firebaseData.gender = product.gender;
       }
       
-      // Adiciona imagem se disponível
+      // Preserva imagem existente ou adiciona nova
       if (validImagePath) {
         firebaseData.imagem = validImagePath;
+      } else if (existingData.imagem) {
+        firebaseData.imagem = existingData.imagem;
       }
       
       // Salva na subcoleção organizada: loja/categoria/products/sku
-      const categoryPath = product.categoria || 'oculos';
-      await setDoc(doc(db, storeId, categoryPath, 'products', product.sku), firebaseData);
-      console.log(`Produto salvo no Firebase em "${storeId}/${categoryPath}/products":`, product.sku);
+      await setDoc(existingDocRef, firebaseData);
+      console.log(`Produto salvo no Firebase em "${storeId}/${product.categoria}/products":`, product.sku);
     } catch (error) {
       console.error('Firebase error, dados salvos apenas localmente:', error);
     }
