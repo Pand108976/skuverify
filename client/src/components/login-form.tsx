@@ -21,7 +21,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     const getSavedPasswords = () => {
       const saved = localStorage.getItem('luxury_store_passwords');
       return saved ? JSON.parse(saved) : {
-        'patio-batel': 'patio123',
+        'patiobatel': 'patio123',
         'village': 'village123',
         'jk': 'jk123',
         'iguatemi': 'iguatemi123',
@@ -29,11 +29,11 @@ export function LoginForm({ onLogin }: LoginFormProps) {
       };
     };
 
-    // Mapeia nomes de usuário para IDs de loja
+    // Mapeia nomes de usuário para IDs de loja (usando estruturas corretas do Firebase)
     const usernameToStoreId: Record<string, string> = {
-      'patiobatel': 'patio-batel',
-      'patio-batel': 'patio-batel',
-      'patio': 'patio-batel',
+      'patiobatel': 'patiobatel',
+      'patio-batel': 'patiobatel',
+      'patio': 'patiobatel',
       'village': 'village',
       'jk': 'jk',
       'iguatemi': 'iguatemi',
@@ -60,7 +60,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
 
   const getStoreName = (storeId: string) => {
     const storeNames: Record<string, string> = {
-      'patio-batel': 'Patio Batel',
+      'patiobatel': 'Patio Batel',
       'village': 'Village',
       'jk': 'JK',
       'iguatemi': 'Iguatemi',

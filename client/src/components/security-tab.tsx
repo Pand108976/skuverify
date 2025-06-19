@@ -8,7 +8,7 @@ import { Shield, Lock, Eye, EyeOff, Check, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const STORE_PROFILES = [
-  { id: 'patio-batel', name: 'Patio Batel' },
+  { id: 'patiobatel', name: 'Patio Batel' },
   { id: 'village', name: 'Village' },
   { id: 'jk', name: 'JK' },
   { id: 'iguatemi', name: 'Iguatemi' },
@@ -30,7 +30,7 @@ export function SecurityTab() {
   const getSavedPasswords = () => {
     const saved = localStorage.getItem('luxury_store_passwords');
     return saved ? JSON.parse(saved) : {
-      'patio-batel': 'patio123',
+      'patiobatel': 'patio123',
       'village': 'village123',
       'jk': 'jk123',
       'iguatemi': 'iguatemi123',
