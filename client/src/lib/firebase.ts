@@ -174,7 +174,9 @@ export const firebase = {
       const oculosSnapshot = await getDocs(oculosRef);
       for (const doc of oculosSnapshot.docs) {
         const data = doc.data();
-        const validImagePath = await getValidImagePath(data.sku, 'oculos');
+        // Preservar imagem já salva no Firebase, ou detectar automaticamente se não houver
+        const savedImage = data.imagem;
+        const validImagePath = savedImage || await getValidImagePath(data.sku, 'oculos');
         const productLink = data.link || getProductLink(data.sku);
         firebaseProducts.push({ 
           id: doc.id, 
@@ -190,7 +192,9 @@ export const firebase = {
       const cintosSnapshot = await getDocs(cintosRef);
       for (const doc of cintosSnapshot.docs) {
         const data = doc.data();
-        const validImagePath = await getValidImagePath(data.sku, 'cintos');
+        // Preservar imagem já salva no Firebase, ou detectar automaticamente se não houver
+        const savedImage = data.imagem;
+        const validImagePath = savedImage || await getValidImagePath(data.sku, 'cintos');
         const productLink = data.link || getProductLink(data.sku);
         firebaseProducts.push({ 
           id: doc.id, 
