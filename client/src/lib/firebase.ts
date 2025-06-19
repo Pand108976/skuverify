@@ -205,9 +205,10 @@ export const firebase = {
           } as Product);
         }
         
-        // Se a loja não tem produtos próprios, copia do admin
-        if (firebaseProducts.length === 0) {
+        // Se a loja não tem produtos próprios, copia do admin (apenas uma vez)
+        if (firebaseProducts.length === 0 && !localStorage.getItem(`copied_from_admin_${storeId}`)) {
           await firebase.copyProductsFromAdminToStore(storeId);
+          localStorage.setItem(`copied_from_admin_${storeId}`, 'true');
           // Tenta buscar novamente após copiar
           return firebase.getProductsFromFirebase();
         }
@@ -331,7 +332,7 @@ export const firebase = {
     // Busca no Firebase nas subcoleções de categorias
     try {
       // Buscar em óculos
-      let docRef = doc(db, storeId, 'oculos', 'products', sku);
+      let docRef = firestoreDoc(db, storeId, 'oculos', 'products', sku);
       let docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
@@ -351,7 +352,7 @@ export const firebase = {
       }
       
       // Buscar em cintos
-      docRef = doc(db, storeId, 'cintos', 'products', sku);
+      docRef = firestoreDoc(db, storeId, 'cintos', 'products', sku);
       docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
@@ -408,7 +409,7 @@ export const firebase = {
     try {
       // Verifica se produto já existe no Firebase para preservar dados existentes
       const categoryPath = product.categoria || 'oculos';
-      const existingDocRef = doc(db, storeId, categoryPath, 'products', product.sku);
+      const existingDocRef = firestoreDoc(db, storeId, categoryPath, 'products', product.sku);
       const existingDoc = await getDoc(existingDocRef);
       const existingData = existingDoc.exists() ? existingDoc.data() : {};
       
@@ -462,7 +463,7 @@ export const firebase = {
     try {
       for (const product of productsToRemove) {
         const categoryPath = product.categoria || 'oculos';
-        await deleteDoc(doc(db, storeId, categoryPath, 'products', product.sku));
+        await deleteDoc(firestoreDoc(db, storeId, categoryPath, 'products', product.sku));
         console.log(`Produto removido do Firebase em "${storeId}/${categoryPath}/products":`, product.sku);
       }
     } catch (error) {
@@ -488,7 +489,7 @@ export const firebase = {
         
         // Use timestamp + SKU as document ID to avoid conflicts
         const docId = `${timestamp.getTime()}_${product.sku}`;
-        await setDoc(doc(db, deletedCollectionName, docId), auditRecord);
+        await setDoc(firestoreDoc(db, deletedCollectionName, docId), auditRecord);
         console.log(`Auditoria registrada em "${deletedCollectionName}":`, product.sku);
       }
     } catch (error) {
@@ -547,7 +548,7 @@ export const firebase = {
           };
           
           // Add to Firebase
-          await setDoc(doc(db, storeId, sku), product);
+          await setDoc(firestoreDoc(db, storeId, sku), product);
           
           // Add to localStorage
           const localStorageKey = `luxury_products_${storeId}`;
@@ -731,7 +732,7 @@ export const firebase = {
           const categoria = productData.categoria || 'oculos';
           
           // Criar na nova estrutura hierárquica
-          const newDocRef = doc(db, storeId, categoria, 'products', sku);
+          const newDocRef = firestoreDoc(db, storeId, categoria, 'products', sku);
           await setDoc(newDocRef, {
             sku: productData.sku || sku,
             categoria: categoria,
@@ -843,7 +844,7 @@ export const firebase = {
         throw new Error('Category is required for product update');
       }
 
-      const productRef = doc(db, storeId, categoria, 'products', productId);
+      const productRef = firestoreDoc(db, storeId, categoria, 'products', productId);
       await updateDoc(productRef, updatedProduct);
     } catch (error) {
       console.error('Error updating product:', error);
@@ -854,7 +855,7 @@ export const firebase = {
   // Update product image path specifically
   async updateProductImagePath(productId: string, imagePath: string, category: 'oculos' | 'cintos', storeId: string): Promise<void> {
     try {
-      const productRef = doc(db, storeId, category, 'products', productId);
+      const productRef = firestoreDoc(db, storeId, category, 'products', productId);
       await updateDoc(productRef, { imagem: imagePath });
     } catch (error) {
       console.error('Error updating product image:', error);
@@ -866,7 +867,7 @@ export const firebase = {
   async saveProductToFirebase(product: Product): Promise<void> {
     try {
       const storeId = getStoreCollection();
-      const productRef = doc(db, storeId, product.categoria, 'products', product.sku);
+      const productRef = firestoreDoc(db, storeId, product.categoria, 'products', product.sku);
       
       const firebaseData: any = {
         sku: product.sku,
@@ -906,7 +907,7 @@ export const firebase = {
   // Save/update product to specific store Firebase
   async saveProductToSpecificStore(product: Product, storeId: string): Promise<void> {
     try {
-      const productRef = doc(db, storeId, product.categoria, 'products', product.sku);
+      const productRef = firestoreDoc(db, storeId, product.categoria, 'products', product.sku);
       
       const firebaseData: any = {
         sku: product.sku,
@@ -1009,7 +1010,7 @@ export const firebase = {
       console.log(`Criando coleções para a loja: ${storeId}`);
       
       // Create initial document for oculos collection
-      const ocolosRef = doc(db, storeId, 'oculos', 'products', '_init');
+      const ocolosRef = firestoreDoc(db, storeId, 'oculos', 'products', '_init');
       await setDoc(ocolosRef, {
         _placeholder: true,
         createdAt: new Date(),
@@ -1017,7 +1018,7 @@ export const firebase = {
       });
       
       // Create initial document for cintos collection
-      const cintosRef = doc(db, storeId, 'cintos', 'products', '_init');
+      const cintosRef = firestoreDoc(db, storeId, 'cintos', 'products', '_init');
       await setDoc(cintosRef, {
         _placeholder: true,
         createdAt: new Date(),
