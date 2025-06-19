@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Crown } from "lucide-react";
 
 interface LoginFormProps {
-  onLogin: () => void;
+  onLogin: (isAdmin?: boolean) => void;
 }
 
 export function LoginForm({ onLogin }: LoginFormProps) {
@@ -48,7 +48,10 @@ export function LoginForm({ onLogin }: LoginFormProps) {
       // Salva informação da loja no localStorage
       localStorage.setItem('luxury_store_id', storeId);
       localStorage.setItem('luxury_store_name', getStoreName(storeId));
-      onLogin();
+      
+      // Check if this is admin login to trigger 2FA
+      const isAdminLogin = storeId === 'admin';
+      onLogin(isAdminLogin);
     } else {
       setError("Credenciais inválidas. Tente novamente.");
       setTimeout(() => setError(""), 3000);

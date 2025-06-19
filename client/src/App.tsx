@@ -11,6 +11,8 @@ import { Admin2FALogin } from "@/components/admin-2fa-login";
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [adminLoginState, setAdminLoginState] = useState<'login' | '2fa-setup' | '2fa-login' | 'authenticated'>('login');
+  const [pendingAdminLogin, setPendingAdminLogin] = useState(false);
 
   // Verificar se já existe um login salvo ao inicializar
   useEffect(() => {
@@ -37,10 +39,44 @@ function App() {
     setIsLoading(false);
   }, []);
 
-  const handleLogin = () => {
-    // Salvar timestamp do login para controle de expiração
+  const handleLogin = (isAdmin: boolean = false) => {
+    if (isAdmin) {
+      // Check if admin 2FA is enabled
+      const admin2FAEnabled = localStorage.getItem('admin_2fa_enabled') === 'true';
+      
+      if (admin2FAEnabled) {
+        // Redirect to 2FA login
+        setAdminLoginState('2fa-login');
+        setPendingAdminLogin(true);
+      } else {
+        // First time admin login - setup 2FA
+        setAdminLoginState('2fa-setup');
+        setPendingAdminLogin(true);
+      }
+    } else {
+      // Regular store login
+      localStorage.setItem('luxury_login_time', Date.now().toString());
+      setIsLoggedIn(true);
+    }
+  };
+
+  const handleAdmin2FASetupComplete = () => {
     localStorage.setItem('luxury_login_time', Date.now().toString());
+    setAdminLoginState('authenticated');
+    setPendingAdminLogin(false);
     setIsLoggedIn(true);
+  };
+
+  const handleAdmin2FALoginSuccess = () => {
+    localStorage.setItem('luxury_login_time', Date.now().toString());
+    setAdminLoginState('authenticated');
+    setPendingAdminLogin(false);
+    setIsLoggedIn(true);
+  };
+
+  const handleBackToLogin = () => {
+    setAdminLoginState('login');
+    setPendingAdminLogin(false);
   };
 
   const handleLogout = () => {
@@ -48,6 +84,8 @@ function App() {
     localStorage.removeItem('luxury_store_name');
     localStorage.removeItem('luxury_login_time');
     setIsLoggedIn(false);
+    setAdminLoginState('login');
+    setPendingAdminLogin(false);
   };
 
   // Mostrar loading durante verificação inicial
@@ -73,7 +111,23 @@ function App() {
         {isLoggedIn ? (
           <InventoryPage onLogout={handleLogout} />
         ) : (
-          <LoginForm onLogin={handleLogin} />
+          <>
+            {adminLoginState === 'login' && (
+              <LoginForm onLogin={handleLogin} />
+            )}
+            {adminLoginState === '2fa-setup' && (
+              <Admin2FASetup 
+                onSetupComplete={handleAdmin2FASetupComplete}
+                onSkip={handleAdmin2FASetupComplete}
+              />
+            )}
+            {adminLoginState === '2fa-login' && (
+              <Admin2FALogin 
+                onSuccess={handleAdmin2FALoginSuccess}
+                onBack={handleBackToLogin}
+              />
+            )}
+          </>
         )}
       </TooltipProvider>
     </QueryClientProvider>

@@ -114,7 +114,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Generate QR code
-      const qrCodeUrl = await QRCode.toDataURL(secret.otpauth_url);
+      const otpauthUrl = secret.otpauth_url;
+      if (!otpauthUrl) {
+        throw new Error('Failed to generate TOTP URL');
+      }
+      const qrCodeUrl = await QRCode.toDataURL(otpauthUrl);
 
       res.json({
         secret: secret.base32,
