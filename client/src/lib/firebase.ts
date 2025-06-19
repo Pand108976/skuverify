@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, doc, setDoc, deleteDoc, getDocs, getDoc, query, where, updateDoc, limit } from 'firebase/firestore';
+import { getFirestore, collection, doc as firestoreDoc, setDoc, deleteDoc, getDocs, getDoc, query, where, updateDoc, limit } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import type { Product } from './types';
 
@@ -169,40 +169,81 @@ export const firebase = {
     try {
       const firebaseProducts: Product[] = [];
       
-      // Buscar produtos de óculos
-      const oculosRef = collection(db, storeId, 'oculos', 'products');
-      const oculosSnapshot = await getDocs(oculosRef);
-      for (const doc of oculosSnapshot.docs) {
-        const data = doc.data();
-        // Preservar imagem já salva no Firebase, ou detectar automaticamente se não houver
-        const savedImage = data.imagem;
-        const validImagePath = savedImage || await getValidImagePath(data.sku, 'oculos');
-        const productLink = data.link || getProductLink(data.sku);
-        firebaseProducts.push({ 
-          id: doc.id, 
-          categoria: 'oculos',
-          ...data,
-          imagem: validImagePath,
-          link: productLink
-        } as Product);
-      }
-      
-      // Buscar produtos de cintos
-      const cintosRef = collection(db, storeId, 'cintos', 'products');
-      const cintosSnapshot = await getDocs(cintosRef);
-      for (const doc of cintosSnapshot.docs) {
-        const data = doc.data();
-        // Preservar imagem já salva no Firebase, ou detectar automaticamente se não houver
-        const savedImage = data.imagem;
-        const validImagePath = savedImage || await getValidImagePath(data.sku, 'cintos');
-        const productLink = data.link || getProductLink(data.sku);
-        firebaseProducts.push({ 
-          id: doc.id, 
-          categoria: 'cintos',
-          ...data,
-          imagem: validImagePath,
-          link: productLink
-        } as Product);
+      // Para lojas específicas, busca primeiro na sua própria estrutura
+      if (storeId !== 'admin') {
+        // Buscar produtos de óculos na loja específica
+        const oculosRef = collection(db, storeId, 'oculos', 'products');
+        const oculosSnapshot = await getDocs(oculosRef);
+        for (const doc of oculosSnapshot.docs) {
+          const data = doc.data();
+          const savedImage = data.imagem;
+          const validImagePath = savedImage || await getValidImagePath(data.sku, 'oculos');
+          const productLink = data.link || getProductLink(data.sku);
+          firebaseProducts.push({ 
+            id: doc.id, 
+            categoria: 'oculos',
+            ...data,
+            imagem: validImagePath,
+            link: productLink
+          } as Product);
+        }
+        
+        // Buscar produtos de cintos na loja específica
+        const cintosRef = collection(db, storeId, 'cintos', 'products');
+        const cintosSnapshot = await getDocs(cintosRef);
+        for (const doc of cintosSnapshot.docs) {
+          const data = doc.data();
+          const savedImage = data.imagem;
+          const validImagePath = savedImage || await getValidImagePath(data.sku, 'cintos');
+          const productLink = data.link || getProductLink(data.sku);
+          firebaseProducts.push({ 
+            id: doc.id, 
+            categoria: 'cintos',
+            ...data,
+            imagem: validImagePath,
+            link: productLink
+          } as Product);
+        }
+        
+        // Se a loja não tem produtos próprios, copia do admin
+        if (firebaseProducts.length === 0) {
+          await firebase.copyProductsFromAdminToStore(storeId);
+          // Tenta buscar novamente após copiar
+          return firebase.getProductsFromFirebase();
+        }
+      } else {
+        // Para admin, busca da estrutura admin normalmente
+        const oculosRef = collection(db, storeId, 'oculos', 'products');
+        const oculosSnapshot = await getDocs(oculosRef);
+        for (const doc of oculosSnapshot.docs) {
+          const data = doc.data();
+          const savedImage = data.imagem;
+          const validImagePath = savedImage || await getValidImagePath(data.sku, 'oculos');
+          const productLink = data.link || getProductLink(data.sku);
+          firebaseProducts.push({ 
+            id: doc.id, 
+            categoria: 'oculos',
+            ...data,
+            imagem: validImagePath,
+            link: productLink
+          } as Product);
+        }
+        
+        const cintosRef = collection(db, storeId, 'cintos', 'products');
+        const cintosSnapshot = await getDocs(cintosRef);
+        for (const doc of cintosSnapshot.docs) {
+          const data = doc.data();
+          const savedImage = data.imagem;
+          const validImagePath = savedImage || await getValidImagePath(data.sku, 'cintos');
+          const productLink = data.link || getProductLink(data.sku);
+          firebaseProducts.push({ 
+            id: doc.id, 
+            categoria: 'cintos',
+            ...data,
+            imagem: validImagePath,
+            link: productLink
+          } as Product);
+        }
       }
       
       // Atualiza localStorage com dados do Firebase
@@ -215,6 +256,53 @@ export const firebase = {
       // Retorna dados locais se Firebase falhar
       const stored = localStorage.getItem(localStorageKey);
       return stored ? JSON.parse(stored) : [];
+    }
+  },
+
+  // Copy products from admin to specific store
+  async copyProductsFromAdminToStore(targetStoreId: string): Promise<void> {
+    try {
+      console.log(`Copiando produtos do admin para loja "${targetStoreId}"...`);
+      
+      // Get products from admin structure
+      const adminOculosRef = collection(db, 'admin', 'oculos', 'products');
+      const adminCintosRef = collection(db, 'admin', 'cintos', 'products');
+      
+      const [ocolosSnapshot, cintosSnapshot] = await Promise.all([
+        getDocs(adminOculosRef),
+        getDocs(adminCintosRef)
+      ]);
+      
+      let copiedCount = 0;
+      
+      // Copy glasses products
+      for (const docSnapshot of ocolosSnapshot.docs) {
+        const data = docSnapshot.data();
+        const targetRef = firestoreDoc(db, targetStoreId, 'oculos', 'products', docSnapshot.id);
+        await setDoc(targetRef, {
+          ...data,
+          copiedFromAdmin: true,
+          copiedAt: new Date()
+        });
+        copiedCount++;
+      }
+      
+      // Copy belt products
+      for (const docSnapshot of cintosSnapshot.docs) {
+        const data = docSnapshot.data();
+        const targetRef = firestoreDoc(db, targetStoreId, 'cintos', 'products', docSnapshot.id);
+        await setDoc(targetRef, {
+          ...data,
+          copiedFromAdmin: true,
+          copiedAt: new Date()
+        });
+        copiedCount++;
+      }
+      
+      console.log(`${copiedCount} produtos copiados do admin para "${targetStoreId}"`);
+      
+    } catch (error) {
+      console.error(`Erro ao copiar produtos para loja ${targetStoreId}:`, error);
     }
   },
 
