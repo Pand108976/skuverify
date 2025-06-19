@@ -117,75 +117,75 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto p-6">
         <Tabs defaultValue="search" className="w-full">
-          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-9' : 'grid-cols-4'} bg-background border premium-shadow`}>
-            <TabsTrigger value="search" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-2">
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-9' : 'grid-cols-4'} bg-background border premium-shadow h-11`}>
+            <TabsTrigger value="search" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-1 min-w-0">
               <Search size={12} />
-              <span className="hidden xl:inline text-xs">Pesquisar</span>
+              <span className="hidden lg:inline text-xs">Pesquisar</span>
             </TabsTrigger>
             {!isAdmin && (
               <>
-                <TabsTrigger value="glasses" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
-                  <Glasses size={16} />
-                  <span className="hidden sm:inline">Óculos</span>
+                <TabsTrigger value="glasses" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-1 min-w-0">
+                  <Glasses size={12} />
+                  <span className="hidden lg:inline text-xs">Óculos</span>
                 </TabsTrigger>
-                <TabsTrigger value="belts" className="flex items-center space-x-2 data-[state=active]:gold-gradient data-[state=active]:text-white">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <TabsTrigger value="belts" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-1 min-w-0">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="2" y="10" width="20" height="4" rx="2"/>
                     <rect x="15" y="8" width="4" height="8" rx="1"/>
                     <circle cx="17" cy="12" r="1"/>
                   </svg>
-                  <span className="hidden sm:inline">Cintos</span>
+                  <span className="hidden lg:inline text-xs">Cintos</span>
                 </TabsTrigger>
               </>
             )}
 
             {!isAdmin && (
-              <TabsTrigger value="sales" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-2">
+              <TabsTrigger value="sales" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-1 min-w-0">
                 <ShoppingCart size={12} />
-                <span className="hidden xl:inline text-xs">Vendas</span>
+                <span className="hidden lg:inline text-xs">Vendas</span>
               </TabsTrigger>
             )}
 
-            <TabsTrigger value="add" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-2">
+            <TabsTrigger value="add" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-1 min-w-0">
               <Plus size={12} />
-              <span className="hidden xl:inline text-xs">Adicionar</span>
+              <span className="hidden lg:inline text-xs">Adicionar</span>
             </TabsTrigger>
             {isAdmin && (
-              <TabsTrigger value="remove" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-2">
+              <TabsTrigger value="remove" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-1 min-w-0">
                 <Trash2 size={12} />
-                <span className="hidden xl:inline text-xs">Remover</span>
+                <span className="hidden lg:inline text-xs">Remover</span>
               </TabsTrigger>
             )}
             {isAdmin && (
               <>
-                <TabsTrigger value="promotions" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-2">
+                <TabsTrigger value="promotions" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-1 min-w-0">
                   <Percent size={12} />
-                  <span className="hidden xl:inline text-xs">Promoções</span>
+                  <span className="hidden lg:inline text-xs">Promoções</span>
                 </TabsTrigger>
-                <TabsTrigger value="movement" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-2">
+                <TabsTrigger value="movement" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-1 min-w-0">
                   <ArrowRightLeft size={12} />
-                  <span className="hidden xl:inline text-xs">Movimentar</span>
+                  <span className="hidden lg:inline text-xs">Movimentar</span>
                 </TabsTrigger>
-                <TabsTrigger value="photos" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-2">
+                <TabsTrigger value="photos" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-1 min-w-0">
                   <Upload size={12} />
-                  <span className="hidden xl:inline text-xs">Fotos</span>
+                  <span className="hidden lg:inline text-xs">Fotos</span>
                 </TabsTrigger>
-                <TabsTrigger value="firebase" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-2">
+                <TabsTrigger value="firebase" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-1 min-w-0">
                   <Database size={12} />
-                  <span className="hidden xl:inline text-xs">Firebase</span>
+                  <span className="hidden lg:inline text-xs">Firebase</span>
                 </TabsTrigger>
-                <TabsTrigger value="security" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-2">
+                <TabsTrigger value="security" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-1 min-w-0">
                   <Shield size={12} />
-                  <span className="hidden xl:inline text-xs">Segurança</span>
+                  <span className="hidden lg:inline text-xs">Segurança</span>
                 </TabsTrigger>
-                <TabsTrigger value="edit-gender" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-2">
+                <TabsTrigger value="edit-gender" className="flex items-center space-x-1 data-[state=active]:gold-gradient data-[state=active]:text-white text-xs px-1 min-w-0">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <circle cx="12" cy="4" r="2"/>
                     <path d="M10.5 6.5L8 9h8l-2.5-2.5"/>
                     <path d="M12 10v10"/>
                     <path d="M8 16h8"/>
                   </svg>
-                  <span className="hidden xl:inline text-xs">Gênero</span>
+                  <span className="hidden lg:inline text-xs">Gênero</span>
                 </TabsTrigger>
 
               </>
