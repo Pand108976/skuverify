@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Shield, Lock, Eye, EyeOff, Check, AlertCircle } from "lucide-react";
+import { Shield, Lock, Eye, EyeOff, Check, AlertCircle, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const STORE_PROFILES = [
@@ -46,6 +46,34 @@ export function SecurityTab() {
   const validateCurrentPassword = (profile: string, password: string): boolean => {
     const savedPasswords = getSavedPasswords();
     return savedPasswords[profile] === password;
+  };
+
+  const resetToDefault = (profileId: string) => {
+    const defaultPasswords = {
+      'patio-batel': 'patio123',
+      'village': 'village123',
+      'jk': 'jk123',
+      'iguatemi': 'iguatemi123',
+      'admin': 'admin123'
+    };
+
+    const savedPasswords = getSavedPasswords();
+    savedPasswords[profileId] = defaultPasswords[profileId as keyof typeof defaultPasswords];
+    savePasswords(savedPasswords);
+
+    const profileName = STORE_PROFILES.find(p => p.id === profileId)?.name;
+    toast({
+      title: "Senha resetada",
+      description: `Senha de ${profileName} resetada para padrão`,
+      variant: "default",
+    });
+
+    // Clear form if this profile was selected
+    if (selectedProfile === profileId) {
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    }
   };
 
   const handlePasswordChange = async () => {
@@ -283,6 +311,42 @@ export function SecurityTab() {
             </div>
           )}
 
+        </CardContent>
+      </Card>
+
+      {/* Reset de Senhas */}
+      <Card className="premium-shadow border-2 border-red-200">
+        <CardHeader className="bg-red-50">
+          <CardTitle className="text-red-800 flex items-center">
+            <RotateCcw className="mr-2" size={24} />
+            Reset de Senhas
+          </CardTitle>
+          <p className="text-sm text-red-600">
+            Resetar senhas para valores padrão em caso de esquecimento
+          </p>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {STORE_PROFILES.map((profile) => (
+              <div key={profile.id} className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <h4 className="font-medium">{profile.name}</h4>
+                  <p className="text-xs text-gray-500">
+                    Reset para senha padrão
+                  </p>
+                </div>
+                <Button
+                  onClick={() => resetToDefault(profile.id)}
+                  size="sm"
+                  variant="outline"
+                  className="text-red-600 border-red-200 hover:bg-red-50"
+                >
+                  <RotateCcw size={14} className="mr-1" />
+                  Reset
+                </Button>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
 
