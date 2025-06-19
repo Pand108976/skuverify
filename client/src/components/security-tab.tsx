@@ -26,16 +26,19 @@ export function SecurityTab() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  // Obtém as senhas salvas do localStorage
+  // Obtém as senhas salvas do localStorage (mesma lógica do login)
   const getSavedPasswords = () => {
-    const saved = localStorage.getItem('luxury_store_passwords');
-    return saved ? JSON.parse(saved) : {
+    // Força uso das senhas padrão para resolver problema de inconsistência
+    const defaultPasswords = {
       'patiobatel': 'patio123',
       'village': 'village123',
       'jk': 'jk123',
       'iguatemi': 'iguatemi123',
       'admin': 'admin123'
     };
+    
+    const saved = localStorage.getItem('luxury_store_passwords');
+    return saved ? { ...defaultPasswords, ...JSON.parse(saved) } : defaultPasswords;
   };
 
   // Salva as senhas no localStorage
@@ -45,6 +48,8 @@ export function SecurityTab() {
 
   const validateCurrentPassword = (profile: string, password: string): boolean => {
     const savedPasswords = getSavedPasswords();
+    console.log('Validating password for profile:', profile, 'Available passwords:', Object.keys(savedPasswords));
+    console.log('Expected password:', savedPasswords[profile], 'Provided password:', password);
     return savedPasswords[profile] === password;
   };
 
