@@ -117,38 +117,38 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto p-6">
         <Tabs defaultValue="search" className="w-full">
-          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-9' : 'grid-cols-4'} bg-background border premium-shadow h-8 text-xs`}>
-            <TabsTrigger value="search" className="flex items-center justify-center h-7 text-xs px-0.5 py-1 min-w-0 data-[state=active]:gold-gradient data-[state=active]:text-white">
-              <Search size={10} />
-              <span className="hidden md:inline ml-1 text-xs">Pesquisar</span>
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-9' : 'grid-cols-4'} bg-background border premium-shadow h-8 text-xs gap-0.5`}>
+            <TabsTrigger value="search" className="flex items-center justify-center h-6 text-xs px-1 py-0.5 min-w-0 max-w-20 data-[state=active]:gold-gradient data-[state=active]:text-white">
+              <Search size={9} />
+              <span className="hidden lg:inline ml-0.5 text-xs">Pesquisar</span>
             </TabsTrigger>
             {!isAdmin && (
               <>
-                <TabsTrigger value="glasses" className="flex items-center justify-center h-7 text-xs px-0.5 py-1 min-w-0 data-[state=active]:gold-gradient data-[state=active]:text-white">
-                  <Glasses size={10} />
-                  <span className="hidden md:inline ml-1 text-xs">Óculos</span>
+                <TabsTrigger value="glasses" className="flex items-center justify-center h-6 text-xs px-1 py-0.5 min-w-0 max-w-16 data-[state=active]:gold-gradient data-[state=active]:text-white">
+                  <Glasses size={9} />
+                  <span className="hidden lg:inline ml-0.5 text-xs">Óculos</span>
                 </TabsTrigger>
-                <TabsTrigger value="belts" className="flex items-center justify-center h-7 text-xs px-0.5 py-1 min-w-0 data-[state=active]:gold-gradient data-[state=active]:text-white">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <TabsTrigger value="belts" className="flex items-center justify-center h-6 text-xs px-1 py-0.5 min-w-0 max-w-16 data-[state=active]:gold-gradient data-[state=active]:text-white">
+                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="2" y="10" width="20" height="4" rx="2"/>
                     <rect x="15" y="8" width="4" height="8" rx="1"/>
                     <circle cx="17" cy="12" r="1"/>
                   </svg>
-                  <span className="hidden md:inline ml-1 text-xs">Cintos</span>
+                  <span className="hidden lg:inline ml-0.5 text-xs">Cintos</span>
                 </TabsTrigger>
               </>
             )}
 
             {!isAdmin && (
-              <TabsTrigger value="sales" className="flex items-center justify-center h-7 text-xs px-0.5 py-1 min-w-0 data-[state=active]:gold-gradient data-[state=active]:text-white">
-                <ShoppingCart size={10} />
-                <span className="hidden md:inline ml-1 text-xs">Vendas</span>
+              <TabsTrigger value="sales" className="flex items-center justify-center h-6 text-xs px-1 py-0.5 min-w-0 max-w-16 data-[state=active]:gold-gradient data-[state=active]:text-white">
+                <ShoppingCart size={9} />
+                <span className="hidden lg:inline ml-0.5 text-xs">Vendas</span>
               </TabsTrigger>
             )}
 
-            <TabsTrigger value="add" className="flex items-center justify-center h-7 text-xs px-0.5 py-1 min-w-0 data-[state=active]:gold-gradient data-[state=active]:text-white">
-              <Plus size={10} />
-              <span className="hidden md:inline ml-1 text-xs">Adicionar</span>
+            <TabsTrigger value="add" className="flex items-center justify-center h-6 text-xs px-1 py-0.5 min-w-0 max-w-20 data-[state=active]:gold-gradient data-[state=active]:text-white">
+              <Plus size={9} />
+              <span className="hidden lg:inline ml-0.5 text-xs">Adicionar</span>
             </TabsTrigger>
             {isAdmin && (
               <TabsTrigger value="remove" className="flex items-center justify-center h-7 text-xs px-0.5 py-1 min-w-0 data-[state=active]:gold-gradient data-[state=active]:text-white">
