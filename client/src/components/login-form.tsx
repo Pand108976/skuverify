@@ -120,16 +120,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             )}
           </form>
           
-          {/* Informação sobre login persistente */}
-          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="text-center">
-              <h4 className="font-semibold text-blue-800 mb-2">Login Automático</h4>
-              <p className="text-sm text-blue-700 leading-relaxed">
-                Este dispositivo manterá você logado automaticamente.<br />
-                Não será necessário fazer login novamente ao abrir o sistema.
-              </p>
-            </div>
-          </div>
+
         </CardContent>
       </Card>
     </div>
