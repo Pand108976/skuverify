@@ -17,6 +17,7 @@ export function FirebaseStatusTab() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [storeCollectionStatus, setStoreCollectionStatus] = useState<{[key: string]: { oculos: boolean; cintos: boolean }}>({});
   const [creatingCollections, setCreatingCollections] = useState<{[key: string]: boolean}>({});
+  const [migratingPhotos, setMigratingPhotos] = useState(false);
   const { toast } = useToast();
 
   const checkAllStoreCollections = async () => {

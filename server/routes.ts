@@ -7,6 +7,7 @@ import * as QRCode from "qrcode";
 import path from "path";
 import fs from "fs";
 import { updateDoc, doc, setDoc, getDoc } from "firebase/firestore";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db } from "./firebase";
 
 // Configure multer for file uploads
@@ -67,29 +68,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Missing required fields' });
       }
 
-      // Create directory if it doesn't exist
-      const imageDir = path.join(process.cwd(), 'images', category);
-      if (!fs.existsSync(imageDir)) {
-        fs.mkdirSync(imageDir, { recursive: true });
-      }
-
       // Determine correct file extension
       const extension = category === 'oculos' ? '.jpg' : '.webp';
-      const localFileName = `${sku}${extension}`;
-      const filePath = path.join(imageDir, localFileName);
+      const storageFileName = `${sku}${extension}`;
+      
+      // Upload to Firebase Storage
+      const storage = getStorage();
+      const storageRef = ref(storage, `images/${category}/${storageFileName}`);
+      
+      await uploadBytes(storageRef, req.file.buffer);
+      const downloadURL = await getDownloadURL(storageRef);
 
-      // Save file to local directory
-      fs.writeFileSync(filePath, req.file.buffer);
-
-      // Update Firebase document with image path
-      const imagePath = `/images/${category}/${localFileName}`;
+      // Update Firebase document with Firebase Storage URL
       const productRef = doc(db, storeId, category, 'products', productId);
-      await updateDoc(productRef, { imagem: imagePath });
+      await updateDoc(productRef, { imagem: downloadURL });
 
       res.json({ 
         success: true, 
-        message: 'Photo uploaded successfully',
-        imagePath: imagePath 
+        message: 'Photo uploaded successfully to Firebase Storage',
+        imagePath: downloadURL 
       });
 
     } catch (error) {
@@ -111,22 +108,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Missing required fields' });
       }
 
-      // Create directory if it doesn't exist
-      const imageDir = path.join(process.cwd(), 'images', category);
-      if (!fs.existsSync(imageDir)) {
-        fs.mkdirSync(imageDir, { recursive: true });
-      }
+      // Upload to Firebase Storage
+      const storage = getStorage();
+      const storageRef = ref(storage, `images/${category}/${path.basename(fileName)}`);
+      
+      await uploadBytes(storageRef, req.file.buffer);
+      const downloadURL = await getDownloadURL(storageRef);
 
-      // Save file to local images folder
-      const filePath = path.join(imageDir, path.basename(fileName));
-      fs.writeFileSync(filePath, req.file.buffer);
-
-      console.log(`Image saved successfully: ${filePath}`);
-      res.json({ success: true, path: filePath });
+      console.log(`Image uploaded to Firebase Storage: ${downloadURL}`);
+      res.json({ success: true, path: downloadURL });
 
     } catch (error) {
       console.error('Error uploading image:', error);
       res.status(500).json({ error: 'Failed to upload image' });
+    }
+  });
+
+  // Migration endpoint to fix existing photos
+  app.post('/api/migrate-photos-to-firebase', async (req, res) => {
+    try {
+      const { storeId, skus } = req.body;
+      
+      if (!storeId || !skus || !Array.isArray(skus)) {
+        return res.status(400).json({ error: 'Missing storeId or skus array' });
+      }
+
+      const results = [];
+      const storage = getStorage();
+
+      for (const sku of skus) {
+        try {
+          // Check both categories for this SKU
+          for (const category of ['oculos', 'cintos']) {
+            const productRef = doc(db, storeId, category, 'products', sku);
+            const productDoc = await getDoc(productRef);
+            
+            if (productDoc.exists()) {
+              const productData = productDoc.data();
+              const currentImagePath = productData.imagem;
+              
+              // Check if image path is local (starts with /images/)
+              if (currentImagePath && currentImagePath.startsWith('/images/')) {
+                // Try to find the local file and upload it to Firebase Storage
+                const extension = category === 'oculos' ? '.jpg' : '.webp';
+                const localFilePath = path.join(process.cwd(), 'images', category, `${sku}${extension}`);
+                
+                if (fs.existsSync(localFilePath)) {
+                  // Read local file and upload to Firebase Storage
+                  const fileBuffer = fs.readFileSync(localFilePath);
+                  const storageRef = ref(storage, `images/${category}/${sku}${extension}`);
+                  
+                  await uploadBytes(storageRef, fileBuffer);
+                  const downloadURL = await getDownloadURL(storageRef);
+                  
+                  // Update Firestore with Firebase Storage URL
+                  await updateDoc(productRef, { imagem: downloadURL });
+                  
+                  results.push({
+                    sku,
+                    category,
+                    status: 'migrated',
+                    oldPath: currentImagePath,
+                    newPath: downloadURL
+                  });
+                } else {
+                  results.push({
+                    sku,
+                    category,
+                    status: 'file_not_found',
+                    path: localFilePath
+                  });
+                }
+              } else if (currentImagePath && currentImagePath.startsWith('https://')) {
+                results.push({
+                  sku,
+                  category,
+                  status: 'already_migrated',
+                  path: currentImagePath
+                });
+              } else {
+                results.push({
+                  sku,
+                  category,
+                  status: 'no_image',
+                  path: currentImagePath || 'none'
+                });
+              }
+              break; // Found the SKU, no need to check other category
+            }
+          }
+        } catch (error) {
+          results.push({
+            sku,
+            status: 'error',
+            error: error instanceof Error ? error.message : 'Unknown error'
+          });
+        }
+      }
+
+      res.json({
+        success: true,
+        message: 'Migration completed',
+        results
+      });
+
+    } catch (error) {
+      console.error('Error migrating photos:', error);
+      res.status(500).json({ error: 'Failed to migrate photos' });
     }
   });
 
