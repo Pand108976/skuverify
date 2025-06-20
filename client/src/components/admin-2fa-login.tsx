@@ -10,11 +10,14 @@ import { getAdmin2FASecret } from "@/lib/firebase";
 interface Admin2FALoginProps {
   onSuccess: () => void;
   onBack: () => void;
+  onMasterPasswordAccess?: () => void;
 }
 
-export function Admin2FALogin({ onSuccess, onBack }: Admin2FALoginProps) {
+export function Admin2FALogin({ onSuccess, onBack, onMasterPasswordAccess }: Admin2FALoginProps) {
   const [verificationCode, setVerificationCode] = useState("");
   const [loading, setLoading] = useState(false);
+  const [masterPassword, setMasterPassword] = useState("");
+  const [showMasterLogin, setShowMasterLogin] = useState(false);
   const { toast } = useToast();
 
   const verifyCode = async () => {
@@ -85,6 +88,21 @@ export function Admin2FALogin({ onSuccess, onBack }: Admin2FALoginProps) {
     }
   };
 
+  const handleMasterPasswordLogin = () => {
+    if (masterPassword.trim() === '@Piterpanda123') {
+      localStorage.setItem('admin_master_login', 'true');
+      if (onMasterPasswordAccess) {
+        onMasterPasswordAccess();
+      }
+    } else {
+      toast({
+        title: "Erro",
+        description: "Senha mestre incorreta",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && verificationCode.length === 6) {
       verifyCode();
@@ -149,6 +167,61 @@ export function Admin2FALogin({ onSuccess, onBack }: Admin2FALoginProps) {
 
           <div className="text-center text-xs text-gray-500">
             <p>Use o app Google Authenticator para obter o código</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Master Password Access */}
+      <Card className="premium-shadow border-2 border-blue-200">
+        <CardContent className="p-6">
+          <div className="text-center space-y-4">
+            <div className="flex items-center justify-center space-x-2 text-blue-700">
+              <Key size={20} />
+              <span className="font-medium">Acesso Alternativo</span>
+            </div>
+            
+            {!showMasterLogin ? (
+              <Button
+                onClick={() => setShowMasterLogin(true)}
+                variant="outline"
+                className="w-full border-blue-300 text-blue-700 hover:bg-blue-50"
+              >
+                Acessar com Senha Mestre
+              </Button>
+            ) : (
+              <div className="space-y-3">
+                <div className="text-sm text-blue-600 mb-3">
+                  Digite a senha mestre para acessar sem código 2FA:
+                </div>
+                <Input
+                  type="password"
+                  value={masterPassword}
+                  onChange={(e) => setMasterPassword(e.target.value)}
+                  placeholder="Senha mestre"
+                  className="text-center"
+                  onKeyPress={(e) => e.key === 'Enter' && handleMasterPasswordLogin()}
+                />
+                <div className="flex space-x-2">
+                  <Button
+                    onClick={handleMasterPasswordLogin}
+                    disabled={!masterPassword.trim()}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    Acessar
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setShowMasterLogin(false);
+                      setMasterPassword("");
+                    }}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

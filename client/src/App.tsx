@@ -133,6 +133,7 @@ function App() {
               <Admin2FALogin 
                 onSuccess={handleAdmin2FALoginSuccess}
                 onBack={handleBackToLogin}
+                onMasterPasswordAccess={handleMasterPasswordAccess}
               />
             )}
           </>
