@@ -8,10 +8,10 @@ import { useToast } from "@/hooks/use-toast";
 
 interface Admin2FASetupProps {
   onSetupComplete: (secret: string) => void;
-  onSkip: () => void;
+  onBack: () => void;
 }
 
-export function Admin2FASetup({ onSetupComplete, onSkip }: Admin2FASetupProps) {
+export function Admin2FASetup({ onSetupComplete, onBack }: Admin2FASetupProps) {
   const [secret, setSecret] = useState("");
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
@@ -116,9 +116,9 @@ export function Admin2FASetup({ onSetupComplete, onSkip }: Admin2FASetupProps) {
   useEffect(() => {
     const existing2FA = localStorage.getItem('admin_2fa_enabled');
     if (existing2FA === 'true') {
-      onSkip(); // Pula configuração se já estiver ativo
+      onSetupComplete(localStorage.getItem('admin_2fa_secret') || '');
     }
-  }, [onSkip]);
+  }, [onSetupComplete]);
 
   return (
     <div className="min-h-screen luxury-gradient flex items-center justify-center p-6">
@@ -159,11 +159,11 @@ export function Admin2FASetup({ onSetupComplete, onSkip }: Admin2FASetupProps) {
               </Button>
               
               <Button
-                onClick={onSkip}
+                onClick={onBack}
                 variant="outline"
                 className="w-full"
               >
-                Pular por Agora
+                Voltar ao Login
               </Button>
             </div>
           )}

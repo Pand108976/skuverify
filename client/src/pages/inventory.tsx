@@ -37,6 +37,31 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
     setStoreName(currentStoreName);
     setIsAdmin(currentStoreId === 'admin');
     
+    // Admin auto-logout after 10 minutes of inactivity
+    if (currentStoreId === 'admin') {
+      const loginTime = localStorage.getItem('admin_login_time');
+      if (loginTime) {
+        const now = Date.now();
+        const tenMinutes = 10 * 60 * 1000; // 10 minutes in milliseconds
+        
+        if (now - parseInt(loginTime) > tenMinutes) {
+          // Auto logout if more than 10 minutes have passed
+          localStorage.removeItem('admin_login_time');
+          onLogout();
+          return;
+        }
+        
+        // Set timer for remaining time
+        const remainingTime = tenMinutes - (now - parseInt(loginTime));
+        const logoutTimer = setTimeout(() => {
+          localStorage.removeItem('admin_login_time');
+          onLogout();
+        }, remainingTime);
+        
+        return () => clearTimeout(logoutTimer);
+      }
+    }
+    
     // Initialize automatic synchronization system
     const initializeApp = async () => {
       // Update Firebase extensions first
@@ -117,75 +142,75 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto p-6">
         <Tabs defaultValue="search" className="w-full">
-          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-9' : 'grid-cols-4'} bg-background border premium-shadow h-8 text-xs p-0`}>
-            <TabsTrigger value="search" className="flex items-center justify-center h-7 text-xs px-0.5 py-1 data-[state=active]:gold-gradient data-[state=active]:text-white">
-              <Search size={10} />
-              <span className="hidden md:inline ml-1 text-xs">Pesquisar</span>
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-9' : 'grid-cols-4'} bg-background border premium-shadow h-10 text-xs p-0`}>
+            <TabsTrigger value="search" className="flex items-center justify-center h-9 text-sm px-2 py-1 data-[state=active]:gold-gradient data-[state=active]:text-white">
+              <Search size={14} />
+              <span className="hidden md:inline ml-1 text-sm">Pesquisar</span>
             </TabsTrigger>
             {!isAdmin && (
               <>
-                <TabsTrigger value="glasses" className="flex items-center justify-center h-7 text-xs px-0.5 py-1 data-[state=active]:gold-gradient data-[state=active]:text-white">
-                  <Glasses size={10} />
-                  <span className="hidden md:inline ml-1 text-xs">Óculos</span>
+                <TabsTrigger value="glasses" className="flex items-center justify-center h-9 text-sm px-2 py-1 data-[state=active]:gold-gradient data-[state=active]:text-white">
+                  <Glasses size={14} />
+                  <span className="hidden md:inline ml-1 text-sm">Óculos</span>
                 </TabsTrigger>
-                <TabsTrigger value="belts" className="flex items-center justify-center h-7 text-xs px-0.5 py-1 data-[state=active]:gold-gradient data-[state=active]:text-white">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <TabsTrigger value="belts" className="flex items-center justify-center h-9 text-sm px-2 py-1 data-[state=active]:gold-gradient data-[state=active]:text-white">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="2" y="10" width="20" height="4" rx="2"/>
                     <rect x="15" y="8" width="4" height="8" rx="1"/>
                     <circle cx="17" cy="12" r="1"/>
                   </svg>
-                  <span className="hidden md:inline ml-1 text-xs">Cintos</span>
+                  <span className="hidden md:inline ml-1 text-sm">Cintos</span>
                 </TabsTrigger>
               </>
             )}
 
             {!isAdmin && (
-              <TabsTrigger value="sales" className="flex items-center justify-center h-7 text-xs px-0.5 py-1 data-[state=active]:gold-gradient data-[state=active]:text-white">
-                <ShoppingCart size={10} />
-                <span className="hidden md:inline ml-1 text-xs">Vendas</span>
+              <TabsTrigger value="sales" className="flex items-center justify-center h-9 text-sm px-2 py-1 data-[state=active]:gold-gradient data-[state=active]:text-white">
+                <ShoppingCart size={14} />
+                <span className="hidden md:inline ml-1 text-sm">Vendas</span>
               </TabsTrigger>
             )}
 
-            <TabsTrigger value="add" className="flex items-center justify-center h-7 text-xs px-0.5 py-1 data-[state=active]:gold-gradient data-[state=active]:text-white">
-              <Plus size={10} />
-              <span className="hidden md:inline ml-1 text-xs">Adicionar</span>
+            <TabsTrigger value="add" className="flex items-center justify-center h-9 text-sm px-2 py-1 data-[state=active]:gold-gradient data-[state=active]:text-white">
+              <Plus size={14} />
+              <span className="hidden md:inline ml-1 text-sm">Adicionar</span>
             </TabsTrigger>
             {isAdmin && (
-              <TabsTrigger value="remove" className="flex items-center justify-center h-7 text-xs px-0.5 py-1 min-w-0 data-[state=active]:gold-gradient data-[state=active]:text-white">
-                <Trash2 size={10} />
-                <span className="hidden md:inline ml-1 text-xs">Remover</span>
+              <TabsTrigger value="remove" className="flex items-center justify-center h-9 text-sm px-1 py-1 min-w-0 data-[state=active]:gold-gradient data-[state=active]:text-white">
+                <Trash2 size={12} />
+                <span className="hidden lg:inline ml-0.5 text-xs">Remover</span>
               </TabsTrigger>
             )}
             {isAdmin && (
               <>
-                <TabsTrigger value="promotions" className="flex items-center justify-center h-7 text-xs px-0.5 py-1 min-w-0 data-[state=active]:gold-gradient data-[state=active]:text-white">
-                  <Percent size={10} />
-                  <span className="hidden md:inline ml-1 text-xs">Promoções</span>
+                <TabsTrigger value="promotions" className="flex items-center justify-center h-9 text-sm px-1 py-1 min-w-0 data-[state=active]:gold-gradient data-[state=active]:text-white">
+                  <Percent size={12} />
+                  <span className="hidden lg:inline ml-0.5 text-xs">Promoções</span>
                 </TabsTrigger>
-                <TabsTrigger value="movement" className="flex items-center justify-center h-7 text-xs px-0.5 py-1 min-w-0 data-[state=active]:gold-gradient data-[state=active]:text-white">
-                  <ArrowRightLeft size={10} />
-                  <span className="hidden md:inline ml-1 text-xs">Movimentar</span>
+                <TabsTrigger value="movement" className="flex items-center justify-center h-9 text-sm px-1 py-1 min-w-0 data-[state=active]:gold-gradient data-[state=active]:text-white">
+                  <ArrowRightLeft size={12} />
+                  <span className="hidden lg:inline ml-0.5 text-xs">Movimentar</span>
                 </TabsTrigger>
-                <TabsTrigger value="photos" className="flex items-center justify-center h-7 text-xs px-0.5 py-1 min-w-0 data-[state=active]:gold-gradient data-[state=active]:text-white">
-                  <Upload size={10} />
-                  <span className="hidden md:inline ml-1 text-xs">Fotos</span>
+                <TabsTrigger value="photos" className="flex items-center justify-center h-9 text-sm px-1 py-1 min-w-0 data-[state=active]:gold-gradient data-[state=active]:text-white">
+                  <Upload size={12} />
+                  <span className="hidden lg:inline ml-0.5 text-xs">Fotos</span>
                 </TabsTrigger>
-                <TabsTrigger value="firebase" className="flex items-center justify-center h-7 text-xs px-0.5 py-1 min-w-0 data-[state=active]:gold-gradient data-[state=active]:text-white">
-                  <Database size={10} />
-                  <span className="hidden md:inline ml-1 text-xs">Firebase</span>
+                <TabsTrigger value="firebase" className="flex items-center justify-center h-9 text-sm px-1 py-1 min-w-0 data-[state=active]:gold-gradient data-[state=active]:text-white">
+                  <Database size={12} />
+                  <span className="hidden lg:inline ml-0.5 text-xs">Firebase</span>
                 </TabsTrigger>
-                <TabsTrigger value="security" className="flex items-center justify-center h-7 text-xs px-0.5 py-1 min-w-0 data-[state=active]:gold-gradient data-[state=active]:text-white">
-                  <Shield size={10} />
-                  <span className="hidden md:inline ml-1 text-xs">Segurança</span>
+                <TabsTrigger value="security" className="flex items-center justify-center h-9 text-sm px-1 py-1 min-w-0 data-[state=active]:gold-gradient data-[state=active]:text-white">
+                  <Shield size={12} />
+                  <span className="hidden lg:inline ml-0.5 text-xs">Segurança</span>
                 </TabsTrigger>
-                <TabsTrigger value="edit-gender" className="flex items-center justify-center h-7 text-xs px-0.5 py-1 min-w-0 data-[state=active]:gold-gradient data-[state=active]:text-white">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <TabsTrigger value="edit-gender" className="flex items-center justify-center h-9 text-sm px-1 py-1 min-w-0 data-[state=active]:gold-gradient data-[state=active]:text-white">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <circle cx="12" cy="4" r="2"/>
                     <path d="M10.5 6.5L8 9h8l-2.5-2.5"/>
                     <path d="M12 10v10"/>
                     <path d="M8 16h8"/>
                   </svg>
-                  <span className="hidden md:inline ml-1 text-xs">Gênero</span>
+                  <span className="hidden lg:inline ml-0.5 text-xs">Gênero</span>
                 </TabsTrigger>
 
               </>
