@@ -158,6 +158,54 @@ export function FirebaseStatusTab() {
 
 
 
+  const migratePhotosToFirebase = async () => {
+    setMigratingPhotos(true);
+    
+    const problemSkus = [
+      '759203', '764035', '771136', '771138', '771841', '780478',
+      '759032', '764165', '764808', '770675', '770986', '776308',
+      '781219', '783264'
+    ];
+
+    try {
+      const response = await fetch('/api/migrate-photos-to-firebase', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          storeId: localStorage.getItem('luxury_store_id'),
+          skus: problemSkus
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        const migrated = result.results.filter((r: any) => r.status === 'migrated').length;
+        const alreadyMigrated = result.results.filter((r: any) => r.status === 'already_migrated').length;
+        const notFound = result.results.filter((r: any) => r.status === 'file_not_found').length;
+        
+        toast({
+          title: "Migração Concluída",
+          description: `${migrated} fotos migradas, ${alreadyMigrated} já estavam no Firebase, ${notFound} arquivos não encontrados`,
+          variant: "default",
+        });
+      } else {
+        throw new Error(result.error || 'Migration failed');
+      }
+    } catch (error) {
+      console.error('Error migrating photos:', error);
+      toast({
+        title: "Erro na Migração",
+        description: "Falha ao migrar fotos para Firebase Storage",
+        variant: "destructive",
+      });
+    } finally {
+      setMigratingPhotos(false);
+    }
+  };
+
   const clearLocalData = () => {
     const storeId = localStorage.getItem('luxury_store_id') || 'default';
     const confirmed = confirm('Tem certeza que deseja limpar todos os dados locais?');
@@ -519,6 +567,26 @@ export function FirebaseStatusTab() {
                 <Eye className="mr-2" size={16} />
                 Abrir Console Firebase
               </Button>
+
+              {isAdmin && (
+                <Button 
+                  onClick={migratePhotosToFirebase}
+                  disabled={migratingPhotos}
+                  className="bg-purple-600 hover:bg-purple-700 text-white py-4"
+                >
+                  {migratingPhotos ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                      Migrando Fotos...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="mr-2" size={16} />
+                      Migrar Fotos para Firebase Storage
+                    </>
+                  )}
+                </Button>
+              )}
 
               {!isAdmin && (
                 <Button 
