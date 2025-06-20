@@ -26,6 +26,33 @@ const getLocalStorageKey = () => {
   return `luxury_products_${storeId}`;
 };
 
+// Funções para gerenciar senhas centralizadas no Firebase
+export const getStorePassword = async (storeId: string): Promise<string | null> => {
+  try {
+    const passwordDoc = await getDoc(firestoreDoc(db, 'passwords', storeId));
+    if (passwordDoc.exists()) {
+      return passwordDoc.data().password;
+    }
+    return null;
+  } catch (error) {
+    console.error('Erro ao obter senha:', error);
+    return null;
+  }
+};
+
+export const updateStorePassword = async (storeId: string, newPassword: string): Promise<boolean> => {
+  try {
+    await setDoc(firestoreDoc(db, 'passwords', storeId), {
+      password: newPassword,
+      updatedAt: new Date()
+    });
+    return true;
+  } catch (error) {
+    console.error('Erro ao atualizar senha:', error);
+    return false;
+  }
+};
+
 // Função para obter caminho da imagem baseado no SKU e categoria
 function getImagePath(sku: string, categoria: 'oculos' | 'cintos'): string | undefined {
   const extension = categoria === 'oculos' ? '.jpg' : '.webp';

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Crown } from "lucide-react";
+import { getStorePassword } from "@/lib/firebase";
 
 interface LoginFormProps {
   onLogin: (isAdmin?: boolean) => void;
@@ -13,25 +14,12 @@ export function LoginForm({ onLogin }: LoginFormProps) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     
-    // Obtém senhas salvas do localStorage ou usa padrões iniciais
-    const getSavedPasswords = () => {
-      // Força uso das senhas padrão para resolver problema de inconsistência
-      const defaultPasswords = {
-        'patiobatel': 'patio123',
-        'village': 'village123',
-        'jk': 'jk123',
-        'iguatemi': 'iguatemi123',
-        'admin': 'admin123'
-      };
-      
-      const saved = localStorage.getItem('luxury_store_passwords');
-      return saved ? { ...defaultPasswords, ...JSON.parse(saved) } : defaultPasswords;
-    };
-
     // Mapeia nomes de usuário para IDs de loja (usando estruturas corretas do Firebase)
     const usernameToStoreId: Record<string, string> = {
       'patiobatel': 'patiobatel',
@@ -45,21 +33,54 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     
     const normalizedUsername = username.toLowerCase().trim();
     const storeId = usernameToStoreId[normalizedUsername];
-    const savedPasswords = getSavedPasswords();
     
-    console.log('Login attempt:', { username: normalizedUsername, storeId, savedPassword: savedPasswords[storeId] });
-    
-    if (storeId && savedPasswords[storeId] === password.trim()) {
-      // Salva informação da loja no localStorage
-      localStorage.setItem('luxury_store_id', storeId);
-      localStorage.setItem('luxury_store_name', getStoreName(storeId));
-      
-      // Check if this is admin login to trigger 2FA
-      const isAdminLogin = storeId === 'admin';
-      onLogin(isAdminLogin);
-    } else {
-      setError("Credenciais inválidas. Tente novamente.");
+    if (!storeId) {
+      setError("Usuário não encontrado.");
+      setIsLoading(false);
       setTimeout(() => setError(""), 3000);
+      return;
+    }
+
+    try {
+      // Obter senha do Firebase
+      const correctPassword = await getStorePassword(storeId);
+      
+      // Fallback para senhas padrão se não encontrar no Firebase
+      const defaultPasswords = {
+        'patiobatel': 'patio123',
+        'village': 'village123',
+        'jk': 'jk123',
+        'iguatemi': 'iguatemi123',
+        'admin': 'admin123'
+      };
+      
+      const passwordToCheck = correctPassword || defaultPasswords[storeId as keyof typeof defaultPasswords];
+      
+      console.log('Login attempt:', { username: normalizedUsername, storeId, hasFirebasePassword: !!correctPassword });
+      
+      if (passwordToCheck === password.trim()) {
+        // Salva informação da loja no localStorage
+        localStorage.setItem('luxury_store_id', storeId);
+        localStorage.setItem('luxury_store_name', getStoreName(storeId));
+        
+        // Define login time para admin logout automático
+        if (storeId === 'admin') {
+          localStorage.setItem('admin_login_time', Date.now().toString());
+        }
+        
+        // Check if this is admin login to trigger 2FA
+        const isAdminLogin = storeId === 'admin';
+        onLogin(isAdminLogin);
+      } else {
+        setError("Credenciais inválidas. Tente novamente.");
+        setTimeout(() => setError(""), 3000);
+      }
+    } catch (error) {
+      console.error('Erro no login:', error);
+      setError("Erro ao verificar credenciais. Tente novamente.");
+      setTimeout(() => setError(""), 3000);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -113,9 +134,9 @@ export function LoginForm({ onLogin }: LoginFormProps) {
               <Label htmlFor="password" className="text-sm font-medium">Senha</Label>
             </div>
             
-            <Button type="submit" className="w-full gold-gradient text-white font-semibold py-3 hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300">
+            <Button type="submit" className="w-full gold-gradient text-white font-semibold py-3 hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300" disabled={isLoading}>
               <Crown className="mr-2" size={16} />
-              Entrar
+              {isLoading ? "Verificando..." : "Entrar"}
             </Button>
             
             {error && (
