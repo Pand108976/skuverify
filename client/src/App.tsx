@@ -118,7 +118,7 @@ function App() {
             {adminLoginState === '2fa-setup' && (
               <Admin2FASetup 
                 onSetupComplete={handleAdmin2FASetupComplete}
-                onSkip={handleAdmin2FASetupComplete}
+                onBack={handleBackToLogin}
               />
             )}
             {adminLoginState === '2fa-login' && (

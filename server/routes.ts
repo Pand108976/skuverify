@@ -6,7 +6,7 @@ import * as speakeasy from "speakeasy";
 import * as QRCode from "qrcode";
 import path from "path";
 import fs from "fs";
-import { updateDoc, doc } from "firebase/firestore";
+import { updateDoc, doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "./firebase";
 
 // Configure multer for file uploads
@@ -26,6 +26,34 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Initialize default passwords in Firebase
+  app.post('/api/init-passwords', async (req, res) => {
+    try {
+      const defaultPasswords = {
+        'patiobatel': 'patio123',
+        'village': 'village123',
+        'jk': 'jk123',
+        'iguatemi': 'iguatemi123',
+        'admin': 'admin123'
+      };
+
+      for (const [storeId, password] of Object.entries(defaultPasswords)) {
+        const passwordDoc = await getDoc(doc(db, 'passwords', storeId));
+        if (!passwordDoc.exists()) {
+          await setDoc(doc(db, 'passwords', storeId), {
+            password,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          });
+        }
+      }
+
+      res.json({ success: true, message: 'Default passwords initialized' });
+    } catch (error) {
+      console.error('Error initializing passwords:', error);
+      res.status(500).json({ error: 'Failed to initialize passwords' });
+    }
+  });
   // Photo upload endpoint
   app.post('/api/upload-photo', upload.single('file'), async (req, res) => {
     try {
