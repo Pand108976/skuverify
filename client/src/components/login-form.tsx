@@ -42,23 +42,18 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     }
 
     try {
-      // Obter senha do Firebase
+      // Obter senha SOMENTE do Firebase
       const correctPassword = await getStorePassword(storeId);
       
-      // Fallback para senhas padrão se não encontrar no Firebase
-      const defaultPasswords = {
-        'patiobatel': 'patio123',
-        'village': 'village123',
-        'jk': 'jk123',
-        'iguatemi': 'iguatemi123',
-        'admin': 'admin123'
-      };
+      console.log('Login attempt:', { username: normalizedUsername, storeId, hasFirebasePassword: !!correctPassword, passwordFromFirebase: correctPassword });
       
-      const passwordToCheck = correctPassword || defaultPasswords[storeId as keyof typeof defaultPasswords];
+      if (!correctPassword) {
+        setError("Erro: senha não encontrada no sistema. Contacte o administrador.");
+        setTimeout(() => setError(""), 3000);
+        return;
+      }
       
-      console.log('Login attempt:', { username: normalizedUsername, storeId, hasFirebasePassword: !!correctPassword });
-      
-      if (passwordToCheck === password.trim()) {
+      if (correctPassword === password.trim()) {
         // Salva informação da loja no localStorage
         localStorage.setItem('luxury_store_id', storeId);
         localStorage.setItem('luxury_store_name', getStoreName(storeId));

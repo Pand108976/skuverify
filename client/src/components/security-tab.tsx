@@ -31,17 +31,12 @@ export function SecurityTab() {
     try {
       const correctPassword = await getStorePassword(profile);
       
-      // Fallback para senhas padrão se não encontrar no Firebase
-      const defaultPasswords = {
-        'patiobatel': 'patio123',
-        'village': 'village123',
-        'jk': 'jk123',
-        'iguatemi': 'iguatemi123',
-        'admin': 'admin123'
-      };
+      if (!correctPassword) {
+        console.error('Senha não encontrada no Firebase para:', profile);
+        return false;
+      }
       
-      const passwordToCheck = correctPassword || defaultPasswords[profile as keyof typeof defaultPasswords];
-      return passwordToCheck === password;
+      return correctPassword === password;
     } catch (error) {
       console.error('Erro ao validar senha:', error);
       return false;
