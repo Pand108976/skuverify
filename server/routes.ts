@@ -147,18 +147,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
               const productData = productDoc.data();
               const currentImagePath = productData.imagem;
               
-              // Check if image path is local (starts with /images/)
-              if (currentImagePath && currentImagePath.startsWith('/images/')) {
-                // Try to find the local file and upload it to Firebase Storage
+              // Check if image path is local (starts with /images/) or broken
+              if (!currentImagePath || currentImagePath.startsWith('/images/')) {
+                // Try to generate Firebase Storage URL for this SKU
                 const extension = category === 'oculos' ? '.jpg' : '.webp';
-                const localFilePath = path.join(process.cwd(), 'images', category, `${sku}${extension}`);
+                const storageRef = ref(storage, `images/${category}/${sku}${extension}`);
                 
-                if (fs.existsSync(localFilePath)) {
-                  // Read local file and upload to Firebase Storage
-                  const fileBuffer = fs.readFileSync(localFilePath);
-                  const storageRef = ref(storage, `images/${category}/${sku}${extension}`);
-                  
-                  await uploadBytes(storageRef, fileBuffer);
+                try {
+                  // Check if file exists in Firebase Storage and get its URL
                   const downloadURL = await getDownloadURL(storageRef);
                   
                   // Update Firestore with Firebase Storage URL
@@ -167,34 +163,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   results.push({
                     sku,
                     category,
-                    status: 'migrated',
-                    oldPath: currentImagePath,
+                    status: 'fixed_from_storage',
+                    oldPath: currentImagePath || 'none',
                     newPath: downloadURL
                   });
-                } else {
+                } catch (storageError) {
+                  // File doesn't exist in Firebase Storage
                   results.push({
                     sku,
                     category,
-                    status: 'file_not_found',
-                    path: localFilePath
+                    status: 'not_in_storage',
+                    path: `images/${category}/${sku}${extension}`
                   });
                 }
               } else if (currentImagePath && currentImagePath.startsWith('https://')) {
                 results.push({
                   sku,
                   category,
-                  status: 'already_migrated',
+                  status: 'already_correct',
                   path: currentImagePath
-                });
-              } else {
-                results.push({
-                  sku,
-                  category,
-                  status: 'no_image',
-                  path: currentImagePath || 'none'
                 });
               }
               break; // Found the SKU, no need to check other category
+            } else {
+              // Product not found in this category, continue to next
+              if (category === 'cintos') {
+                results.push({
+                  sku,
+                  status: 'product_not_found',
+                  searched: ['oculos', 'cintos']
+                });
+              }
             }
           }
         } catch (error) {
