@@ -10,15 +10,18 @@ import { getAdmin2FASecret, setAdmin2FASecret } from "@/lib/firebase";
 interface Admin2FASetupProps {
   onSetupComplete: (secret: string) => void;
   onBack: () => void;
+  onMasterPasswordAccess?: () => void;
 }
 
-export function Admin2FASetup({ onSetupComplete, onBack }: Admin2FASetupProps) {
+export function Admin2FASetup({ onSetupComplete, onBack, onMasterPasswordAccess }: Admin2FASetupProps) {
   const [secret, setSecret] = useState("");
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [step, setStep] = useState<"generate" | "verify">("generate");
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [masterPassword, setMasterPassword] = useState("");
+  const [showMasterLogin, setShowMasterLogin] = useState(false);
   const { toast } = useToast();
 
   const generateSecret = async () => {
@@ -141,6 +144,21 @@ export function Admin2FASetup({ onSetupComplete, onBack }: Admin2FASetupProps) {
     
     checkExisting2FA();
   }, [onSetupComplete]);
+
+  const handleMasterPasswordLogin = () => {
+    if (masterPassword.trim() === '@Piterpanda123') {
+      localStorage.setItem('admin_master_login', 'true');
+      if (onMasterPasswordAccess) {
+        onMasterPasswordAccess();
+      }
+    } else {
+      toast({
+        title: "Erro",
+        description: "Senha mestre incorreta",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen luxury-gradient flex items-center justify-center p-6">
@@ -267,6 +285,61 @@ export function Admin2FASetup({ onSetupComplete, onBack }: Admin2FASetupProps) {
               </Button>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Master Password Access */}
+      <Card className="premium-shadow border-2 border-blue-200">
+        <CardContent className="p-6">
+          <div className="text-center space-y-4">
+            <div className="flex items-center justify-center space-x-2 text-blue-700">
+              <Shield size={20} />
+              <span className="font-medium">Acesso Alternativo</span>
+            </div>
+            
+            {!showMasterLogin ? (
+              <Button
+                onClick={() => setShowMasterLogin(true)}
+                variant="outline"
+                className="w-full border-blue-300 text-blue-700 hover:bg-blue-50"
+              >
+                Acessar com Senha Mestre
+              </Button>
+            ) : (
+              <div className="space-y-3">
+                <div className="text-sm text-blue-600 mb-3">
+                  Digite a senha mestre para acessar sem configurar 2FA:
+                </div>
+                <Input
+                  type="password"
+                  value={masterPassword}
+                  onChange={(e) => setMasterPassword(e.target.value)}
+                  placeholder="Senha mestre"
+                  className="text-center"
+                  onKeyPress={(e) => e.key === 'Enter' && handleMasterPasswordLogin()}
+                />
+                <div className="flex space-x-2">
+                  <Button
+                    onClick={handleMasterPasswordLogin}
+                    disabled={!masterPassword.trim()}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    Acessar
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setShowMasterLogin(false);
+                      setMasterPassword("");
+                    }}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>

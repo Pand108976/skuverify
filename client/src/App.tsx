@@ -67,6 +67,13 @@ function App() {
     setIsLoggedIn(true);
   };
 
+  const handleMasterPasswordAccess = () => {
+    localStorage.setItem('luxury_login_time', Date.now().toString());
+    setAdminLoginState('authenticated');
+    setPendingAdminLogin(false);
+    setIsLoggedIn(true);
+  };
+
   const handleAdmin2FALoginSuccess = () => {
     localStorage.setItem('luxury_login_time', Date.now().toString());
     setAdminLoginState('authenticated');
