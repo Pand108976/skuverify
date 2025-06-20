@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Smartphone, Key, QrCode, Shield, Copy, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { getAdmin2FASecret, setAdmin2FASecret } from "@/lib/firebase";
 
 interface Admin2FASetupProps {
   onSetupComplete: (secret: string) => void;
@@ -72,17 +73,27 @@ export function Admin2FASetup({ onSetupComplete, onBack }: Admin2FASetupProps) {
       const data = await response.json();
       
       if (data.verified) {
-        // Salva o secret do admin no localStorage
-        localStorage.setItem('admin_2fa_secret', secret);
-        localStorage.setItem('admin_2fa_enabled', 'true');
+        // Salva o secret do admin no Firebase E localStorage
+        const saved = await setAdmin2FASecret(secret);
         
-        toast({
-          title: "Sucesso",
-          description: "Autenticação 2FA configurada com sucesso!",
-          variant: "default",
-        });
-        
-        onSetupComplete(secret);
+        if (saved) {
+          localStorage.setItem('admin_2fa_secret', secret);
+          localStorage.setItem('admin_2fa_enabled', 'true');
+          
+          toast({
+            title: "Sucesso",
+            description: "Autenticação 2FA configurada com sucesso para todos os dispositivos!",
+            variant: "default",
+          });
+          
+          onSetupComplete(secret);
+        } else {
+          toast({
+            title: "Erro",
+            description: "Erro ao salvar configuração 2FA no servidor",
+            variant: "destructive",
+          });
+        }
       } else {
         toast({
           title: "Erro",
@@ -112,12 +123,19 @@ export function Admin2FASetup({ onSetupComplete, onBack }: Admin2FASetupProps) {
     });
   };
 
-  // Verifica se 2FA já está configurado
+  // Verifica se 2FA já está configurado no Firebase
   useEffect(() => {
-    const existing2FA = localStorage.getItem('admin_2fa_enabled');
-    if (existing2FA === 'true') {
-      onSetupComplete(localStorage.getItem('admin_2fa_secret') || '');
-    }
+    const checkExisting2FA = async () => {
+      const existingSecret = await getAdmin2FASecret();
+      if (existingSecret) {
+        setSecret(existingSecret);
+        localStorage.setItem('admin_2fa_secret', existingSecret);
+        localStorage.setItem('admin_2fa_enabled', 'true');
+        onSetupComplete(existingSecret);
+      }
+    };
+    
+    checkExisting2FA();
   }, [onSetupComplete]);
 
   return (

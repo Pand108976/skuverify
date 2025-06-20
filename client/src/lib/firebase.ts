@@ -53,6 +53,35 @@ export const updateStorePassword = async (storeId: string, newPassword: string):
   }
 };
 
+// Funções para gerenciar 2FA secret do admin no Firebase
+export const getAdmin2FASecret = async (): Promise<string | null> => {
+  try {
+    const secretDoc = await getDoc(firestoreDoc(db, 'admin_config', '2fa'));
+    if (secretDoc.exists()) {
+      return secretDoc.data().secret;
+    }
+    return null;
+  } catch (error) {
+    console.error('Erro ao obter secret 2FA:', error);
+    return null;
+  }
+};
+
+export const setAdmin2FASecret = async (secret: string): Promise<boolean> => {
+  try {
+    await setDoc(firestoreDoc(db, 'admin_config', '2fa'), {
+      secret,
+      enabled: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+    return true;
+  } catch (error) {
+    console.error('Erro ao salvar secret 2FA:', error);
+    return false;
+  }
+};
+
 // Função para obter caminho da imagem baseado no SKU e categoria
 function getImagePath(sku: string, categoria: 'oculos' | 'cintos'): string | undefined {
   const extension = categoria === 'oculos' ? '.jpg' : '.webp';

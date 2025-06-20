@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Smartphone, Key, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { getAdmin2FASecret } from "@/lib/firebase";
 
 interface Admin2FALoginProps {
   onSuccess: () => void;
@@ -28,12 +29,21 @@ export function Admin2FALogin({ onSuccess, onBack }: Admin2FALoginProps) {
 
     setLoading(true);
     try {
-      const adminSecret = localStorage.getItem('admin_2fa_secret');
+      // Primeiro tenta obter do Firebase, depois localStorage como fallback
+      let adminSecret = await getAdmin2FASecret();
+      
+      if (!adminSecret) {
+        adminSecret = localStorage.getItem('admin_2fa_secret');
+      } else {
+        // Se obteve do Firebase, atualiza localStorage
+        localStorage.setItem('admin_2fa_secret', adminSecret);
+        localStorage.setItem('admin_2fa_enabled', 'true');
+      }
       
       if (!adminSecret) {
         toast({
           title: "Erro",
-          description: "Configuração 2FA não encontrada",
+          description: "Configuração 2FA não encontrada. Configure primeiro no admin.",
           variant: "destructive",
         });
         return;
