@@ -82,6 +82,23 @@ export const setAdmin2FASecret = async (secret: string): Promise<boolean> => {
   }
 };
 
+// Função para resetar completamente o sistema 2FA
+export const resetAdmin2FA = async (): Promise<boolean> => {
+  try {
+    // Remove do Firebase
+    await deleteDoc(firestoreDoc(db, 'admin_config', '2fa'));
+    
+    // Remove do localStorage atual
+    localStorage.removeItem('admin_2fa_secret');
+    localStorage.removeItem('admin_2fa_enabled');
+    
+    return true;
+  } catch (error) {
+    console.error('Erro ao resetar 2FA:', error);
+    return false;
+  }
+};
+
 // Função para obter caminho da imagem baseado no SKU e categoria
 function getImagePath(sku: string, categoria: 'oculos' | 'cintos'): string | undefined {
   const extension = categoria === 'oculos' ? '.jpg' : '.webp';

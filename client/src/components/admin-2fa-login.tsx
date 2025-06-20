@@ -29,25 +29,24 @@ export function Admin2FALogin({ onSuccess, onBack }: Admin2FALoginProps) {
 
     setLoading(true);
     try {
-      // Primeiro tenta obter do Firebase, depois localStorage como fallback
-      let adminSecret = await getAdmin2FASecret();
+      // Sempre limpa localStorage primeiro e busca do Firebase
+      localStorage.removeItem('admin_2fa_secret');
+      localStorage.removeItem('admin_2fa_enabled');
       
-      if (!adminSecret) {
-        adminSecret = localStorage.getItem('admin_2fa_secret');
-      } else {
-        // Se obteve do Firebase, atualiza localStorage
-        localStorage.setItem('admin_2fa_secret', adminSecret);
-        localStorage.setItem('admin_2fa_enabled', 'true');
-      }
+      const adminSecret = await getAdmin2FASecret();
       
       if (!adminSecret) {
         toast({
           title: "Erro",
-          description: "Configuração 2FA não encontrada. Configure primeiro no admin.",
+          description: "Sistema 2FA não configurado. Configure primeiro no admin.",
           variant: "destructive",
         });
         return;
       }
+      
+      // Atualiza localStorage com o secret do Firebase
+      localStorage.setItem('admin_2fa_secret', adminSecret);
+      localStorage.setItem('admin_2fa_enabled', 'true');
 
       const response = await fetch('/api/verify-2fa-code', {
         method: 'POST',

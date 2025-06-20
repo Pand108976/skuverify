@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Shield, Lock, Eye, EyeOff, Check, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { getStorePassword, updateStorePassword } from "@/lib/firebase";
+import { getStorePassword, updateStorePassword, resetAdmin2FA } from "@/lib/firebase";
 
 const STORE_PROFILES = [
   { id: 'patiobatel', name: 'Patio Batel' },
@@ -25,6 +25,7 @@ export function SecurityTab() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [resetting2FA, setResetting2FA] = useState(false);
   const { toast } = useToast();
 
   const validateCurrentPassword = async (profile: string, password: string): Promise<boolean> => {
@@ -134,6 +135,36 @@ export function SecurityTab() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleReset2FA = async () => {
+    setResetting2FA(true);
+    try {
+      const success = await resetAdmin2FA();
+      
+      if (success) {
+        toast({
+          title: "Sucesso",
+          description: "Sistema 2FA resetado completamente. Agora você pode configurar um novo QR code que funcionará em todos os dispositivos.",
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: "Falha ao resetar sistema 2FA",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao resetar 2FA:', error);
+      toast({
+        title: "Erro",
+        description: "Falha ao resetar sistema 2FA",
+        variant: "destructive",
+      });
+    } finally {
+      setResetting2FA(false);
     }
   };
 
@@ -293,6 +324,50 @@ export function SecurityTab() {
               </div>
             )}
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="premium-shadow border-2 border-red-200">
+        <CardHeader className="bg-red-50">
+          <CardTitle className="flex items-center text-red-800">
+            <AlertCircle className="mr-2" size={20} />
+            Sistema 2FA - Autenticação Admin
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="bg-red-50 p-4 rounded-lg border border-red-200 mb-4">
+            <div className="flex items-start space-x-3">
+              <AlertCircle className="text-red-600 mt-0.5" size={20} />
+              <div>
+                <h3 className="font-semibold text-red-800 mb-1">Resetar Autenticação 2FA</h3>
+                <p className="text-sm text-red-700 mb-3">
+                  Se você está tendo problemas com códigos 2FA diferentes em dispositivos, use esta opção para resetar completamente o sistema. 
+                  Após o reset, você precisará escanear apenas UM QR code que funcionará em todos os dispositivos (PC, iPad, celular).
+                </p>
+                <ul className="text-xs text-red-600 space-y-1">
+                  <li>• Remove todos os códigos 2FA salvos localmente</li>
+                  <li>• Limpa configuração centralizada no Firebase</li>
+                  <li>• Próximo login admin gerará QR code universal</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <Button
+            onClick={handleReset2FA}
+            disabled={resetting2FA}
+            variant="destructive"
+            className="w-full font-semibold py-3 hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300"
+          >
+            {resetting2FA ? (
+              "Resetando Sistema 2FA..."
+            ) : (
+              <>
+                <Shield className="mr-2" size={16} />
+                Resetar Sistema 2FA Completamente
+              </>
+            )}
+          </Button>
         </CardContent>
       </Card>
 

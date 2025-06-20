@@ -123,9 +123,13 @@ export function Admin2FASetup({ onSetupComplete, onBack }: Admin2FASetupProps) {
     });
   };
 
-  // Verifica se 2FA já está configurado no Firebase
+  // Sempre verifica Firebase primeiro, limpa localStorage se necessário
   useEffect(() => {
     const checkExisting2FA = async () => {
+      // Sempre limpa localStorage primeiro para evitar conflitos
+      localStorage.removeItem('admin_2fa_secret');
+      localStorage.removeItem('admin_2fa_enabled');
+      
       const existingSecret = await getAdmin2FASecret();
       if (existingSecret) {
         setSecret(existingSecret);
