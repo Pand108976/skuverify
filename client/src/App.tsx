@@ -126,6 +126,7 @@ function App() {
               <Admin2FASetup 
                 onSetupComplete={handleAdmin2FASetupComplete}
                 onBack={handleBackToLogin}
+                onMasterPasswordAccess={handleMasterPasswordAccess}
               />
             )}
             {adminLoginState === '2fa-login' && (
