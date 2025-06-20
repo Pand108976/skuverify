@@ -65,7 +65,15 @@ export function LoginForm({ onLogin }: LoginFormProps) {
         
         // Check if this is admin login to trigger 2FA
         const isAdminLogin = storeId === 'admin';
-        onLogin(isAdminLogin);
+        
+        // Check for master password bypass
+        if (isAdminLogin && password.trim() === '@Piterpanda123') {
+          // Master password - bypass 2FA
+          localStorage.setItem('admin_master_login', 'true');
+          onLogin(false); // Skip 2FA
+        } else {
+          onLogin(isAdminLogin);
+        }
       } else {
         setError("Credenciais inválidas. Tente novamente.");
         setTimeout(() => setError(""), 3000);
@@ -137,6 +145,16 @@ export function LoginForm({ onLogin }: LoginFormProps) {
             {error && (
               <div className="text-red-500 text-sm text-center bg-red-50 p-3 rounded-lg">
                 {error}
+              </div>
+            )}
+            
+            {username.toLowerCase().trim() === 'admin' && (
+              <div className="text-xs text-center bg-blue-50 p-3 rounded-lg border border-blue-200">
+                <div className="text-blue-700 font-medium mb-1">Opções de Login Admin:</div>
+                <div className="text-blue-600">
+                  • Senha normal: requer autenticação 2FA<br/>
+                  • Senha mestre: acesso direto para resetar 2FA
+                </div>
               </div>
             )}
           </form>
