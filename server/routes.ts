@@ -30,11 +30,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let products = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
-      }));
+      })) as any[];
       
       if (search) {
         const searchTerm = search.toString().toLowerCase();
-        products = products.filter(product => 
+        products = products.filter((product: any) => 
           product.sku?.toLowerCase().includes(searchTerm) ||
           product.caixa?.toLowerCase().includes(searchTerm)
         );
@@ -232,7 +232,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Generate QR code
       const otpauthUrl = secret.otpauth_url;
-      const qrCodeDataURL = await QRCode.toDataURL(otpauthUrl);
+      const qrCodeDataURL = await QRCode.toDataURL(otpauthUrl || '');
 
       // Store secret in Firestore
       await setDoc(doc(db, 'admin_settings', '2fa_config'), {

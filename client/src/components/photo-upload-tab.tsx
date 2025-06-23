@@ -166,12 +166,12 @@ export function PhotoUploadTab({}: PhotoUploadTabProps) {
           
           // Save image to local project folder
           const formData = new FormData();
-          formData.append('file', pair.file);
+          formData.append('photo', pair.file);
           formData.append('fileName', fileName);
           formData.append('category', existingProduct.categoria);
           formData.append('sku', pair.sku);
 
-          const response = await fetch('/api/upload-image', {
+          const response = await fetch('/api/upload-photo', {
             method: 'POST',
             body: formData,
           });
