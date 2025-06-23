@@ -142,18 +142,18 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto p-6">
         <Tabs defaultValue="search" className="w-full">
-          <TabsList className={`flex w-full ${isAdmin ? 'justify-start overflow-x-auto' : 'justify-center'} bg-background border premium-shadow h-10 text-xs p-0`}>
-            <TabsTrigger value="search" className="flex items-center justify-center h-9 text-sm px-2 py-1 whitespace-nowrap flex-shrink-0 data-[state=active]:gold-gradient data-[state=active]:text-white">
+          <TabsList className={`${isAdmin ? 'flex justify-start overflow-x-auto' : 'grid grid-cols-4'} w-full bg-background border premium-shadow h-10 text-xs p-0`}>
+            <TabsTrigger value="search" className="flex items-center justify-center h-9 text-sm px-2 py-1 data-[state=active]:gold-gradient data-[state=active]:text-white">
               <Search size={14} />
               <span className="hidden md:inline ml-1 text-sm">Pesquisar</span>
             </TabsTrigger>
             {!isAdmin && (
               <>
-                <TabsTrigger value="glasses" className="flex items-center justify-center h-9 text-sm px-2 py-1 whitespace-nowrap flex-shrink-0 data-[state=active]:gold-gradient data-[state=active]:text-white">
+                <TabsTrigger value="glasses" className="flex items-center justify-center h-9 text-sm px-2 py-1 data-[state=active]:gold-gradient data-[state=active]:text-white">
                   <Glasses size={14} />
                   <span className="hidden md:inline ml-1 text-sm">Óculos</span>
                 </TabsTrigger>
-                <TabsTrigger value="belts" className="flex items-center justify-center h-9 text-sm px-2 py-1 whitespace-nowrap flex-shrink-0 data-[state=active]:gold-gradient data-[state=active]:text-white">
+                <TabsTrigger value="belts" className="flex items-center justify-center h-9 text-sm px-2 py-1 data-[state=active]:gold-gradient data-[state=active]:text-white">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="2" y="10" width="20" height="4" rx="2"/>
                     <rect x="15" y="8" width="4" height="8" rx="1"/>
@@ -165,13 +165,13 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
             )}
 
             {!isAdmin && (
-              <TabsTrigger value="sales" className="flex items-center justify-center h-9 text-sm px-2 py-1 whitespace-nowrap flex-shrink-0 data-[state=active]:gold-gradient data-[state=active]:text-white">
+              <TabsTrigger value="sales" className="flex items-center justify-center h-9 text-sm px-2 py-1 data-[state=active]:gold-gradient data-[state=active]:text-white">
                 <ShoppingCart size={14} />
                 <span className="hidden md:inline ml-1 text-sm">Vendas</span>
               </TabsTrigger>
             )}
 
-            <TabsTrigger value="add" className="flex items-center justify-center h-9 text-sm px-2 py-1 whitespace-nowrap flex-shrink-0 data-[state=active]:gold-gradient data-[state=active]:text-white">
+            <TabsTrigger value="add" className="flex items-center justify-center h-9 text-sm px-2 py-1 data-[state=active]:gold-gradient data-[state=active]:text-white">
               <Plus size={14} />
               <span className="hidden md:inline ml-1 text-sm">Adicionar</span>
             </TabsTrigger>
