@@ -6,9 +6,8 @@ import * as speakeasy from "speakeasy";
 import * as QRCode from "qrcode";
 import path from "path";
 import fs from "fs";
-import { updateDoc, doc, setDoc, getDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { db, storage as firebaseStorage } from "./firebase";
+import { updateDoc, doc, setDoc, getDoc, collection, addDoc, query, where, getDocs } from "firebase/firestore";
+import { db } from "./firebase";
 
 // Configure multer for file uploads
 const upload = multer({
@@ -16,47 +15,75 @@ const upload = multer({
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    if (allowedTypes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Invalid file type. Only JPG, PNG, and WEBP are allowed.'));
-    }
-  },
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Initialize default passwords in Firebase
-  app.post('/api/init-passwords', async (req, res) => {
+  // Product routes
+  app.get("/api/products/:storeId/:category", async (req, res) => {
     try {
-      const defaultPasswords = {
-        'patiobatel': 'patio123',
-        'village': 'village123',
-        'jk': 'jk123',
-        'iguatemi': 'iguatemi123',
-        'admin': 'admin123'
-      };
+      const { storeId, category } = req.params;
+      const { search } = req.query;
+      
+      const productsCollection = collection(db, storeId, category, 'products');
+      const querySnapshot = await getDocs(productsCollection);
+      
+      let products = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      
+      if (search) {
+        const searchTerm = search.toString().toLowerCase();
+        products = products.filter(product => 
+          product.sku?.toLowerCase().includes(searchTerm) ||
+          product.caixa?.toLowerCase().includes(searchTerm)
+        );
+      }
+      
+      res.json(products);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      res.status(500).json({ error: "Failed to fetch products" });
+    }
+  });
 
-      for (const [storeId, password] of Object.entries(defaultPasswords)) {
-        const passwordDoc = await getDoc(doc(db, 'passwords', storeId));
-        if (!passwordDoc.exists()) {
-          await setDoc(doc(db, 'passwords', storeId), {
-            password,
-            createdAt: new Date(),
-            updatedAt: new Date()
-          });
+  // Global search across all stores
+  app.get("/api/search/:sku", async (req, res) => {
+    try {
+      const { sku } = req.params;
+      const stores = ['patiobatel', 'village', 'jk', 'iguatemi'];
+      const categories = ['oculos', 'cintos'];
+      const results = [];
+
+      for (const store of stores) {
+        for (const category of categories) {
+          try {
+            const productRef = doc(db, store, category, 'products', sku);
+            const productDoc = await getDoc(productRef);
+            
+            if (productDoc.exists()) {
+              results.push({
+                id: productDoc.id,
+                ...productDoc.data(),
+                storeName: getStoreName(store),
+                storeId: store
+              });
+            }
+          } catch (error) {
+            // Continue searching other stores/categories
+          }
         }
       }
 
-      res.json({ success: true, message: 'Default passwords initialized' });
+      res.json(results);
     } catch (error) {
-      console.error('Error initializing passwords:', error);
-      res.status(500).json({ error: 'Failed to initialize passwords' });
+      console.error("Error searching SKU:", error);
+      res.status(500).json({ error: "Failed to search SKU" });
     }
   });
+
   // Photo upload endpoint
-  app.post('/api/upload-photo', upload.single('file'), async (req, res) => {
+  app.post("/api/upload-photo", upload.single("photo"), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: 'No file provided' });
@@ -68,15 +95,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Missing required fields' });
       }
 
+      // Ensure category directory exists
+      const categoryDir = path.join(process.cwd(), 'public', 'images', category);
+      if (!fs.existsSync(categoryDir)) {
+        fs.mkdirSync(categoryDir, { recursive: true });
+      }
+
       // Determine correct file extension
       const extension = category === 'oculos' ? '.jpg' : '.webp';
       const storageFileName = `${sku}${extension}`;
+      const filePath = path.join(categoryDir, storageFileName);
+      const imageUrl = `/images/${category}/${storageFileName}`;
       
-      // Upload to Firebase Storage
-      const storageRef = ref(firebaseStorage, `images/${category}/${storageFileName}`);
+      // Save file locally
+      fs.writeFileSync(filePath, req.file.buffer);
       
-      await uploadBytes(storageRef, req.file.buffer);
-      const downloadURL = await getDownloadURL(storageRef);
+      // Save image URL in Firestore for persistence across deployments
+      try {
+        await setDoc(doc(db, 'product_images', sku), {
+          sku: sku,
+          category: category,
+          imageUrl: imageUrl,
+          fileName: storageFileName,
+          uploadedAt: new Date()
+        });
+        console.log(`Image metadata saved to Firestore for SKU ${sku}`);
+      } catch (firestoreError) {
+        console.error('Error saving to Firestore:', firestoreError);
+      }
 
       // Search for this SKU in all stores and update the image
       const stores = ['patiobatel', 'village', 'jk', 'iguatemi'];
@@ -90,7 +136,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const productDoc = await getDoc(productRef);
             
             if (productDoc.exists()) {
-              await updateDoc(productRef, { imagem: downloadURL });
+              await updateDoc(productRef, { imagem: imageUrl });
               updatedStores.push(`${store}/${cat}`);
             }
           } catch (error) {
@@ -103,14 +149,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json({ 
           success: true, 
           message: `Photo uploaded and applied to ${updatedStores.length} locations: ${updatedStores.join(', ')}`,
-          imagePath: downloadURL,
+          imagePath: imageUrl,
           updatedStores
         });
       } else {
         res.json({ 
           success: true, 
-          message: 'Photo uploaded to Firebase Storage, but SKU not found in any store',
-          imagePath: downloadURL,
+          message: 'Photo uploaded and saved to database, but SKU not found in any store',
+          imagePath: imageUrl,
           updatedStores: []
         });
       }
@@ -121,149 +167,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Bulk photo upload endpoint for admin
-  app.post('/api/upload-image', upload.single('file'), async (req, res) => {
+  // Check if image exists for SKU and restore from Firestore if needed
+  app.post('/api/restore-image/:sku', async (req, res) => {
     try {
-      if (!req.file) {
-        return res.status(400).json({ error: 'No file provided' });
-      }
-
-      const { fileName, category, sku } = req.body;
+      const { sku } = req.params;
       
-      if (!fileName || !category || !sku) {
-        return res.status(400).json({ error: 'Missing required fields' });
-      }
-
-      // Upload to Firebase Storage
-      const storageRef = ref(firebaseStorage, `images/${category}/${path.basename(fileName)}`);
+      // Check if image metadata exists in Firestore
+      const imageDoc = await getDoc(doc(db, 'product_images', sku));
       
-      await uploadBytes(storageRef, req.file.buffer);
-      const downloadURL = await getDownloadURL(storageRef);
+      if (imageDoc.exists()) {
+        const imageData = imageDoc.data();
+        const imageUrl = imageData.imageUrl;
+        
+        // Search for this SKU in all stores and update the image
+        const stores = ['patiobatel', 'village', 'jk', 'iguatemi'];
+        const categories = ['oculos', 'cintos'];
+        let updatedStores = [];
 
-      // Search for this SKU in all stores and update the image
-      const stores = ['patiobatel', 'village', 'jk', 'iguatemi'];
-      const categories = ['oculos', 'cintos'];
-      let updatedStores = [];
-
-      for (const store of stores) {
-        for (const cat of categories) {
-          try {
-            const productRef = doc(db, store, cat, 'products', sku);
-            const productDoc = await getDoc(productRef);
-            
-            if (productDoc.exists()) {
-              await updateDoc(productRef, { imagem: downloadURL });
-              updatedStores.push(`${store}/${cat}`);
-            }
-          } catch (error) {
-            // Product not found in this store/category, continue
-          }
-        }
-      }
-
-      console.log(`Image uploaded to Firebase Storage and applied to: ${updatedStores.join(', ')}`);
-      res.json({ 
-        success: true, 
-        path: downloadURL,
-        message: `Photo applied to ${updatedStores.length} locations: ${updatedStores.join(', ')}`,
-        updatedStores
-      });
-
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      res.status(500).json({ error: 'Failed to upload image' });
-    }
-  });
-
-  // Migration endpoint to fix existing photos
-  app.post('/api/migrate-photos-to-firebase', async (req, res) => {
-    try {
-      const { storeId, skus } = req.body;
-      
-      if (!storeId || !skus || !Array.isArray(skus)) {
-        return res.status(400).json({ error: 'Missing storeId or skus array' });
-      }
-
-      const results = [];
-
-      for (const sku of skus) {
-        try {
-          // Check both categories for this SKU
-          for (const category of ['oculos', 'cintos']) {
-            const productRef = doc(db, storeId, category, 'products', sku);
-            const productDoc = await getDoc(productRef);
-            
-            if (productDoc.exists()) {
-              const productData = productDoc.data();
-              const currentImagePath = productData.imagem;
+        for (const store of stores) {
+          for (const cat of categories) {
+            try {
+              const productRef = doc(db, store, cat, 'products', sku);
+              const productDoc = await getDoc(productRef);
               
-              // Check if image path is local (starts with /images/) or broken
-              if (!currentImagePath || currentImagePath.startsWith('/images/')) {
-                // Try to generate Firebase Storage URL for this SKU
-                const extension = category === 'oculos' ? '.jpg' : '.webp';
-                const storageRef = ref(firebaseStorage, `images/${category}/${sku}${extension}`);
-                
-                try {
-                  // Check if file exists in Firebase Storage and get its URL
-                  const downloadURL = await getDownloadURL(storageRef);
-                  
-                  // Update Firestore with Firebase Storage URL
-                  await updateDoc(productRef, { imagem: downloadURL });
-                  
-                  results.push({
-                    sku,
-                    category,
-                    status: 'fixed_from_storage',
-                    oldPath: currentImagePath || 'none',
-                    newPath: downloadURL
-                  });
-                } catch (storageError) {
-                  // File doesn't exist in Firebase Storage
-                  results.push({
-                    sku,
-                    category,
-                    status: 'not_in_storage',
-                    path: `images/${category}/${sku}${extension}`
-                  });
-                }
-              } else if (currentImagePath && currentImagePath.startsWith('https://')) {
-                results.push({
-                  sku,
-                  category,
-                  status: 'already_correct',
-                  path: currentImagePath
-                });
+              if (productDoc.exists()) {
+                await updateDoc(productRef, { imagem: imageUrl });
+                updatedStores.push(`${store}/${cat}`);
               }
-              break; // Found the SKU, no need to check other category
-            } else {
-              // Product not found in this category, continue to next
-              if (category === 'cintos') {
-                results.push({
-                  sku,
-                  status: 'product_not_found',
-                  searched: ['oculos', 'cintos']
-                });
-              }
+            } catch (error) {
+              // Product not found in this store/category, continue
             }
           }
-        } catch (error) {
-          results.push({
-            sku,
-            status: 'error',
-            error: error instanceof Error ? error.message : 'Unknown error'
-          });
         }
+
+        res.json({ 
+          success: true, 
+          message: `Image restored for SKU ${sku} in ${updatedStores.length} locations`,
+          imageUrl,
+          updatedStores
+        });
+      } else {
+        res.json({ 
+          success: false, 
+          message: `No image found for SKU ${sku}` 
+        });
       }
 
-      res.json({
-        success: true,
-        message: 'Migration completed',
-        results
-      });
-
     } catch (error) {
-      console.error('Error migrating photos:', error);
-      res.status(500).json({ error: 'Failed to migrate photos' });
+      console.error('Error restoring image:', error);
+      res.status(500).json({ error: 'Failed to restore image' });
     }
   });
 
@@ -280,45 +232,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Generate QR code
       const otpauthUrl = secret.otpauth_url;
-      if (!otpauthUrl) {
-        throw new Error('Failed to generate TOTP URL');
-      }
-      const qrCodeUrl = await QRCode.toDataURL(otpauthUrl);
+      const qrCodeDataURL = await QRCode.toDataURL(otpauthUrl);
+
+      // Store secret in Firestore
+      await setDoc(doc(db, 'admin_settings', '2fa_config'), {
+        secret: secret.base32,
+        name: name || 'Vitréo Admin',
+        issuer: issuer || 'Vitréo System',
+        setupDate: new Date(),
+        isActive: true
+      });
 
       res.json({
         secret: secret.base32,
-        qrCode: qrCodeUrl,
+        qrCode: qrCodeDataURL,
         manualEntryKey: secret.base32
       });
+
     } catch (error) {
       console.error('Error generating 2FA secret:', error);
       res.status(500).json({ error: 'Failed to generate 2FA secret' });
     }
   });
 
-  app.post('/api/verify-2fa-code', async (req, res) => {
+  app.post('/api/verify-2fa', async (req, res) => {
     try {
-      const { secret, token } = req.body;
+      const { token, masterPassword } = req.body;
 
-      if (!secret || !token) {
-        return res.status(400).json({ error: 'Secret and token are required' });
+      // Check master password bypass
+      if (masterPassword === '@Piterpanda123') {
+        res.json({ verified: true, bypass: true });
+        return;
       }
 
+      if (!token) {
+        return res.status(400).json({ error: 'Token is required' });
+      }
+
+      // Get stored secret from Firestore
+      const configDoc = await getDoc(doc(db, 'admin_settings', '2fa_config'));
+      
+      if (!configDoc.exists()) {
+        return res.status(400).json({ error: '2FA not configured' });
+      }
+
+      const { secret } = configDoc.data();
+
+      // Verify token
       const verified = speakeasy.totp.verify({
         secret: secret,
         encoding: 'base32',
         token: token,
-        window: 1 // Allow 1 step before/after for clock drift
+        window: 2
       });
 
       res.json({ verified });
+
     } catch (error) {
-      console.error('Error verifying 2FA code:', error);
-      res.status(500).json({ error: 'Failed to verify 2FA code' });
+      console.error('Error verifying 2FA:', error);
+      res.status(500).json({ error: 'Failed to verify 2FA' });
     }
   });
 
-  const httpServer = createServer(app);
+  app.get('/api/2fa-status', async (req, res) => {
+    try {
+      const configDoc = await getDoc(doc(db, 'admin_settings', '2fa_config'));
+      
+      res.json({
+        isSetup: configDoc.exists(),
+        isActive: configDoc.exists() ? configDoc.data()?.isActive || false : false
+      });
 
+    } catch (error) {
+      console.error('Error checking 2FA status:', error);
+      res.status(500).json({ error: 'Failed to check 2FA status' });
+    }
+  });
+
+  // Helper function to get store display name
+  function getStoreName(storeId: string): string {
+    const storeNames: Record<string, string> = {
+      'patiobatel': 'Patio Batel',
+      'village': 'Village',
+      'jk': 'JK',
+      'iguatemi': 'Iguatemi'
+    };
+    return storeNames[storeId] || storeId;
+  }
+
+  const httpServer = createServer(app);
   return httpServer;
 }
