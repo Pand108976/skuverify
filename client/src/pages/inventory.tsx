@@ -142,7 +142,7 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto p-6">
         <Tabs defaultValue="search" className="w-full">
-          <TabsList className={`flex w-full justify-start bg-background border premium-shadow h-10 text-xs p-0 ${isAdmin ? 'overflow-x-auto' : ''}`}>
+          <TabsList className={`flex w-full ${isAdmin ? 'justify-start overflow-x-auto' : 'justify-center'} bg-background border premium-shadow h-10 text-xs p-0`}>
             <TabsTrigger value="search" className="flex items-center justify-center h-9 text-sm px-2 py-1 whitespace-nowrap flex-shrink-0 data-[state=active]:gold-gradient data-[state=active]:text-white">
               <Search size={14} />
               <span className="hidden md:inline ml-1 text-sm">Pesquisar</span>
