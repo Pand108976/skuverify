@@ -1,14 +1,14 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage as dbStorage } from "./storage";
 import multer from "multer";
 import * as speakeasy from "speakeasy";
 import * as QRCode from "qrcode";
 import path from "path";
 import fs from "fs";
 import { updateDoc, doc, setDoc, getDoc } from "firebase/firestore";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { db } from "./firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db, storage as firebaseStorage } from "./firebase";
 
 // Configure multer for file uploads
 const upload = multer({
@@ -73,8 +73,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const storageFileName = `${sku}${extension}`;
       
       // Upload to Firebase Storage
-      const storage = getStorage();
-      const storageRef = ref(storage, `images/${category}/${storageFileName}`);
+      const storageRef = ref(firebaseStorage, `images/${category}/${storageFileName}`);
       
       await uploadBytes(storageRef, req.file.buffer);
       const downloadURL = await getDownloadURL(storageRef);
@@ -136,8 +135,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Upload to Firebase Storage
-      const storage = getStorage();
-      const storageRef = ref(storage, `images/${category}/${path.basename(fileName)}`);
+      const storageRef = ref(firebaseStorage, `images/${category}/${path.basename(fileName)}`);
       
       await uploadBytes(storageRef, req.file.buffer);
       const downloadURL = await getDownloadURL(storageRef);
@@ -187,7 +185,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const results = [];
-      const storage = getStorage();
 
       for (const sku of skus) {
         try {
@@ -204,7 +201,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               if (!currentImagePath || currentImagePath.startsWith('/images/')) {
                 // Try to generate Firebase Storage URL for this SKU
                 const extension = category === 'oculos' ? '.jpg' : '.webp';
-                const storageRef = ref(storage, `images/${category}/${sku}${extension}`);
+                const storageRef = ref(firebaseStorage, `images/${category}/${sku}${extension}`);
                 
                 try {
                   // Check if file exists in Firebase Storage and get its URL
