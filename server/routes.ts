@@ -64,7 +64,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { fileName, category, sku, storeId, productId } = req.body;
       
-      if (!fileName || !category || !sku || !storeId || !productId) {
+      if (!fileName || !category || !sku) {
         return res.status(400).json({ error: 'Missing required fields' });
       }
 
@@ -79,15 +79,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await uploadBytes(storageRef, req.file.buffer);
       const downloadURL = await getDownloadURL(storageRef);
 
-      // Update Firebase document with Firebase Storage URL
-      const productRef = doc(db, storeId, category, 'products', productId);
-      await updateDoc(productRef, { imagem: downloadURL });
+      // Search for this SKU in all stores and update the image
+      const stores = ['patiobatel', 'village', 'jk', 'iguatemi'];
+      const categories = ['oculos', 'cintos'];
+      let updatedStores = [];
 
-      res.json({ 
-        success: true, 
-        message: 'Photo uploaded successfully to Firebase Storage',
-        imagePath: downloadURL 
-      });
+      for (const store of stores) {
+        for (const cat of categories) {
+          try {
+            const productRef = doc(db, store, cat, 'products', sku);
+            const productDoc = await getDoc(productRef);
+            
+            if (productDoc.exists()) {
+              await updateDoc(productRef, { imagem: downloadURL });
+              updatedStores.push(`${store}/${cat}`);
+            }
+          } catch (error) {
+            console.log(`Product ${sku} not found in ${store}/${cat}`);
+          }
+        }
+      }
+
+      if (updatedStores.length > 0) {
+        res.json({ 
+          success: true, 
+          message: `Photo uploaded and applied to ${updatedStores.length} locations: ${updatedStores.join(', ')}`,
+          imagePath: downloadURL,
+          updatedStores
+        });
+      } else {
+        res.json({ 
+          success: true, 
+          message: 'Photo uploaded to Firebase Storage, but SKU not found in any store',
+          imagePath: downloadURL,
+          updatedStores: []
+        });
+      }
 
     } catch (error) {
       console.error('Error uploading photo:', error);
@@ -115,8 +142,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await uploadBytes(storageRef, req.file.buffer);
       const downloadURL = await getDownloadURL(storageRef);
 
-      console.log(`Image uploaded to Firebase Storage: ${downloadURL}`);
-      res.json({ success: true, path: downloadURL });
+      // Search for this SKU in all stores and update the image
+      const stores = ['patiobatel', 'village', 'jk', 'iguatemi'];
+      const categories = ['oculos', 'cintos'];
+      let updatedStores = [];
+
+      for (const store of stores) {
+        for (const cat of categories) {
+          try {
+            const productRef = doc(db, store, cat, 'products', sku);
+            const productDoc = await getDoc(productRef);
+            
+            if (productDoc.exists()) {
+              await updateDoc(productRef, { imagem: downloadURL });
+              updatedStores.push(`${store}/${cat}`);
+            }
+          } catch (error) {
+            // Product not found in this store/category, continue
+          }
+        }
+      }
+
+      console.log(`Image uploaded to Firebase Storage and applied to: ${updatedStores.join(', ')}`);
+      res.json({ 
+        success: true, 
+        path: downloadURL,
+        message: `Photo applied to ${updatedStores.length} locations: ${updatedStores.join(', ')}`,
+        updatedStores
+      });
 
     } catch (error) {
       console.error('Error uploading image:', error);
