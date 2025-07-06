@@ -1,8 +1,15 @@
 import express, { type Request, Response, NextFunction } from "express";
 import cors from "cors";
 import { registerRoutes } from "./routes";
+import multer from 'multer';
+import fetch from 'node-fetch';
+import fs from 'fs';
+import path from 'path';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const app = express();
+const upload = multer({ dest: 'temp-uploads/' });
 
 // CORS configuration for production
 const corsOptions = {
@@ -70,6 +77,76 @@ app.use((req, res, next) => {
   // Health check endpoint for Render
   app.get('/health', (req, res) => {
     res.json({ status: 'OK', timestamp: new Date().toISOString() });
+  });
+
+  // Endpoint para upload de imagem para o GitHub
+  app.post('/upload-image-github', upload.single('image'), async (req, res) => {
+    try {
+      const { sku, categoria } = req.body;
+      const file = req.file;
+      if (!file || !sku || !categoria) {
+        return res.status(400).json({ error: 'Faltando dados.' });
+      }
+
+      // Ler o arquivo
+      const filePath = file.path;
+      const fileBuffer = fs.readFileSync(filePath);
+      const fileBase64 = fileBuffer.toString('base64');
+      const ext = path.extname(file.originalname).toLowerCase();
+      const githubFilePath = `images/${categoria}/${sku}${ext}`;
+
+      // Dados do GitHub
+      const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+      const GITHUB_REPO = 'Pand108976/skuverify';
+      const GITHUB_BRANCH = 'main';
+
+      if (!GITHUB_TOKEN) {
+        return res.status(500).json({ error: 'Token do GitHub não configurado.' });
+      }
+
+      // Verificar se o arquivo já existe (pegar SHA se sim)
+      let sha = undefined;
+      const getUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${githubFilePath}?ref=${GITHUB_BRANCH}`;
+      const getResp = await fetch(getUrl, {
+        headers: {
+          Authorization: `token ${GITHUB_TOKEN}`,
+          'User-Agent': 'skuverify-bot'
+        }
+      });
+      if (getResp.status === 200) {
+        const getData = await getResp.json();
+        sha = getData.sha;
+      }
+
+      // Commitar a imagem
+      const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${githubFilePath}`;
+      const commitResp = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          Authorization: `token ${GITHUB_TOKEN}`,
+          'User-Agent': 'skuverify-bot',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: `Upload automático da imagem do produto ${sku}`,
+          content: fileBase64,
+          branch: GITHUB_BRANCH,
+          sha: sha
+        })
+      });
+      const commitData = await commitResp.json();
+      fs.unlinkSync(filePath); // Limpar arquivo temporário
+
+      if (commitResp.status === 201 || commitResp.status === 200) {
+        // URL RAW do GitHub
+        const githubUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/images/${categoria}/${sku}${ext}`;
+        return res.json({ url: githubUrl });
+      } else {
+        return res.status(500).json({ error: 'Erro ao enviar para o GitHub', details: commitData });
+      }
+    } catch (err) {
+      return res.status(500).json({ error: 'Erro interno', details: err.message });
+    }
   });
 
   // Use PORT from environment variable (Render requirement)

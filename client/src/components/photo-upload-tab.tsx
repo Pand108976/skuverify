@@ -164,31 +164,19 @@ export function PhotoUploadTab({}: PhotoUploadTabProps) {
           const correctExtension = existingProduct.categoria === 'oculos' ? '.jpg' : '.webp';
           const fileName = `${existingProduct.categoria}/${pair.sku}${correctExtension}`;
           
-          // Save image to local project folder
-          const formData = new FormData();
-          formData.append('photo', pair.file);
-          formData.append('fileName', fileName);
-          formData.append('category', existingProduct.categoria);
-          formData.append('sku', pair.sku);
-
-          const response = await fetch('/api/upload-photo', {
-            method: 'POST',
-            body: formData,
-          });
-
-          if (response.ok) {
-            const responseData = await response.json();
-            console.log(`Photo uploaded successfully for SKU ${pair.sku}:`, responseData);
+          // Upload image directly to GitHub using the new endpoint
+          try {
+            const imageUrl = await firebase.uploadImage(pair.file, fileName);
+            console.log(`Photo uploaded to GitHub for SKU ${pair.sku}:`, imageUrl);
             
-            // Update product with photo link in all stores where it exists
-            const imagePath = `/images/${fileName}`;
-            console.log(`Updating image path to: ${imagePath}`);
+            // Update product with GitHub URL in all stores where it exists
+            console.log(`Updating image path to: ${imageUrl}`);
             
             for (const product of searchResults) {
               try {
                 await firebase.updateProductImagePath(
                   product.sku, // Use SKU instead of ID for consistent updates
-                  imagePath, 
+                  imageUrl, 
                   existingProduct.categoria, 
                   product.storeId
                 );
@@ -209,9 +197,8 @@ export function PhotoUploadTab({}: PhotoUploadTabProps) {
             }, 1000);
             
             successCount++;
-          } else {
-            const errorText = await response.text();
-            console.error(`Failed to upload photo for SKU ${pair.sku}:`, errorText);
+          } catch (uploadError) {
+            console.error(`Failed to upload image for SKU ${pair.sku}:`, uploadError);
             errorCount++;
           }
         } catch (error) {

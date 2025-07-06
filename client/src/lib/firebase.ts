@@ -897,13 +897,34 @@ export const firebase = {
   // Upload image to Firebase Storage
   async uploadImage(file: File, fileName: string): Promise<string> {
     try {
-      const imageRef = ref(storage, fileName);
-      const snapshot = await uploadBytes(imageRef, file);
-      const downloadURL = await getDownloadURL(snapshot.ref);
-      return downloadURL;
+      // Extrair SKU e categoria do fileName
+      const pathParts = fileName.split('/');
+      const sku = pathParts[pathParts.length - 1].split('.')[0];
+      const categoria = pathParts[pathParts.length - 2];
+      
+      // Criar FormData para enviar ao backend
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('sku', sku);
+      formData.append('categoria', categoria);
+      
+      // Enviar para o endpoint do GitHub
+      const response = await fetch('/upload-image-github', {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro no upload para GitHub');
+      }
+      
+      const result = await response.json();
+      console.log(`Imagem enviada para GitHub: ${result.url}`);
+      return result.url;
     } catch (error) {
-      console.error('Error uploading image:', error);
-      throw new Error('Failed to upload image');
+      console.error('Error uploading image to GitHub:', error);
+      throw new Error('Failed to upload image to GitHub');
     }
   },
 
