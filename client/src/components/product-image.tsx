@@ -15,6 +15,12 @@ export function ProductImage({ sku, categoria, imagePath, className = "", alt }:
   
   // Tenta carregar a imagem com extensões diferentes
   const getImageSources = () => {
+    // Se já temos uma URL completa (GitHub), usa ela
+    if (imagePath && imagePath.startsWith('http')) {
+      return [imagePath];
+    }
+    
+    // Caso contrário, tenta caminhos locais
     const basePath = `/images/${categoria}/${sku}`;
     return [
       `${basePath}.webp`,
@@ -65,6 +71,7 @@ export function ProductImage({ sku, categoria, imagePath, className = "", alt }:
           }}
           onLoad={handleImageLoad}
           onError={handleImageError}
+          crossOrigin="anonymous"
         />
       </div>
     );
@@ -112,6 +119,7 @@ export function ProductImage({ sku, categoria, imagePath, className = "", alt }:
           img.onerror = handleImageError;
           img.src = imageSources[1];
         }}
+        crossOrigin="anonymous"
       />
       
       {/* Imagem de fallback (.jpg) - só carrega se a primeira falhar */}
