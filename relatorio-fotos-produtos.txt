@@ -1,0 +1,8 @@
+---
+SKUs COM FOTO:
+(skus_com_foto)
+
+---
+SKUs SEM FOTO:
+(skus_sem_foto)
+--- 

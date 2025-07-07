@@ -1,6 +1,13 @@
-node_modules
-dist
-.DS_Store
-server/public
-vite.config.ts.*
-*.tar.gz
+# Ignorar pastas de imagens locais
+images/
+public/images/
+*.webp
+*.jpg
+*.jpeg
+*.png
+
+# Outras regras comuns
+node_modules/
+.env
+dist/
+build/

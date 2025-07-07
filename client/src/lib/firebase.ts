@@ -915,41 +915,32 @@ export const firebase = {
     await this.forceRefreshImages();
   },
 
-  // Upload image to GitHub and save permanently
-  async uploadImage(file: File, fileName: string): Promise<string> {
+  // Upload image to Firebase Storage e vincula ao produto
+  async uploadImage(file: File, sku: string, categoria: string): Promise<string> {
     try {
-      // Extrair SKU e categoria do fileName
-      const pathParts = fileName.split('/');
-      const sku = pathParts[pathParts.length - 1].split('.')[0];
-      const categoria = pathParts[pathParts.length - 2];
-      
-      // Criar FormData para enviar ao backend
-      const formData = new FormData();
-      formData.append('image', file);
-      formData.append('sku', sku);
-      formData.append('categoria', categoria);
-      
-      // Enviar para o endpoint do GitHub
-      const response = await fetch('/upload-image-github', {
-        method: 'POST',
-        body: formData
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Erro no upload para GitHub');
+      // 1. Caminho no Storage
+      const ext = file.name.split('.').pop();
+      const storageRef = ref(storage, `product-images/${categoria}/${sku}.${ext}`);
+
+      // 2. Upload
+      await uploadBytes(storageRef, file);
+
+      // 3. Pegar URL pública
+      const url = await getDownloadURL(storageRef);
+
+      // 4. Atualizar produto no Firestore
+      const stores = ['patiobatel', 'village', 'jk', 'iguatemi'];
+      for (const store of stores) {
+        const productRef = firestoreDoc(db, store, categoria, 'products', sku);
+        const productDoc = await getDoc(productRef);
+        if (productDoc.exists()) {
+          await updateDoc(productRef, { imagem: url, lastModified: new Date() });
+        }
       }
-      
-      const result = await response.json();
-      console.log(`✅ Imagem enviada para GitHub e salva permanentemente: ${result.url}`);
-      
-      // Atualizar produtos existentes com a nova imagem
-      await this.updateProductImages(sku, result.url, categoria);
-      
-      return result.url;
+      return url;
     } catch (error) {
-      console.error('Error uploading image to GitHub:', error);
-      throw new Error('Failed to upload image to GitHub');
+      console.error('Erro ao fazer upload da imagem:', error);
+      throw new Error('Falha ao fazer upload da imagem');
     }
   },
 

@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Plus, Save, Glasses, Shirt, Store, AlertTriangle, X, Check } from "lucide-react";
 import { firebase } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
+import { useRef } from "react";
 
 export function AddProductTab() {
   const [step, setStep] = useState(1);
@@ -18,6 +19,8 @@ export function AddProductTab() {
   const [duplicateProduct, setDuplicateProduct] = useState<any>(null);
   const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
   const { toast } = useToast();
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Verificar se é admin
   const isAdmin = localStorage.getItem('luxury_store_id') === 'admin';
@@ -134,6 +137,12 @@ export function AddProductTab() {
         gender: selectedGender as 'masculino' | 'feminino'
       };
       
+      let imageUrl = undefined;
+      if (imageFile && sku && selectedCategory) {
+        imageUrl = await firebase.uploadImage(imageFile, sku.trim().toUpperCase(), selectedCategory);
+        productData.imagem = imageUrl;
+      }
+
       await firebase.addProduct(productData);
 
       toast({
@@ -163,6 +172,8 @@ export function AddProductTab() {
       });
     } finally {
       setLoading(false);
+      setImageFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -313,6 +324,17 @@ export function AddProductTab() {
                       required
                     />
                     <Label htmlFor="addBox" className="text-sm font-medium">Caixa de Armazenamento</Label>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="addImage" className="text-sm font-medium">Foto do Produto (opcional)</Label>
+                    <Input
+                      id="addImage"
+                      type="file"
+                      accept="image/*"
+                      ref={fileInputRef}
+                      onChange={e => setImageFile(e.target.files && e.target.files[0] ? e.target.files[0] : null)}
+                    />
                   </div>
                   
                   <Button 
