@@ -6,7 +6,7 @@ import * as speakeasy from "speakeasy";
 import * as QRCode from "qrcode";
 import path from "path";
 import fs from "fs";
-import { updateDoc, doc, setDoc, getDoc, collection, addDoc, query, where, getDocs } from "firebase/firestore";
+import { updateDoc, doc, setDoc, getDoc, collection, addDoc, query, where, getDocs, deleteDoc } from "firebase/firestore";
 import { db } from "./firebase";
 
 // Configure multer for file uploads
@@ -16,6 +16,128 @@ const upload = multer({
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },
 });
+
+// Sistema de armazenamento permanente de imagens
+interface PermanentImage {
+  sku: string;
+  category: 'oculos' | 'cintos';
+  imageUrl: string;
+  fileName: string;
+  uploadedAt: Date;
+  lastUsedAt: Date;
+  usageCount: number;
+  isActive: boolean;
+  metadata?: {
+    fileSize?: number;
+    mimeType?: string;
+    dimensions?: { width: number; height: number };
+  };
+}
+
+// Função para salvar imagem permanentemente
+async function saveImagePermanently(sku: string, category: 'oculos' | 'cintos', imageUrl: string, fileName: string, metadata?: any): Promise<void> {
+  try {
+    const imageData: PermanentImage = {
+      sku,
+      category,
+      imageUrl,
+      fileName,
+      uploadedAt: new Date(),
+      lastUsedAt: new Date(),
+      usageCount: 1,
+      isActive: true,
+      metadata
+    };
+
+    // Salvar na coleção permanente de imagens
+    await setDoc(doc(db, 'permanent_images', sku), imageData);
+    
+    // Também salvar na coleção por categoria para busca rápida
+    await setDoc(doc(db, `permanent_images_${category}`, sku), imageData);
+    
+    console.log(`✅ Imagem salva permanentemente para SKU ${sku}`);
+  } catch (error) {
+    console.error(`❌ Erro ao salvar imagem permanentemente para SKU ${sku}:`, error);
+  }
+}
+
+// Função para atualizar uso da imagem
+async function updateImageUsage(sku: string, category: 'oculos' | 'cintos'): Promise<void> {
+  try {
+    const imageRef = doc(db, 'permanent_images', sku);
+    const imageDoc = await getDoc(imageRef);
+    
+    if (imageDoc.exists()) {
+      const imageData = imageDoc.data() as PermanentImage;
+      await updateDoc(imageRef, {
+        lastUsedAt: new Date(),
+        usageCount: imageData.usageCount + 1,
+        isActive: true
+      });
+      
+      // Atualizar também na coleção por categoria
+      const categoryRef = doc(db, `permanent_images_${category}`, sku);
+      await updateDoc(categoryRef, {
+        lastUsedAt: new Date(),
+        usageCount: imageData.usageCount + 1,
+        isActive: true
+      });
+    }
+  } catch (error) {
+    console.error(`❌ Erro ao atualizar uso da imagem ${sku}:`, error);
+  }
+}
+
+// Função para recuperar imagem permanente
+async function getPermanentImage(sku: string, category: 'oculos' | 'cintos'): Promise<string | null> {
+  try {
+    // Primeiro, tentar na coleção específica da categoria
+    const categoryRef = doc(db, `permanent_images_${category}`, sku);
+    const categoryDoc = await getDoc(categoryRef);
+    
+    if (categoryDoc.exists()) {
+      const imageData = categoryDoc.data() as PermanentImage;
+      if (imageData.isActive && imageData.imageUrl) {
+        await updateImageUsage(sku, category);
+        return imageData.imageUrl;
+      }
+    }
+    
+    // Se não encontrar na categoria específica, tentar na coleção geral
+    const generalRef = doc(db, 'permanent_images', sku);
+    const generalDoc = await getDoc(generalRef);
+    
+    if (generalDoc.exists()) {
+      const imageData = generalDoc.data() as PermanentImage;
+      if (imageData.isActive && imageData.imageUrl) {
+        await updateImageUsage(sku, category);
+        return imageData.imageUrl;
+      }
+    }
+    
+    return null;
+  } catch (error) {
+    console.error(`❌ Erro ao recuperar imagem permanente ${sku}:`, error);
+    return null;
+  }
+}
+
+// Função para listar todas as imagens permanentes
+async function getAllPermanentImages(): Promise<PermanentImage[]> {
+  try {
+    const imagesRef = collection(db, 'permanent_images');
+    const snapshot = await getDocs(imagesRef);
+    
+    return snapshot.docs.map(doc => ({
+      ...doc.data(),
+      uploadedAt: doc.data().uploadedAt?.toDate(),
+      lastUsedAt: doc.data().lastUsedAt?.toDate()
+    })) as PermanentImage[];
+  } catch (error) {
+    console.error('❌ Erro ao listar imagens permanentes:', error);
+    return [];
+  }
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Product routes
@@ -82,7 +204,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Photo upload endpoint
+  // Photo upload endpoint - Sistema Permanente
   app.post("/api/upload-photo", upload.single("photo"), async (req, res) => {
     try {
       if (!req.file) {
@@ -110,20 +232,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Save file locally
       fs.writeFileSync(filePath, req.file.buffer);
       
-      // Save image URL in Firestore for persistence across deployments
-      try {
-        await setDoc(doc(db, 'product_images', sku), {
-          sku: sku,
-          category: category,
-          imageUrl: imageUrl,
-          fileName: storageFileName,
-          uploadedAt: new Date()
-        });
-        console.log(`Image metadata saved to Firestore for SKU ${sku}`);
-      } catch (firestoreError) {
-        console.error('Error saving to Firestore:', firestoreError);
-      }
-
+      // Salvar imagem permanentemente no sistema
+      const metadata = {
+        fileSize: req.file.size,
+        mimeType: req.file.mimetype
+      };
+      
+      await saveImagePermanently(sku, category as 'oculos' | 'cintos', imageUrl, storageFileName, metadata);
+      
       // Search for this SKU in all stores and update the image
       const stores = ['patiobatel', 'village', 'jk', 'iguatemi'];
       const categories = ['oculos', 'cintos'];
@@ -148,14 +264,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (updatedStores.length > 0) {
         res.json({ 
           success: true, 
-          message: `Photo uploaded and applied to ${updatedStores.length} locations: ${updatedStores.join(', ')}`,
+          message: `Photo uploaded permanently and applied to ${updatedStores.length} locations: ${updatedStores.join(', ')}`,
           imagePath: imageUrl,
           updatedStores
         });
       } else {
         res.json({ 
           success: true, 
-          message: 'Photo uploaded and saved to database, but SKU not found in any store',
+          message: 'Photo uploaded permanently and saved to database, but SKU not found in any store',
           imagePath: imageUrl,
           updatedStores: []
         });
@@ -167,18 +283,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Check if image exists for SKU and restore from Firestore if needed
+  // Sistema de recuperação automática de imagens permanentes
   app.post('/api/restore-image/:sku', async (req, res) => {
     try {
       const { sku } = req.params;
+      const { category } = req.body;
       
-      // Check if image metadata exists in Firestore
-      const imageDoc = await getDoc(doc(db, 'product_images', sku));
+      if (!category) {
+        return res.status(400).json({ error: 'Category is required' });
+      }
       
-      if (imageDoc.exists()) {
-        const imageData = imageDoc.data();
-        const imageUrl = imageData.imageUrl;
-        
+      // Tentar recuperar imagem do sistema permanente
+      const imageUrl = await getPermanentImage(sku, category as 'oculos' | 'cintos');
+      
+      if (imageUrl) {
         // Search for this SKU in all stores and update the image
         const stores = ['patiobatel', 'village', 'jk', 'iguatemi'];
         const categories = ['oculos', 'cintos'];
@@ -202,20 +320,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         res.json({ 
           success: true, 
-          message: `Image restored for SKU ${sku} in ${updatedStores.length} locations`,
+          message: `Imagem permanente restaurada para SKU ${sku} em ${updatedStores.length} locais`,
           imageUrl,
           updatedStores
         });
       } else {
         res.json({ 
           success: false, 
-          message: `No image found for SKU ${sku}` 
+          message: `Nenhuma imagem permanente encontrada para SKU ${sku}` 
         });
       }
 
     } catch (error) {
       console.error('Error restoring image:', error);
       res.status(500).json({ error: 'Failed to restore image' });
+    }
+  });
+
+  // Endpoint para listar todas as imagens permanentes
+  app.get('/api/permanent-images', async (req, res) => {
+    try {
+      const images = await getAllPermanentImages();
+      res.json({
+        success: true,
+        count: images.length,
+        images: images
+      });
+    } catch (error) {
+      console.error('Error listing permanent images:', error);
+      res.status(500).json({ error: 'Failed to list permanent images' });
+    }
+  });
+
+  // Endpoint para buscar imagem permanente por SKU
+  app.get('/api/permanent-images/:sku', async (req, res) => {
+    try {
+      const { sku } = req.params;
+      const { category } = req.query;
+      
+      if (!category) {
+        return res.status(400).json({ error: 'Category query parameter is required' });
+      }
+      
+      const imageUrl = await getPermanentImage(sku, category as 'oculos' | 'cintos');
+      
+      if (imageUrl) {
+        res.json({
+          success: true,
+          sku,
+          category,
+          imageUrl,
+          found: true
+        });
+      } else {
+        res.json({
+          success: true,
+          sku,
+          category,
+          imageUrl: null,
+          found: false
+        });
+      }
+    } catch (error) {
+      console.error('Error getting permanent image:', error);
+      res.status(500).json({ error: 'Failed to get permanent image' });
+    }
+  });
+
+  // Endpoint para migrar imagens antigas para o sistema permanente
+  app.post('/api/migrate-to-permanent', async (req, res) => {
+    try {
+      const { sku, category, imageUrl } = req.body;
+      
+      if (!sku || !category || !imageUrl) {
+        return res.status(400).json({ error: 'SKU, category and imageUrl are required' });
+      }
+      
+      // Salvar no sistema permanente
+      await saveImagePermanently(sku, category as 'oculos' | 'cintos', imageUrl, `${sku}.${category === 'oculos' ? 'jpg' : 'webp'}`);
+      
+      res.json({
+        success: true,
+        message: `Imagem migrada para sistema permanente: ${sku}`,
+        sku,
+        category,
+        imageUrl
+      });
+    } catch (error) {
+      console.error('Error migrating to permanent:', error);
+      res.status(500).json({ error: 'Failed to migrate to permanent' });
     }
   });
 

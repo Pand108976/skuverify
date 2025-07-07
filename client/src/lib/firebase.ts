@@ -451,7 +451,7 @@ export const firebase = {
     }
   },
 
-  // Add product
+  // Add product - Sistema Permanente de Imagens
   async addProduct(product: Omit<Product, 'id'>): Promise<void> {
     const storeId = getStoreCollection();
     const localStorageKey = getLocalStorageKey();
@@ -461,8 +461,29 @@ export const firebase = {
     const existingProducts: Product[] = storedData ? JSON.parse(storedData) : [];
     const existingProduct = existingProducts.find(p => p.sku === product.sku);
     
-    // Prioriza: 1) imagem fornecida 2) imagem já salva 3) detecção automática
-    const validImagePath = product.imagem || existingProduct?.imagem || await getValidImagePath(product.sku, product.categoria);
+    // Prioriza: 1) imagem fornecida 2) imagem já salva 3) sistema permanente 4) detecção automática
+    let validImagePath = product.imagem || existingProduct?.imagem;
+    
+    // Se não tem imagem, tenta recuperar do sistema permanente
+    if (!validImagePath) {
+      try {
+        const response = await fetch(`/api/permanent-images/${product.sku}?category=${product.categoria}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.found && data.imageUrl) {
+            validImagePath = data.imageUrl;
+            console.log(`🔄 Imagem recuperada do sistema permanente para SKU ${product.sku}`);
+          }
+        }
+      } catch (error) {
+        console.log(`Não foi possível verificar sistema permanente para SKU ${product.sku}`);
+      }
+    }
+    
+    // Se ainda não tem imagem, tenta detecção automática
+    if (!validImagePath) {
+      validImagePath = await getValidImagePath(product.sku, product.categoria);
+    }
     
     // Atualiza localStorage primeiro para velocidade
     const products: Product[] = existingProducts;
@@ -894,7 +915,7 @@ export const firebase = {
     await this.forceRefreshImages();
   },
 
-  // Upload image to Firebase Storage
+  // Upload image to GitHub and save permanently
   async uploadImage(file: File, fileName: string): Promise<string> {
     try {
       // Extrair SKU e categoria do fileName
@@ -920,11 +941,48 @@ export const firebase = {
       }
       
       const result = await response.json();
-      console.log(`Imagem enviada para GitHub: ${result.url}`);
+      console.log(`✅ Imagem enviada para GitHub e salva permanentemente: ${result.url}`);
+      
+      // Atualizar produtos existentes com a nova imagem
+      await this.updateProductImages(sku, result.url, categoria);
+      
       return result.url;
     } catch (error) {
       console.error('Error uploading image to GitHub:', error);
       throw new Error('Failed to upload image to GitHub');
+    }
+  },
+
+  // Update all products with the same SKU across all stores
+  async updateProductImages(sku: string, imageUrl: string, categoria: string): Promise<void> {
+    try {
+      const stores = ['patiobatel', 'village', 'jk', 'iguatemi'];
+      const categories = ['oculos', 'cintos'];
+      let updatedCount = 0;
+
+      for (const store of stores) {
+        for (const cat of categories) {
+          try {
+            const productRef = firestoreDoc(db, store, cat, 'products', sku);
+            const productDoc = await getDoc(productRef);
+            
+            if (productDoc.exists()) {
+              await updateDoc(productRef, { 
+                imagem: imageUrl,
+                lastModified: new Date()
+              });
+              updatedCount++;
+              console.log(`🔄 Produto atualizado: ${store}/${cat}/${sku}`);
+            }
+          } catch (error) {
+            console.log(`Produto ${sku} não encontrado em ${store}/${cat}`);
+          }
+        }
+      }
+
+      console.log(`✅ ${updatedCount} produtos atualizados com nova imagem para SKU ${sku}`);
+    } catch (error) {
+      console.error('Erro ao atualizar produtos:', error);
     }
   },
 

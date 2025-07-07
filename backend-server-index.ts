@@ -79,7 +79,7 @@ app.use((req, res, next) => {
     res.json({ status: 'OK', timestamp: new Date().toISOString() });
   });
 
-  // Endpoint para upload de imagem para o GitHub
+  // Endpoint para upload de imagem para o GitHub e sistema permanente
   app.post('/upload-image-github', upload.single('image'), async (req, res) => {
     try {
       const { sku, categoria } = req.body;
@@ -140,7 +140,44 @@ app.use((req, res, next) => {
       if (commitResp.status === 201 || commitResp.status === 200) {
         // URL RAW do GitHub
         const githubUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/images/${categoria}/${sku}${ext}`;
-        return res.json({ url: githubUrl });
+        
+        // Salvar no sistema permanente
+        try {
+          const { db } = await import('./firebase');
+          const { setDoc, doc } = await import('firebase/firestore');
+          
+          const imageData = {
+            sku,
+            category: categoria,
+            imageUrl: githubUrl,
+            fileName: `${sku}${ext}`,
+            uploadedAt: new Date(),
+            lastUsedAt: new Date(),
+            usageCount: 1,
+            isActive: true,
+            metadata: {
+              fileSize: file.size,
+              mimeType: file.mimetype
+            }
+          };
+
+          // Salvar na coleção permanente de imagens
+          await setDoc(doc(db, 'permanent_images', sku), imageData);
+          
+          // Também salvar na coleção por categoria para busca rápida
+          await setDoc(doc(db, `permanent_images_${categoria}`, sku), imageData);
+          
+          console.log(`✅ Imagem salva permanentemente para SKU ${sku}`);
+        } catch (permanentError) {
+          console.error('Erro ao salvar no sistema permanente:', permanentError);
+          // Continua mesmo se falhar o sistema permanente
+        }
+        
+        return res.json({ 
+          url: githubUrl,
+          message: 'Imagem enviada para GitHub e salva permanentemente',
+          permanent: true
+        });
       } else {
         return res.status(500).json({ error: 'Erro ao enviar para o GitHub', details: commitData });
       }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Crown, Search, Glasses, Plus, Trash2, LogOut, Database, Upload, ArrowRightLeft, ShoppingCart, Percent, MoreHorizontal, Square, Shield } from "lucide-react";
+import { Crown, Search, Glasses, Plus, Trash2, LogOut, Database, Upload, ArrowRightLeft, ShoppingCart, Percent, MoreHorizontal, Square, Shield, Image } from "lucide-react";
 import { SearchTab } from "@/components/search-tab";
 import { ProductsTab } from "@/components/products-tab";
 import { AddProductTab } from "@/components/add-product-tab";
@@ -14,6 +14,7 @@ import { SalesTab } from "@/components/sales-tab";
 import { PromotionsTab } from "@/components/promotions-tab";
 import { EditGenderTab } from "@/components/edit-gender-tab";
 import { SecurityTab } from "@/components/security-tab";
+import { PermanentImagesTab } from "@/components/permanent-images-tab";
 
 
 
@@ -142,7 +143,7 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto p-6">
         <Tabs defaultValue="search" className="w-full">
-          <TabsList className={`${isAdmin ? 'grid grid-cols-9' : 'grid grid-cols-5'} w-full bg-background border premium-shadow h-10 text-xs p-0`}>
+          <TabsList className={`${isAdmin ? 'grid grid-cols-10' : 'grid grid-cols-5'} w-full bg-background border premium-shadow h-10 text-xs p-0`}>
             <TabsTrigger value="search" className="flex items-center justify-center h-9 text-sm px-1 py-1 data-[state=active]:gold-gradient data-[state=active]:text-white">
               <Search size={14} />
               <span className="hidden md:inline ml-1 text-sm">Pesquisar</span>
@@ -212,6 +213,10 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
                   </svg>
                   <span className="hidden lg:inline ml-0.5 text-xs">Gênero</span>
                 </TabsTrigger>
+                <TabsTrigger value="permanent-images" className="flex items-center justify-center h-9 text-sm px-1 py-1 min-w-0 data-[state=active]:gold-gradient data-[state=active]:text-white">
+                  <Image size={12} />
+                  <span className="hidden lg:inline ml-0.5 text-xs">Imagens</span>
+                </TabsTrigger>
 
               </>
             )}
@@ -270,6 +275,9 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
                 </TabsContent>
                 <TabsContent value="edit-gender" className="fade-in">
                   <EditGenderTab />
+                </TabsContent>
+                <TabsContent value="permanent-images" className="fade-in">
+                  <PermanentImagesTab />
                 </TabsContent>
 
               </>
