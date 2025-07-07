@@ -40,8 +40,20 @@ export function PhotoUploadTab() {
     setStatusMessage("");
 
     try {
-      // Verificar se o produto existe
-      const product = await firebase.getProductBySku(sku.trim());
+      // Verificar se o produto existe - buscar em todas as lojas se for admin
+      const storeId = localStorage.getItem('luxury_store_id') || '';
+      let product = null;
+      
+      if (storeId === 'admin') {
+        // Admin: buscar em todas as lojas
+        const allProducts = await firebase.searchProductInAllStores(sku.trim());
+        if (allProducts.length > 0) {
+          product = allProducts[0]; // Pega o primeiro produto encontrado
+        }
+      } else {
+        // Loja específica: buscar apenas na loja atual
+        product = await firebase.getProductBySku(sku.trim());
+      }
       
       if (!product) {
         setUploadStatus("error");
@@ -55,10 +67,10 @@ export function PhotoUploadTab() {
       }
 
       // Upload da imagem para o Firebase Storage
-      const imageUrl = await firebase.uploadProductImage(selectedFile, sku.trim());
+      const imageUrl = await firebase.uploadImage(selectedFile, sku.trim(), product.categoria);
       
       // Atualizar o produto com a nova URL da imagem
-      await firebase.updateProductImage(sku.trim(), imageUrl);
+      await firebase.updateProductImages(sku.trim(), imageUrl, product.categoria);
       
       // Salvar no localStorage para acesso imediato
       const cachedImages = JSON.parse(localStorage.getItem('product_images') || '{}');
