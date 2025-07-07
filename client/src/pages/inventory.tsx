@@ -13,7 +13,6 @@ import { SalesTab } from "@/components/sales-tab";
 import { PromotionsTab } from "@/components/promotions-tab";
 import { EditGenderTab } from "@/components/edit-gender-tab";
 import { SecurityTab } from "@/components/security-tab";
-import { PermanentImagesTab } from "@/components/permanent-images-tab";
 
 
 
@@ -208,10 +207,7 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
                   </svg>
                   <span className="hidden lg:inline ml-0.5 text-xs">Gênero</span>
                 </TabsTrigger>
-                <TabsTrigger value="permanent-images" className="flex items-center justify-center h-9 text-sm px-1 py-1 min-w-0 data-[state=active]:gold-gradient data-[state=active]:text-white">
-                  <Image size={12} />
-                  <span className="hidden lg:inline ml-0.5 text-xs">Imagens</span>
-                </TabsTrigger>
+
 
               </>
             )}
@@ -266,9 +262,6 @@ export function InventoryPage({ onLogout }: InventoryPageProps) {
                 </TabsContent>
                 <TabsContent value="edit-gender" className="fade-in">
                   <EditGenderTab />
-                </TabsContent>
-                <TabsContent value="permanent-images" className="fade-in">
-                  <PermanentImagesTab />
                 </TabsContent>
 
               </>
