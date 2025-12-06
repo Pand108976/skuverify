@@ -4,7 +4,7 @@ export interface Product {
   categoria: 'oculos' | 'cintos';
   tipo?: 'oculos' | 'cintos'; // Alias for categoria for compatibility
   caixa: string;
-  gender?: 'masculino' | 'feminino';
+  gender?: "masculino" | "feminino" | "unissex" | "sale";
   imagem?: string;
   link?: string;
   createdAt?: Date;
