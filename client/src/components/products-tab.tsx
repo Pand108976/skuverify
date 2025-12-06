@@ -236,9 +236,12 @@ function Section({ title, icon, colorClass, products, onProductClick, showSaleBa
               <div className="flex justify-between items-start">
                 <h3 className="font-bold text-ferragamo-dark">SKU {product.sku}</h3>
                 <div className="flex flex-col gap-1">
-                  <span className={`text-xs px-2 py-1 rounded-full ${colorClass.split(' ')[1]} bg-opacity-30`}>
-                    Caixa {product.caixa}
-                  </span>
+                  <span
+  className={`text-xs px-2 py-1 rounded-full border ${colorClass.split(' ')[1]} border-opacity-30 bg-opacity-30`}
+>
+  Caixa {product.caixa}
+</span>
+
                 </div>
               </div>
               {product.link && (
