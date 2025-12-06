@@ -12,7 +12,7 @@ export function AddProductTab() {
   const [step, setStep] = useState(1);
   const [selectedStore, setSelectedStore] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'oculos' | 'cintos' | ''>('');
-  const [selectedGender, setSelectedGender] = useState<'masculino' | 'feminino' | ''>('');
+  const [selectedGender, setSelectedGender] = useState<'masculino' | 'feminino' | 'unissex' | 'sale' | ''>('');
   const [sku, setSku] = useState("");
   const [caixa, setCaixa] = useState("");
   const [loading, setLoading] = useState(false);
@@ -49,9 +49,10 @@ export function AddProductTab() {
     setStep(isAdmin ? 3 : 2.5);
   };
 
-  const handleGenderSelect = (gender: 'masculino' | 'feminino') => {
-    setSelectedGender(gender);
-  };
+  const handleGenderSelect = (gender: 'masculino' | 'feminino' | 'unissex' | 'sale') => {
+  setSelectedGender(gender);
+};
+
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !loading) {
@@ -259,37 +260,67 @@ export function AddProductTab() {
             {/* Step 2.5: Select Gender for Products */}
             {((!isAdmin && step >= 2.5) || (isAdmin && step >= 2.5)) && selectedCategory && (
               <div>
-                <h3 className="text-lg font-semibold mb-4">{isAdmin ? '2.5' : '1.5'}. Selecione o Gênero:</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <Button
-                    variant={selectedGender === 'masculino' ? 'default' : 'outline'}
-                    className={`p-6 h-auto ${selectedGender === 'masculino' ? 'gold-gradient text-white' : 'border-2 hover:border-primary'}`}
-                    onClick={() => handleGenderSelect('masculino')}
-                  >
-                    <div className="text-center">
-                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-3">
-                        <circle cx="12" cy="8" r="3"/>
-                        <path d="M16 20v-2a4 4 0 0 0-8 0v2"/>
-                      </svg>
-                      <p className="font-semibold">Masculino</p>
-                    </div>
-                  </Button>
-                  <Button
-                    variant={selectedGender === 'feminino' ? 'default' : 'outline'}
-                    className={`p-6 h-auto ${selectedGender === 'feminino' ? 'gold-gradient text-white' : 'border-2 hover:border-primary'}`}
-                    onClick={() => handleGenderSelect('feminino')}
-                  >
-                    <div className="text-center">
-                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-3">
-                        <circle cx="12" cy="8" r="3"/>
-                        <path d="M16 18v2a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-2"/>
-                        <path d="M8 14h8l-2-6H10z"/>
-                      </svg>
-                      <p className="font-semibold">Feminino</p>
-                    </div>
-                  </Button>
-                </div>
-              </div>
+  <h3 className="text-lg font-semibold mb-4">{isAdmin ? '2.5' : '1.5'}. Selecione o Gênero:</h3>
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    
+    {/* Masculino */}
+    <Button
+      variant={selectedGender === 'masculino' ? 'default' : 'outline'}
+      className={`p-6 h-auto ${selectedGender === 'masculino' ? 'gold-gradient text-white' : 'border-2 hover:border-primary'}`}
+      onClick={() => handleGenderSelect('masculino')}
+    >
+      <div className="text-center">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-3">
+          <circle cx="12" cy="8" r="3"/>
+          <path d="M16 20v-2a4 4 0 0 0-8 0v2"/>
+        </svg>
+        <p className="font-semibold">Masculino</p>
+      </div>
+    </Button>
+
+    {/* Feminino */}
+    <Button
+      variant={selectedGender === 'feminino' ? 'default' : 'outline'}
+      className={`p-6 h-auto ${selectedGender === 'feminino' ? 'gold-gradient text-white' : 'border-2 hover:border-primary'}`}
+      onClick={() => handleGenderSelect('feminino')}
+    >
+      <div className="text-center">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-3">
+          <circle cx="12" cy="8" r="3"/>
+          <path d="M16 18v2a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-2"/>
+          <path d="M8 14h8l-2-6H10z"/>
+        </svg>
+        <p className="font-semibold">Feminino</p>
+      </div>
+    </Button>
+
+    {/* Unissex */}
+    <Button
+      variant={selectedGender === 'unissex' ? 'default' : 'outline'}
+      className={`p-6 h-auto ${selectedGender === 'unissex' ? 'gold-gradient text-white' : 'border-2 hover:border-primary'}`}
+      onClick={() => handleGenderSelect('unissex')}
+    >
+      <div className="text-center">
+        <Shirt className="mx-auto mb-3" size={32}/>
+        <p className="font-semibold">Unissex</p>
+      </div>
+    </Button>
+
+    {/* Sale */}
+    <Button
+      variant={selectedGender === 'sale' ? 'default' : 'outline'}
+      className={`p-6 h-auto ${selectedGender === 'sale' ? 'gold-gradient text-white' : 'border-2 hover:border-primary'}`}
+      onClick={() => handleGenderSelect('sale')}
+    >
+      <div className="text-center">
+        <Store className="mx-auto mb-3" size={32}/>
+        <p className="font-semibold">Sale</p>
+      </div>
+    </Button>
+
+  </div>
+</div>
+
             )}
             
             {/* Step 3: Product Details */}
