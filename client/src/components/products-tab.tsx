@@ -46,7 +46,7 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
           
           return {
             ...product,
-            gender: savedGender ? (savedGender as "masculino" | "feminino") : product.gender
+            gender: savedGender ? (savedGender as "masculino" | "feminino" | "unissex" | "sale") : product.gender
           };
         });
         
@@ -94,6 +94,8 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
     );
   }
 
+  const { feminine, masculine, unissex, sale, unclassified } = getCategorizedProducts();
+
   return (
     <div>
       <div className="mb-6">
@@ -113,206 +115,62 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
           <p className="text-muted-foreground">Adicione produtos desta categoria para visualizá-los aqui</p>
         </div>
       ) : (
-        // Layout com divisão por gênero para todas as categorias
         <div>
-          {(() => {
-            const { feminine, masculine, unclassified } = getCategorizedProducts();
-            return (
-              <>
-                {/* Seção Sem Classificação (para óculos existentes) */}
-                {unclassified.length > 0 && (
-                  <div className="mb-12">
-                    <div className="flex items-center mb-6">
-                      <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mr-4">
-                        <span className="text-gray-600 font-bold">?</span>
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-bold text-ferragamo-dark">{category === 'oculos' ? 'Óculos (Sem Classificação)' : 'Produtos (Sem Classificação)'}</h3>
-                        <p className="text-muted-foreground">{unclassified.length} produtos</p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-6">
-                      {unclassified.map((product: Product, index: number) => (
-                        <Card 
-                          key={`unclassified-${product.sku}-${index}`}
-                          className="product-card overflow-hidden cursor-pointer premium-shadow hover:shadow-xl transition-all duration-300 border-gray-200"
-                          onClick={() => onProductClick(product)}
-                        >
-                          <div className="aspect-[4/3] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 relative">
-                            <ProductImage 
-                              sku={product.sku}
-                              categoria={product.categoria}
-                              imagePath={product.imagem}
-                              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                            />
-                            {product.onSale && (
-                              <div className="absolute top-2 right-2 z-10">
-                                <span className="text-[11px] sm:text-xs bg-orange-500/90 text-white px-2.5 py-1.5 rounded-lg font-bold shadow-lg whitespace-nowrap border border-white/70 backdrop-blur-sm">
-                                  PROMOÇÃO
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                          <div className="p-4 space-y-3">
-                            <div className="flex justify-between items-start">
-                              <h3 className="font-bold text-ferragamo-dark">SKU {product.sku}</h3>
-                              <div className="flex flex-col gap-1">
-                                <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">
-                                  Caixa {product.caixa}
-                                </span>
-                              </div>
-                            </div>
-                            {product.link && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="w-full"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  window.open(product.link, '_blank');
-                                }}
-                              >
-                                <ExternalLink size={14} className="mr-2" />
-                                Ver Produto
-                              </Button>
-                            )}
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                )}
+          {/* Seção Sem Classificação */}
+          {unclassified.length > 0 && (
+            <Section
+              title={category === 'oculos' ? 'Óculos (Sem Classificação)' : 'Produtos (Sem Classificação)'}
+              icon={<span className="text-gray-600 font-bold">?</span>}
+              colorClass="bg-gray-100 text-gray-600 border-gray-200"
+              products={unclassified}
+              onProductClick={onProductClick}
+            />
+          )}
 
-                {/* Seção Feminina */}
-                {feminine.length > 0 && (
-                  <div className="mb-12">
-                    <div className="flex items-center mb-6">
-                      <div className="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center mr-4">
-                        <span className="text-pink-600 font-bold">♀</span>
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-bold text-ferragamo-dark">{category === 'oculos' ? 'Óculos Femininos' : 'Cintos Femininos'}</h3>
-                        <p className="text-muted-foreground">{feminine.length} produtos</p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-6">
-                      {feminine.map((product: Product, index: number) => (
-                        <Card 
-                          key={`feminine-${product.sku}-${index}`}
-                          className="product-card overflow-hidden cursor-pointer premium-shadow hover:shadow-xl transition-all duration-300 border-pink-200"
-                          onClick={() => onProductClick(product)}
-                        >
-                          <div className="aspect-[4/3] overflow-hidden bg-gradient-to-br from-pink-50 to-pink-100 relative">
-                            <ProductImage 
-                              sku={product.sku}
-                              categoria={product.categoria}
-                              imagePath={product.imagem}
-                              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                            />
-                            {product.onSale && (
-                              <div className="absolute top-2 right-2 z-10">
-                                <span className="text-[11px] sm:text-xs bg-orange-500/90 text-white px-2.5 py-1.5 rounded-lg font-bold shadow-lg whitespace-nowrap border border-white/70 backdrop-blur-sm">
-                                  PROMOÇÃO
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                          <div className="p-4 space-y-3">
-                            <div className="flex justify-between items-start">
-                              <h3 className="font-bold text-ferragamo-dark">SKU {product.sku}</h3>
-                              <div className="flex flex-col gap-1">
-                                <span className="text-xs bg-pink-100 text-pink-700 px-2 py-1 rounded-full">
-                                  Caixa {product.caixa}
-                                </span>
-                              </div>
-                            </div>
-                            {product.link && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="w-full"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  window.open(product.link, '_blank');
-                                }}
-                              >
-                                <ExternalLink size={14} className="mr-2" />
-                                Ver Produto
-                              </Button>
-                            )}
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                )}
+          {/* Seção Feminina */}
+          {feminine.length > 0 && (
+            <Section
+              title={category === 'oculos' ? 'Óculos Femininos' : 'Cintos Femininos'}
+              icon={<span className="text-pink-600 font-bold">♀</span>}
+              colorClass="bg-pink-100 text-pink-600 border-pink-200"
+              products={feminine}
+              onProductClick={onProductClick}
+            />
+          )}
 
-                {/* Seção Masculina */}
-                {masculine.length > 0 && (
-                  <div>
-                    <div className="flex items-center mb-6">
-                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
-                        <span className="text-blue-600 font-bold">♂</span>
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-bold text-ferragamo-dark">{category === 'oculos' ? 'Óculos Masculinos' : 'Cintos Masculinos'}</h3>
-                        <p className="text-muted-foreground">{masculine.length} produtos</p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-6">
-                      {masculine.map((product: Product, index: number) => (
-                        <Card 
-                          key={`masculine-${product.sku}-${index}`}
-                          className="product-card overflow-hidden cursor-pointer premium-shadow hover:shadow-xl transition-all duration-300 border-blue-200"
-                          onClick={() => onProductClick(product)}
-                        >
-                          <div className="aspect-[4/3] overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100 relative">
-                            <ProductImage 
-                              sku={product.sku}
-                              categoria={product.categoria}
-                              imagePath={product.imagem}
-                              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                            />
-                            {product.onSale && (
-                              <div className="absolute top-2 right-2 z-10">
-                                <span className="text-[11px] sm:text-xs bg-orange-500/90 text-white px-2.5 py-1.5 rounded-lg font-bold shadow-lg whitespace-nowrap border border-white/70 backdrop-blur-sm">
-                                  PROMOÇÃO
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                          <div className="p-4 space-y-3">
-                            <div className="flex justify-between items-start">
-                              <h3 className="font-bold text-ferragamo-dark">SKU {product.sku}</h3>
-                              <div className="flex flex-col gap-1">
-                                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-                                  Caixa {product.caixa}
-                                </span>
-                              </div>
-                            </div>
-                            {product.link && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="w-full"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  window.open(product.link, '_blank');
-                                }}
-                              >
-                                <ExternalLink size={14} className="mr-2" />
-                                Ver Produto
-                              </Button>
-                            )}
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </>
-            );
-          })()}
+          {/* Seção Masculina */}
+          {masculine.length > 0 && (
+            <Section
+              title={category === 'oculos' ? 'Óculos Masculinos' : 'Cintos Masculinos'}
+              icon={<span className="text-blue-600 font-bold">♂</span>}
+              colorClass="bg-blue-100 text-blue-600 border-blue-200"
+              products={masculine}
+              onProductClick={onProductClick}
+            />
+          )}
+
+          {/* Seção Unissex */}
+          {unissex.length > 0 && (
+            <Section
+              title="Unissex"
+              icon={<span className="text-purple-700 font-bold text-xl">◎</span>}
+              colorClass="bg-purple-100 text-purple-700 border-purple-300"
+              products={unissex}
+              onProductClick={onProductClick}
+            />
+          )}
+
+          {/* Seção Sale */}
+          {sale.length > 0 && (
+            <Section
+              title="Promoção (SALE)"
+              icon={<span className="text-orange-700 font-bold text-lg">%</span>}
+              colorClass="bg-orange-100 text-orange-700 border-orange-300"
+              products={sale}
+              onProductClick={onProductClick}
+              showSaleBadge
+            />
+          )}
         </div>
       )}
 
@@ -326,6 +184,81 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
           <ChevronUp size={20} className="text-white" />
         </Button>
       )}
+    </div>
+  );
+}
+
+interface SectionProps {
+  title: string;
+  icon: React.ReactNode;
+  colorClass: string; // bg / text / border classes
+  products: Product[];
+  onProductClick: (product: Product) => void;
+  showSaleBadge?: boolean;
+}
+
+function Section({ title, icon, colorClass, products, onProductClick, showSaleBadge = false }: SectionProps) {
+  return (
+    <div className="mb-12">
+      <div className="flex items-center mb-6">
+        <div className={`${colorClass.split(' ')[0]} rounded-full flex items-center justify-center mr-4 w-12 h-12`}>
+          {icon}
+        </div>
+        <div>
+          <h3 className="text-xl font-bold text-ferragamo-dark">{title}</h3>
+          <p className="text-muted-foreground">{products.length} produtos</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-6">
+        {products.map((product, index) => (
+          <Card
+            key={`${title.toLowerCase().replace(/[^a-z0-9]+/g, '')}-${product.sku}-${index}`}
+            className={`product-card overflow-hidden cursor-pointer premium-shadow hover:shadow-xl transition-all duration-300 border ${colorClass.split(' ')[2]}`}
+            onClick={() => onProductClick(product)}
+          >
+            <div className={`aspect-[4/3] overflow-hidden ${colorClass.split(' ')[0]} relative`}>
+              <ProductImage
+                sku={product.sku}
+                categoria={product.categoria}
+                imagePath={product.imagem}
+                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+              />
+              {showSaleBadge || product.onSale ? (
+                <div className="absolute top-2 right-2 z-10">
+                  <span className="text-[11px] sm:text-xs bg-orange-500/90 text-white px-2.5 py-1.5 rounded-lg font-bold shadow-lg whitespace-nowrap border border-white/70 backdrop-blur-sm">
+                    PROMOÇÃO
+                  </span>
+                </div>
+              ) : null}
+            </div>
+            <div className="p-4 space-y-3">
+              <div className="flex justify-between items-start">
+                <h3 className="font-bold text-ferragamo-dark">SKU {product.sku}</h3>
+                <div className="flex flex-col gap-1">
+                  <span className={`text-xs px-2 py-1 rounded-full ${colorClass.split(' ')[1]} bg-opacity-30`}>
+                    Caixa {product.caixa}
+                  </span>
+                </div>
+              </div>
+              {product.link && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(product.link, '_blank');
+                  }}
+                >
+                  <ExternalLink size={14} className="mr-2" />
+                  Ver Produto
+                </Button>
+              )}
+            </div>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }
