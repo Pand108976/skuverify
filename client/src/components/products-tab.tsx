@@ -59,26 +59,18 @@ export function ProductsTab({ category, onProductClick }: ProductsTabProps) {
     }
   };
 
-  // Separar produtos por gênero
   const getCategorizedProducts = () => {
-    if (category === 'cintos') {
-      // Para cintos, usar caixas específicas como fallback se não tiver gender
-      const feminineBoxes = ['44', '48', '49', '50', '51'];
-      const feminineBelts = products.filter(p => 
-        p.gender === 'feminino' || (!p.gender && feminineBoxes.includes(p.caixa))
-      );
-      const masculineBelts = products.filter(p => 
-        p.gender === 'masculino' || (!p.gender && !feminineBoxes.includes(p.caixa))
-      );
-      return { feminine: feminineBelts, masculine: masculineBelts, unclassified: [] };
-    } else {
-      // Para óculos, separar por gênero definido vs não definido
-      const feminineProducts = products.filter(p => p.gender === 'feminino');
-      const masculineProducts = products.filter(p => p.gender === 'masculino');
-      const unclassifiedProducts = products.filter(p => !p.gender);
-      return { feminine: feminineProducts, masculine: masculineProducts, unclassified: unclassifiedProducts };
-    }
-  };
+  const feminine = products.filter(p => p.gender === "feminino");
+  const masculine = products.filter(p => p.gender === "masculino");
+  const unissex = products.filter(p => p.gender === "unissex");
+  const sale = products.filter(p => p.gender === "sale");
+
+  // Caso algum produto venha sem gender (bem raro agora)
+  const unclassified = products.filter(p => !p.gender);
+
+  return { feminine, masculine, unissex, sale, unclassified };
+};
+
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
