@@ -83,8 +83,9 @@ export function ProductModal({ product, open, onClose }: ProductModalProps) {
                     </div>
                   </div>
                   <Badge className="text-sm px-3 py-1 bg-gray-600 text-white">
-                    {product.categoria === 'oculos' ? 'Óculos' : 'Cintos'}
-                  </Badge>
+  {product.gender ? product.gender.charAt(0).toUpperCase() + product.gender.slice(1) : 'Sem gênero'}
+</Badge>
+
                 </div>
               </div>
 
